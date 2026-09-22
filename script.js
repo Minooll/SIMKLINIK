@@ -258,7 +258,7 @@
         }
 
         const roleKey = profileRoleKey;
-        const dashboard = 'dashboard.html?role=' + roleKey;
+        const dashboard = roleKey + '.html';
         return {
           name: profile.full_name || profile.username || data.user.email,
           email: data.user.email,
@@ -358,7 +358,7 @@
             name: registerFullName.value.trim(),
             email: registerEmail.value.trim(),
             role: 'Pasien',
-            dashboard: 'dashboard.html?role=pasien',
+            dashboard: 'pasien.html',
             avatar: null,
             method: 'manual'
           });
@@ -405,7 +405,7 @@
           .eq('id', data.session.user.id)
           .single();
         const roleKey = profile?.role === 'Dokter' ? 'dokter' : profile?.role === 'Pasien' ? 'pasien' : 'petugas';
-        window.location.href = 'dashboard.html?role=' + roleKey;
+        window.location.href = roleKey + '.html';
       }
 
       resumeSupabaseSession();

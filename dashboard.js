@@ -3,6 +3,10 @@
 
   const roleKey = new URLSearchParams(window.location.search).get('role') || 'pasien';
   const role = ['dokter', 'pasien', 'petugas'].includes(roleKey) ? roleKey : 'pasien';
+  if (window.location.pathname.endsWith('/dashboard.html') || window.location.pathname.endsWith('dashboard.html')) {
+    window.location.replace(role + '.html');
+    return;
+  }
   const data = {
     dokter: {
       label: 'Dokter', name: 'dr. Ayu Rahma', initials: 'AR', greeting: 'Selamat pagi, dr. Ayu', copy: 'Berikut ringkasan aktivitas klinik Anda hari ini.', action: 'Buat resep', agenda: 'Jadwal konsultasi', insight: 'Aktivitas terbaru', lower: 'Pasien yang perlu ditindaklanjuti',
