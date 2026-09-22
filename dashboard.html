@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard SIMKLINIK" />
+  <title>Dashboard — SIMKLINIK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">+</span>
+        <span><strong>SIMKLINIK</strong><small>Manajemen Klinik</small></span>
+      </div>
+      <div class="sidebar-label">Menu utama</div>
+      <nav class="main-nav" id="mainNav" aria-label="Navigasi utama"></nav>
+      <div class="sidebar-footer">
+        <div class="help-box"><span class="help-icon">?</span><div><strong>Butuh bantuan?</strong><small>Hubungi administrator</small></div></div>
+        <button class="logout-button" id="logoutButton"><span>↪</span> Keluar</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle" aria-label="Buka menu">☰</button>
+        <div class="breadcrumb"><span>SIMKLINIK</span><b>/</b><strong>Dashboard</strong></div>
+        <div class="topbar-actions">
+          <button class="icon-button" aria-label="Notifikasi"><span class="notification-dot"></span>♢</button>
+          <div class="profile-menu"><div class="avatar" id="headerAvatar">AR</div><div><strong id="headerName">Ayu Rahma</strong><small id="headerRole">Dokter</small></div><span class="chevron">⌄</span></div>
+        </div>
+      </header>
+
+      <div class="content-wrap">
+        <section class="welcome-row">
+          <div><p class="eyebrow" id="dateLabel">SELASA, 22 SEPTEMBER 2026</p><h1 id="welcomeTitle">Selamat pagi, dr. Ayu</h1><p class="welcome-copy" id="welcomeCopy">Berikut ringkasan aktivitas klinik Anda hari ini.</p></div>
+          <button class="primary-button" id="primaryAction"><span>＋</span> <span id="primaryActionText">Buat resep</span></button>
+        </section>
+
+        <section class="stats-grid" id="statsGrid" aria-label="Ringkasan statistik"></section>
+
+        <section class="dashboard-grid">
+          <div class="panel schedule-panel"><div class="panel-heading"><div><p class="eyebrow">AGENDA HARI INI</p><h2 id="agendaTitle">Jadwal konsultasi</h2></div><button class="text-button">Lihat semua <span>→</span></button></div><div class="schedule-list" id="scheduleList"></div></div>
+          <div class="panel insight-panel"><div class="panel-heading"><div><p class="eyebrow">RINGKASAN</p><h2 id="insightTitle">Aktivitas terbaru</h2></div><span class="live-badge"><i></i> Live</span></div><div id="insightContent"></div></div>
+        </section>
+
+        <section class="panel lower-panel"><div class="panel-heading"><div><p class="eyebrow" id="lowerEyebrow">PEMANTAUAN</p><h2 id="lowerTitle">Pasien yang perlu ditindaklanjuti</h2></div><button class="text-button">Buka daftar <span>→</span></button></div><div class="table-wrap"><table><thead><tr id="tableHead"></tr></thead><tbody id="tableBody"></tbody></table></div></section>
+      </div>
+    </main>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html>

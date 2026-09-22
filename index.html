@@ -10,487 +10,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 
-  <style>
-    /* ============================================================
-       DESIGN TOKENS
-    ============================================================ */
-    :root {
-      --clr-primary:        #0EA5E9;
-      --clr-primary-dark:   #0284C7;
-      --clr-primary-light:  #E0F2FE;
-      --clr-teal:           #14B8A6;
-      --clr-teal-dark:      #0D9488;
-      --clr-success:        #16A34A;
-      --clr-success-bg:     #F0FDF4;
-      --clr-success-border: #BBF7D0;
-      --clr-error:          #DC2626;
-      --clr-error-bg:       #FEF2F2;
-      --clr-error-border:   #FECACA;
-      --clr-warning-bg:     #FFFBEB;
-      --clr-warning-border: #FDE68A;
-      --clr-text:           #1E293B;
-      --clr-text-muted:     #64748B;
-      --clr-border:         #CBD5E1;
-      --clr-bg:             #F0F9FF;
-      --clr-white:          #FFFFFF;
-      --clr-card-shadow:    rgba(14,165,233,0.12);
-
-      --radius-sm:  6px;
-      --radius-md:  12px;
-      --radius-lg:  20px;
-      --radius-xl:  28px;
-      --transition: 0.2s ease;
-      --font: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-
-    /* ============================================================
-       RESET & BASE
-    ============================================================ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-
-    body {
-      font-family: var(--font);
-      background: var(--clr-bg);
-      color: var(--clr-text);
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    /* ============================================================
-       BACKGROUND DECORATION
-    ============================================================ */
-    .bg-deco { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-    .bg-deco::before {
-      content: '';
-      position: absolute; width: 600px; height: 600px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(20,184,166,0.15) 0%, transparent 70%);
-      top: -200px; right: -150px;
-    }
-    .bg-deco::after {
-      content: '';
-      position: absolute; width: 500px; height: 500px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%);
-      bottom: -150px; left: -100px;
-    }
-
-    /* ============================================================
-       PAGE WRAPPER — SPLIT LAYOUT
-    ============================================================ */
-    .page-wrapper {
-      position: relative; z-index: 1;
-      display: grid; grid-template-columns: 1fr;
-      width: 100%; max-width: 960px;
-    }
-    @media (min-width: 768px) {
-      .page-wrapper {
-        grid-template-columns: 1fr 1fr;
-        background: var(--clr-white);
-        border-radius: var(--radius-xl);
-        box-shadow:
-          0 4px 6px -1px var(--clr-card-shadow),
-          0 20px 60px -10px rgba(14,165,233,0.18),
-          0 0 0 1px rgba(14,165,233,0.06);
-        overflow: hidden; min-height: 580px;
-      }
-    }
-
-    /* ============================================================
-       ILLUSTRATION PANEL (desktop only)
-    ============================================================ */
-    .illustration-panel { display: none; }
-    @media (min-width: 768px) {
-      .illustration-panel {
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: 1.5rem; padding: 2.5rem;
-        background: linear-gradient(145deg, #0EA5E9 0%, #14B8A6 100%);
-        position: relative; overflow: hidden;
-      }
-      .illustration-panel::before {
-        content: ''; position: absolute;
-        width: 300px; height: 300px; border-radius: 50%;
-        background: rgba(255,255,255,0.06); top: -80px; left: -80px;
-      }
-      .illustration-panel::after {
-        content: ''; position: absolute;
-        width: 200px; height: 200px; border-radius: 50%;
-        background: rgba(255,255,255,0.08); bottom: -60px; right: -60px;
-      }
-    }
-
-    .illus-svg { width: 200px; height: 200px; position: relative; z-index: 1; }
-    .illus-title { font-size: 1.5rem; font-weight: 700; color: #fff; text-align: center; line-height: 1.3; position: relative; z-index: 1; }
-    .illus-subtitle { font-size: 0.875rem; color: rgba(255,255,255,0.82); text-align: center; line-height: 1.6; position: relative; z-index: 1; }
-    .illus-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
-    .badge {
-      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
-      color: #fff; font-size: 0.75rem; font-weight: 500;
-      padding: 0.25rem 0.75rem; border-radius: 100px; backdrop-filter: blur(4px);
-    }
-
-    /* ============================================================
-       LOGIN CARD
-    ============================================================ */
-    .login-card {
-      background: var(--clr-white);
-      border-radius: var(--radius-xl);
-      padding: 2rem 1.75rem;
-      box-shadow:
-        0 4px 6px -1px var(--clr-card-shadow),
-        0 20px 60px -10px rgba(14,165,233,0.18),
-        0 0 0 1px rgba(14,165,233,0.06);
-      width: 100%;
-    }
-    @media (min-width: 480px) { .login-card { max-width: 420px; margin: 0 auto; } }
-    @media (min-width: 768px) { .login-card { padding: 2.25rem 2rem; border-radius: 0; box-shadow: none; max-width: none; } }
-
-    /* ============================================================
-       HEADER
-    ============================================================ */
-    .login-header { text-align: center; margin-bottom: 1.75rem; }
-
-    .logo-wrap {
-      display: inline-flex; align-items: center; gap: 0.625rem;
-      margin-bottom: 1rem; text-decoration: none;
-    }
-    .logo-icon {
-      width: 46px; height: 46px;
-      background: linear-gradient(135deg, var(--clr-primary), var(--clr-teal));
-      border-radius: var(--radius-md);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; box-shadow: 0 4px 12px rgba(14,165,233,0.35);
-    }
-    .logo-icon svg { width: 26px; height: 26px; fill: #fff; }
-    .logo-text { display: flex; flex-direction: column; text-align: left; }
-    .logo-text-main { font-size: 1.2rem; font-weight: 700; color: var(--clr-primary-dark); line-height: 1; letter-spacing: -0.01em; }
-    .logo-text-sub { font-size: 0.6rem; font-weight: 500; color: var(--clr-text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
-
-    .login-title { font-size: 1.3rem; font-weight: 700; color: var(--clr-text); margin-bottom: 0.25rem; letter-spacing: -0.015em; }
-    .login-subtitle { font-size: 0.85rem; color: var(--clr-text-muted); line-height: 1.5; }
-
-    .role-pills { display: flex; flex-wrap: wrap; gap: 0.375rem; justify-content: center; margin-top: 0.75rem; }
-    .role-pill {
-      font-size: 0.7rem; font-weight: 500;
-      padding: 0.2rem 0.6rem; border-radius: 100px;
-      background: var(--clr-primary-light); color: var(--clr-primary-dark);
-      border: 1px solid rgba(14,165,233,0.2);
-    }
-
-    /* ============================================================
-       GOOGLE SIGN-IN BUTTON
-    ============================================================ */
-    .google-signin-wrap {
-      margin-bottom: 1.25rem;
-    }
-
-    /* Custom styled Google button (fallback / styled version) */
-    .btn-google {
-      width: 100%;
-      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-      padding: 0.72rem 1.25rem;
-      background: var(--clr-white);
-      border: 1.5px solid var(--clr-border);
-      border-radius: var(--radius-md);
-      font-family: var(--font); font-size: 0.9375rem; font-weight: 500;
-      color: var(--clr-text); cursor: pointer;
-      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-    }
-    .btn-google:hover {
-      border-color: #4285F4;
-      box-shadow: 0 0 0 3px rgba(66,133,244,0.12), 0 1px 3px rgba(0,0,0,0.1);
-      background: #FAFBFF;
-    }
-    .btn-google:focus-visible { outline: 2px solid #4285F4; outline-offset: 2px; }
-    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-google svg { flex-shrink: 0; }
-
-    /* Divider with OR */
-    .divider {
-      display: flex; align-items: center; gap: 0.75rem;
-      margin: 0 0 1.25rem;
-      color: var(--clr-text-muted); font-size: 0.8125rem;
-    }
-    .divider::before, .divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--clr-border);
-    }
-
-    /* ============================================================
-       FORM ELEMENTS
-    ============================================================ */
-    .form-group { margin-bottom: 1.1rem; }
-    .form-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--clr-text); margin-bottom: 0.375rem; }
-    .required-star { color: var(--clr-error); margin-left: 2px; }
-
-    .input-wrapper { position: relative; }
-
-    .input-icon {
-      position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%);
-      width: 18px; height: 18px; color: var(--clr-text-muted);
-      pointer-events: none; transition: color var(--transition);
-    }
-    .input-wrapper:focus-within .input-icon { color: var(--clr-primary); }
-
-    .form-input {
-      width: 100%;
-      padding: 0.7rem 2.75rem 0.7rem 2.75rem;
-      border: 1.5px solid var(--clr-border);
-      border-radius: var(--radius-md);
-      font-family: var(--font); font-size: 0.9375rem;
-      color: var(--clr-text); background: var(--clr-white);
-      outline: none;
-      transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
-      -webkit-appearance: none;
-    }
-    .form-input::placeholder { color: #94A3B8; }
-    .form-input:focus { border-color: var(--clr-primary); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
-
-    .form-input:user-invalid { border-color: var(--clr-error); background-color: var(--clr-error-bg); }
-    .form-input:user-invalid:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
-    .form-input:user-valid { border-color: var(--clr-success); }
-    .form-input.is-invalid { border-color: var(--clr-error); background-color: var(--clr-error-bg); }
-    .form-input.is-invalid:focus { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
-
-    /* Toggle password */
-    .btn-toggle-pw {
-      position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; padding: 0.25rem;
-      color: var(--clr-text-muted); border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      transition: color var(--transition); line-height: 0;
-    }
-    .btn-toggle-pw:hover { color: var(--clr-primary); }
-    .btn-toggle-pw:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 2px; }
-    .btn-toggle-pw svg { width: 18px; height: 18px; }
-    .icon-eye-off { display: none; }
-
-    /* Field error */
-    .field-error {
-      display: none; font-size: 0.8rem; color: var(--clr-error);
-      margin-top: 0.375rem; align-items: center; gap: 0.25rem;
-    }
-    .field-error svg { width: 14px; height: 14px; flex-shrink: 0; }
-    .form-input:user-invalid ~ .field-error,
-    .form-input.is-invalid  ~ .field-error { display: flex; }
-
-    /* ============================================================
-       OPTIONS ROW
-    ============================================================ */
-    .form-options {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;
-    }
-    .checkbox-label {
-      display: flex; align-items: center; gap: 0.5rem;
-      cursor: pointer; font-size: 0.875rem; color: var(--clr-text); user-select: none;
-    }
-    .checkbox-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--clr-primary); cursor: pointer; flex-shrink: 0; }
-    .forgot-link { font-size: 0.875rem; color: var(--clr-primary); font-weight: 500; text-decoration: none; transition: color var(--transition); }
-    .forgot-link:hover { color: var(--clr-primary-dark); text-decoration: underline; }
-    .forgot-link:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 2px; border-radius: 4px; }
-
-    /* ============================================================
-       SUBMIT BUTTON
-    ============================================================ */
-    .btn-submit {
-      width: 100%; padding: 0.8rem 1.5rem;
-      background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-teal) 100%);
-      color: #fff; border: none; border-radius: var(--radius-md);
-      font-family: var(--font); font-size: 1rem; font-weight: 600;
-      cursor: pointer; letter-spacing: 0.01em;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      transition: opacity var(--transition), transform 0.1s ease, box-shadow var(--transition);
-      box-shadow: 0 4px 14px rgba(14,165,233,0.35);
-      position: relative; overflow: hidden;
-    }
-    .btn-submit::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background var(--transition); }
-    .btn-submit:hover:not(:disabled)::after { background: rgba(255,255,255,0.08); }
-    .btn-submit:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 8px rgba(14,165,233,0.28); }
-    .btn-submit:focus-visible { outline: 3px solid var(--clr-primary); outline-offset: 2px; }
-    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; box-shadow: none; }
-
-    .spinner {
-      display: none; width: 18px; height: 18px;
-      border: 2.5px solid rgba(255,255,255,0.4);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.7s linear infinite; flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-submit.is-loading .spinner { display: block; }
-    .btn-submit.is-loading .btn-text { opacity: 0.85; }
-
-    /* ============================================================
-       ALERT BANNERS
-    ============================================================ */
-    .alert {
-      border-radius: var(--radius-md); padding: 0.75rem 1rem;
-      margin-bottom: 1.25rem; font-size: 0.875rem;
-      display: none; align-items: flex-start; gap: 0.625rem;
-      animation: slideIn 0.25s ease; line-height: 1.5;
-    }
-    .alert.is-visible { display: flex; }
-    .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
-    .alert-error   { background: var(--clr-error-bg);   border: 1px solid var(--clr-error-border);   color: #991B1B; }
-    .alert-warning { background: var(--clr-warning-bg); border: 1px solid var(--clr-warning-border); color: #92400E; }
-    .alert-content { flex: 1; }
-    .alert-title { font-weight: 600; }
-    .alert-desc { margin-top: 0.125rem; font-size: 0.8125rem; }
-    .lockout-timer { font-weight: 700; font-variant-numeric: tabular-nums; }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ============================================================
-       SUCCESS OVERLAY — DASHBOARD MINI
-    ============================================================ */
-    .success-overlay {
-      position: fixed; inset: 0;
-      background: rgba(240,249,255,0.97);
-      backdrop-filter: blur(6px);
-      display: none; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 1.5rem; z-index: 999;
-      animation: fadeIn 0.35s ease;
-      padding: 1.5rem;
-    }
-    .success-overlay.is-visible { display: flex; }
-
-    .success-card {
-      background: var(--clr-white);
-      border-radius: var(--radius-xl);
-      padding: 2.5rem 2rem;
-      max-width: 400px; width: 100%;
-      box-shadow:
-        0 4px 6px -1px rgba(14,165,233,0.1),
-        0 20px 60px -10px rgba(14,165,233,0.2),
-        0 0 0 1px rgba(14,165,233,0.08);
-      display: flex; flex-direction: column; align-items: center;
-      gap: 1rem; text-align: center;
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    /* Top bar gradient */
-    .success-card-topbar {
-      width: 100%; height: 4px; border-radius: 100px;
-      background: linear-gradient(90deg, var(--clr-primary), var(--clr-teal));
-      margin-bottom: 0.5rem;
-    }
-
-    /* Check circle */
-    .success-check {
-      width: 64px; height: 64px;
-      background: linear-gradient(135deg, var(--clr-primary), var(--clr-teal));
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 24px rgba(14,165,233,0.35);
-    }
-    .success-check svg { width: 30px; height: 30px; stroke: #fff; }
-
-    /* Avatar */
-    .user-avatar {
-      width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
-      border: 3px solid var(--clr-primary-light);
-      box-shadow: 0 4px 12px rgba(14,165,233,0.2);
-    }
-    .user-avatar-placeholder {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--clr-primary-light), var(--clr-teal-light));
-      display: flex; align-items: center; justify-content: center;
-      border: 3px solid var(--clr-primary-light);
-      font-size: 1.75rem; font-weight: 700; color: var(--clr-primary-dark);
-    }
-
-    /* User info */
-    .user-name { font-size: 1.25rem; font-weight: 700; color: var(--clr-text); }
-    .user-email { font-size: 0.875rem; color: var(--clr-text-muted); }
-    .user-role-badge {
-      display: inline-flex; align-items: center; gap: 0.375rem;
-      background: var(--clr-primary-light); color: var(--clr-primary-dark);
-      font-size: 0.8125rem; font-weight: 600;
-      padding: 0.35rem 0.875rem; border-radius: 100px;
-      border: 1px solid rgba(14,165,233,0.2);
-    }
-    .user-role-badge svg { width: 14px; height: 14px; }
-
-    /* Login method badge */
-    .login-method {
-      display: flex; align-items: center; gap: 0.375rem;
-      font-size: 0.75rem; color: var(--clr-text-muted);
-      background: #F8FAFC; border: 1px solid var(--clr-border);
-      padding: 0.25rem 0.75rem; border-radius: 100px;
-    }
-    .login-method svg { width: 14px; height: 14px; }
-
-    /* Dashboard redirect info */
-    .dashboard-info {
-      background: #F0FDF4; border: 1px solid #BBF7D0;
-      border-radius: var(--radius-md); padding: 0.875rem 1rem;
-      text-align: left; width: 100%;
-    }
-    .dashboard-info-title { font-size: 0.8125rem; font-weight: 600; color: #15803D; margin-bottom: 0.25rem; }
-    .dashboard-info-url { font-size: 0.8rem; color: #16A34A; font-family: monospace; }
-
-    /* Buttons */
-    .btn-go-dashboard {
-      width: 100%; padding: 0.75rem;
-      background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-teal) 100%);
-      color: #fff; border: none; border-radius: var(--radius-md);
-      font-family: var(--font); font-size: 0.9375rem; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      box-shadow: 0 4px 12px rgba(14,165,233,0.3);
-      transition: opacity var(--transition), transform 0.1s ease;
-    }
-    .btn-go-dashboard:hover { opacity: 0.92; }
-    .btn-go-dashboard:active { transform: translateY(1px); }
-    .btn-go-dashboard svg { width: 16px; height: 16px; }
-
-    .btn-back-login {
-      width: 100%; padding: 0.72rem;
-      background: var(--clr-white);
-      color: var(--clr-text-muted);
-      border: 1.5px solid var(--clr-border);
-      border-radius: var(--radius-md);
-      font-family: var(--font); font-size: 0.9375rem; font-weight: 500;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      transition: border-color var(--transition), color var(--transition), background var(--transition);
-    }
-    .btn-back-login:hover { border-color: var(--clr-primary); color: var(--clr-primary); background: var(--clr-primary-light); }
-    .btn-back-login:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 2px; }
-    .btn-back-login svg { width: 16px; height: 16px; }
-
-    /* Divider inside success card */
-    .success-actions { width: 100%; display: flex; flex-direction: column; gap: 0.625rem; }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes popIn  { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
-
-    /* ============================================================
-       FOOTER
-    ============================================================ */
-    .login-footer { text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: var(--clr-text-muted); line-height: 1.6; }
-    .login-footer a { color: var(--clr-primary); text-decoration: none; }
-    .login-footer a:hover { text-decoration: underline; }
-    .footer-dot { margin: 0 0.375rem; }
-
-    /* ============================================================
-       UTILITIES
-    ============================================================ */
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-
-    /* ============================================================
-       REDUCED MOTION
-    ============================================================ */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-  </style>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
@@ -511,18 +34,18 @@
       </div>
 
       <div>
-        <p id="successTitle" style="font-size:1rem;font-weight:600;color:var(--clr-success);margin-bottom:0.25rem;">Login Berhasil ✓</p>
-        <p style="font-size:0.8125rem;color:var(--clr-text-muted);">Selamat datang di SIMKLINIK</p>
+        <p id="successTitle" class="success-title">Login Berhasil ✓</p>
+        <p class="success-subtitle">Selamat datang di SIMKLINIK</p>
       </div>
 
       <!-- Avatar (photo for Google, initials for manual) -->
       <div id="userAvatarWrap">
-        <img src="" alt="" class="user-avatar" id="userAvatarImg" style="display:none;" />
+        <img src="" alt="" class="user-avatar" id="userAvatarImg" />
         <div class="user-avatar-placeholder" id="userAvatarInitial" aria-hidden="true"></div>
       </div>
 
       <!-- User info -->
-      <div style="display:flex;flex-direction:column;gap:0.25rem;">
+      <div class="user-info">
         <p class="user-name" id="userNameDisplay">—</p>
         <p class="user-email" id="userEmailDisplay"></p>
       </div>
@@ -563,7 +86,7 @@
         </button>
       </div>
 
-      <p style="font-size:0.75rem;color:var(--clr-text-muted);">
+      <p class="session-note">
         Sesi Anda aman. Token JWT telah dibuat.
       </p>
     </div>
@@ -602,10 +125,9 @@
       <h2 class="illus-title">Selamat Datang di<br/>SIMKLINIK</h2>
       <p class="illus-subtitle">Sistem Informasi Manajemen Klinik<br/>terintegrasi untuk pelayanan terbaik.</p>
       <div class="illus-badges">
-        <span class="badge">Admin</span>
         <span class="badge">Dokter</span>
-        <span class="badge">Perawat</span>
-        <span class="badge">Kasir</span>
+        <span class="badge">Petugas</span>
+        <span class="badge">Pasien</span>
       </div>
     </aside>
 
@@ -625,20 +147,20 @@
             <span class="logo-text-sub">Manajemen Klinik</span>
           </div>
         </a>
-        <h1 class="login-title">Masuk ke Akun Anda</h1>
-        <p class="login-subtitle">Masuk dengan akun Google atau kredensial yang diberikan administrator.</p>
-        <div class="role-pills">
-          <span class="role-pill">👨‍⚕️ Dokter</span>
-          <span class="role-pill">🩺 Perawat</span>
-          <span class="role-pill">🛡️ Admin</span>
-          <span class="role-pill">💳 Kasir</span>
+        <p class="auth-mode-label" id="authModeLabel">Akses aman untuk tim klinik</p>
+        <h1 class="login-title" id="authTitle">Masuk ke Akun Anda</h1>
+        <p class="login-subtitle" id="authSubtitle">Pilih akses Anda, lalu masuk dengan akun yang terdaftar.</p>
+        <div class="role-switcher" role="tablist" aria-label="Pilih jenis akun">
+          <button type="button" class="role-option is-selected" data-role="dokter" role="tab" aria-selected="true"><span>＋</span> Dokter</button>
+          <button type="button" class="role-option" data-role="petugas" role="tab" aria-selected="false"><span>▣</span> Petugas</button>
+          <button type="button" class="role-option" data-role="pasien" role="tab" aria-selected="false"><span>♡</span> Pasien</button>
         </div>
       </header>
 
       <!-- ── Google Sign-In Button ── -->
-      <div class="google-signin-wrap">
+      <div class="google-signin-wrap auth-form-hidden" id="googleSignInSection">
         <!-- Container untuk tombol resmi Google GIS -->
-        <div id="googleButtonContainer" style="display: flex; justify-content: center; min-height: 44px; width: 100%;"></div>
+        <div id="googleButtonContainer" class="google-button-container"></div>
 
         <!-- Tombol custom interaktif sebagai tombol utama & fallback -->
         <button type="button" class="btn-google" id="btnGoogleSignIn">
@@ -655,7 +177,7 @@
       </div>
 
       <!-- Divider -->
-      <div class="divider" role="separator" aria-label="atau">atau masuk dengan username</div>
+      <div class="divider" id="authDivider" role="separator" aria-label="akses akun">Akses akun</div>
 
       <!-- ── Login Form ── -->
       <form id="loginForm" method="post" action="#" novalidate autocomplete="on" aria-label="Form login manual">
@@ -692,7 +214,7 @@
         <!-- Username -->
         <div class="form-group">
           <label class="form-label" for="username">
-            Username <span class="required-star" aria-hidden="true">*</span>
+            <span id="usernameLabel">Username</span> <span class="required-star" aria-hidden="true">*</span>
           </label>
           <div class="input-wrapper">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -701,8 +223,8 @@
             </svg>
             <input
               type="text" id="username" name="username" class="form-input"
-              placeholder="Masukkan username Anda"
-              required minlength="3" maxlength="64"
+              placeholder="Masukkan username dokter"
+              required maxlength="254"
               autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
               aria-required="true" aria-describedby="username-err" aria-invalid="false"
             />
@@ -710,7 +232,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
-              Username tidak boleh kosong (min. 3 karakter).
+              Masukkan username atau email yang valid.
             </span>
           </div>
         </div>
@@ -760,6 +282,8 @@
           <a href="#lupa-password" class="forgot-link" id="forgotLink">Lupa Password?</a>
         </div>
 
+        <p class="demo-hint" id="demoHint"><span>i</span> Demo dokter: <strong>dokter</strong> / <strong>dokter123</strong></p>
+
         <!-- Submit -->
         <button type="submit" class="btn-submit" id="btnSubmit">
           <span class="spinner" aria-hidden="true"></span>
@@ -767,435 +291,50 @@
         </button>
       </form>
 
+      <form id="registerForm" class="auth-form-hidden" method="post" action="#" novalidate autocomplete="on" aria-label="Form registrasi akun">
+        <div class="form-group">
+          <label class="form-label" for="registerFullName">Nama Lengkap <span class="required-star" aria-hidden="true">*</span></label>
+          <input type="text" id="registerFullName" class="form-input form-input-plain" placeholder="Masukkan nama lengkap" required minlength="2" maxlength="100" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="registerUsername">Username <span class="required-star" aria-hidden="true">*</span></label>
+          <input type="text" id="registerUsername" class="form-input form-input-plain" placeholder="Pilih username" required minlength="3" maxlength="64" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="registerEmail">Email <span class="required-star" aria-hidden="true">*</span></label>
+          <input type="email" id="registerEmail" class="form-input form-input-plain" placeholder="nama@email.com" required maxlength="254" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="registerPassword">Password <span class="required-star" aria-hidden="true">*</span></label>
+          <input type="password" id="registerPassword" class="form-input form-input-plain" placeholder="Minimal 6 karakter" required minlength="6" maxlength="128" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="registerPasswordConfirm">Konfirmasi Password <span class="required-star" aria-hidden="true">*</span></label>
+          <input type="password" id="registerPasswordConfirm" class="form-input form-input-plain" placeholder="Ulangi password" required minlength="6" maxlength="128" autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn-submit" id="btnRegisterSubmit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-text">Daftar</span>
+        </button>
+        <p class="registration-note"><span class="registration-note-icon" aria-hidden="true">i</span>Akun baru akan dibuat dengan role <strong>Pasien</strong>.</p>
+      </form>
+
+      <p class="auth-switch" id="authSwitchLogin">Belum punya akun? <button type="button" class="auth-switch-button" id="showRegisterButton">Daftar sekarang</button></p>
+      <p class="auth-switch auth-form-hidden" id="authSwitchRegister">Sudah punya akun? <button type="button" class="auth-switch-button" id="showLoginButton">Masuk di sini</button></p>
+
       <footer class="login-footer">
         <p>Butuh bantuan? Hubungi <a href="mailto:support@simklinik.id">support@simklinik.id</a></p>
-        <p style="margin-top:0.5rem">
+        <p class="footer-links">
           <a href="#">Kebijakan Privasi</a>
           <span class="footer-dot">·</span>
           <a href="#">Syarat &amp; Ketentuan</a>
         </p>
-        <p style="margin-top:0.75rem;font-size:0.72rem">&copy; 2026 SIMKLINIK. Hak cipta dilindungi.</p>
+        <p class="footer-copyright">&copy; 2026 SIMKLINIK. Hak cipta dilindungi.</p>
       </footer>
 
     </section>
   </main>
 
-  <script>
-    (() => {
-      'use strict';
-
-      /* ══════════════════════════════════════════════════════════
-         CONFIG
-         ► Ganti GOOGLE_CLIENT_ID dengan Client ID dari
-           Google Cloud Console → APIs & Services → Credentials
-           https://console.cloud.google.com/apis/credentials
-      ══════════════════════════════════════════════════════════ */
-      const GOOGLE_CLIENT_ID = '1038337727039-p6fhtbp0lbkp9cn844gdt9r3f125s2iu.apps.googleusercontent.com';
-      const MAX_ATTEMPTS     = 5;
-      const LOCKOUT_SECS     = 30;
-      const BF_KEY           = 'simklinik_bf';
-
-      /* ── Mock users ─────────────────────────────────────────── */
-      const MOCK_USERS = [
-        { username: 'admin',    password: 'Admin@123',   role: 'Admin',           dashboard: '/dashboard/admin'   },
-        { username: 'dokter1',  password: 'Dokter@123',  role: 'Dokter',          dashboard: '/dashboard/dokter'  },
-        { username: 'perawat1', password: 'Perawat@123', role: 'Perawat',         dashboard: '/dashboard/perawat' },
-        { username: 'kasir1',   password: 'Kasir@123',   role: 'Kasir/Resepsionis', dashboard: '/dashboard/kasir' },
-      ];
-
-      /* ── DOM refs ───────────────────────────────────────────── */
-      const form           = document.getElementById('loginForm');
-      const usernameInput  = document.getElementById('username');
-      const passwordInput  = document.getElementById('password');
-      const togglePwBtn    = document.getElementById('togglePw');
-      const iconEye        = togglePwBtn.querySelector('.icon-eye');
-      const iconEyeOff     = togglePwBtn.querySelector('.icon-eye-off');
-      const btnSubmit      = document.getElementById('btnSubmit');
-      const btnText        = btnSubmit.querySelector('.btn-text');
-      const alertError     = document.getElementById('alertError');
-      const alertErrTitle  = document.getElementById('alertErrTitle');
-      const alertErrDesc   = document.getElementById('alertErrDesc');
-      const alertWarn      = document.getElementById('alertWarn');
-      const lockdownTimer  = document.getElementById('lockdownTimer');
-      const csrfToken      = document.getElementById('csrfToken');
-
-      // Success overlay refs
-      const successOverlay      = document.getElementById('successOverlay');
-      const userAvatarImg       = document.getElementById('userAvatarImg');
-      const userAvatarInitial   = document.getElementById('userAvatarInitial');
-      const userNameDisplay     = document.getElementById('userNameDisplay');
-      const userEmailDisplay    = document.getElementById('userEmailDisplay');
-      const userRoleText        = document.getElementById('userRoleText');
-      const loginMethodBadge    = document.getElementById('loginMethodBadge');
-      const dashboardUrlDisplay = document.getElementById('dashboardUrlDisplay');
-      const btnGoDashboard      = document.getElementById('btnGoDashboard');
-      const btnBackLogin        = document.getElementById('btnBackLogin');
-      const btnGoogleSignIn     = document.getElementById('btnGoogleSignIn');
-
-      /* ── CSRF ───────────────────────────────────────────────── */
-      const arr = new Uint8Array(24);
-      crypto.getRandomValues(arr);
-      csrfToken.value = Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
-
-      /* ── Brute-force helpers ────────────────────────────────── */
-      const getBF  = () => { try { return JSON.parse(sessionStorage.getItem(BF_KEY)) || {attempts:0,until:null}; } catch { return {attempts:0,until:null}; } };
-      const saveBF = s  => { try { sessionStorage.setItem(BF_KEY, JSON.stringify(s)); } catch {} };
-      const clearBF= () => { try { sessionStorage.removeItem(BF_KEY); } catch {} };
-
-      /* ── Password toggle ─────────────────────────────────────── */
-      togglePwBtn.addEventListener('click', () => {
-        const show = passwordInput.type === 'password';
-        passwordInput.type = show ? 'text' : 'password';
-        togglePwBtn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
-        togglePwBtn.setAttribute('aria-pressed', String(show));
-        iconEye.style.display    = show ? 'none' : '';
-        iconEyeOff.style.display = show ? '' : 'none';
-        passwordInput.focus();
-      });
-
-      /* ── :user-invalid fallback ─────────────────────────────── */
-      const supportsUserInvalid = CSS.supports('selector(:user-invalid)');
-      const dirty = new WeakMap();
-
-      function applyFallback(el) {
-        if (!supportsUserInvalid) el.classList.toggle('is-invalid', !el.checkValidity());
-        el.setAttribute('aria-invalid', String(!el.checkValidity()));
-      }
-      [usernameInput, passwordInput].forEach(el => {
-        el.addEventListener('input', () => {
-          const s = dirty.get(el) || {};
-          s.touched = true; dirty.set(el, s);
-          if (s.blurred) applyFallback(el);
-        });
-        el.addEventListener('blur', () => {
-          const s = dirty.get(el) || {};
-          s.blurred = true; dirty.set(el, s);
-          if (s.touched) applyFallback(el);
-        });
-      });
-
-      /* ── Alert helpers ──────────────────────────────────────── */
-      function showError(title, desc) {
-        alertWarn.classList.remove('is-visible');
-        alertErrTitle.textContent = title;
-        alertErrDesc.textContent  = desc;
-        alertError.classList.add('is-visible');
-        alertError.scrollIntoView({ behavior:'smooth', block:'nearest' });
-      }
-      function hideError() { alertError.classList.remove('is-visible'); }
-      function showWarn()  { alertError.classList.remove('is-visible'); alertWarn.classList.add('is-visible'); }
-
-      /* ── Loading state ──────────────────────────────────────── */
-      function setLoading(on) {
-        btnSubmit.classList.toggle('is-loading', on);
-        btnSubmit.disabled = on;
-        btnText.textContent = on ? 'Memproses…' : 'Masuk';
-      }
-
-      /* ── Form disable ───────────────────────────────────────── */
-      function setFormDisabled(on) {
-        usernameInput.disabled = passwordInput.disabled = btnSubmit.disabled = btnGoogleSignIn.disabled = on;
-      }
-
-      /* ── Lockout ────────────────────────────────────────────── */
-      let lockInterval = null;
-      function startLockoutUI(secs) {
-        clearInterval(lockInterval);
-        lockdownTimer.textContent = secs;
-        showWarn(); setFormDisabled(true);
-        lockInterval = setInterval(() => {
-          secs--;
-          lockdownTimer.textContent = secs;
-          if (secs <= 0) { clearInterval(lockInterval); alertWarn.classList.remove('is-visible'); setFormDisabled(false); clearBF(); }
-        }, 1000);
-      }
-      function checkLockout() {
-        const bf = getBF();
-        if (!bf.until) return false;
-        const rem = Math.ceil((bf.until - Date.now()) / 1000);
-        if (rem > 0) { startLockoutUI(rem); return true; }
-        return false;
-      }
-
-      /* ── Shake animation ────────────────────────────────────── */
-      function shake(el) {
-        el.animate(
-          [{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},
-           {transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],
-          {duration:350, easing:'ease-in-out'}
-        );
-      }
-
-      /* ════════════════════════════════════════════════════════
-         SUCCESS OVERLAY — show / hide
-      ════════════════════════════════════════════════════════ */
-      function showSuccess({ name, email, role, dashboard, avatar, method }) {
-        // Avatar
-        if (avatar) {
-          userAvatarImg.src = avatar;
-          userAvatarImg.alt = name + ' avatar';
-          userAvatarImg.style.display = '';
-          userAvatarInitial.style.display = 'none';
-        } else {
-          userAvatarImg.style.display = 'none';
-          userAvatarInitial.style.display = '';
-          userAvatarInitial.textContent = name.charAt(0).toUpperCase();
-        }
-
-        userNameDisplay.textContent     = name;
-        userEmailDisplay.textContent    = email || '';
-        userRoleText.textContent        = role;
-        dashboardUrlDisplay.textContent = dashboard;
-
-        // Login method badge
-        if (method === 'google') {
-          loginMethodBadge.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 48 48" aria-hidden="true">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-            Login via Google`;
-        } else {
-          loginMethodBadge.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
-              <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            Login Manual`;
-        }
-
-        successOverlay.classList.add('is-visible');
-        btnBackLogin.focus();
-      }
-
-      function hideSuccess() {
-        successOverlay.classList.remove('is-visible');
-        // Reset form
-        form.reset();
-        clearBF();
-        hideError();
-        if (!supportsUserInvalid) {
-          [usernameInput, passwordInput].forEach(el => el.classList.remove('is-invalid'));
-        }
-        [usernameInput, passwordInput].forEach(el => el.setAttribute('aria-invalid','false'));
-        usernameInput.focus();
-      }
-
-      /* Back to Login button */
-      btnBackLogin.addEventListener('click', hideSuccess);
-      btnGoDashboard.addEventListener('click', () => {
-        alert('Pada produksi, Anda akan diarahkan ke:\n' + dashboardUrlDisplay.textContent + '\n\nGunakan: window.location.href = dashboard_url');
-      });
-
-      /* ════════════════════════════════════════════════════════
-         MOCK AUTH
-      ════════════════════════════════════════════════════════ */
-      function mockAuth(u, p) {
-        return new Promise(res => setTimeout(() => {
-          res(MOCK_USERS.find(x =>
-            x.username.toLowerCase() === u.toLowerCase() && x.password === p
-          ) || null);
-        }, 1200));
-      }
-
-      /* ════════════════════════════════════════════════════════
-         FORM SUBMIT (Manual Login)
-      ════════════════════════════════════════════════════════ */
-      form.addEventListener('submit', async e => {
-        e.preventDefault();
-        if (checkLockout()) return;
-
-        [usernameInput, passwordInput].forEach(applyFallback);
-        if (!form.checkValidity()) {
-          const first = form.querySelector(':invalid');
-          if (first) first.focus();
-          return;
-        }
-
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value;
-
-        setLoading(true); hideError();
-
-        try {
-          const user = await mockAuth(username, password);
-
-          if (user) {
-            clearBF(); setLoading(false);
-            try {
-              if (document.getElementById('rememberMe').checked) localStorage.setItem('simklinik_remember', username);
-              else localStorage.removeItem('simklinik_remember');
-            } catch {}
-            showSuccess({ name: user.username, email: user.username + '@simklinik.id', role: user.role, dashboard: user.dashboard, avatar: null, method: 'manual' });
-          } else {
-            setLoading(false);
-            const bf = getBF();
-            bf.attempts = (bf.attempts || 0) + 1;
-            const left = MAX_ATTEMPTS - bf.attempts;
-
-            if (bf.attempts >= MAX_ATTEMPTS) {
-              bf.until = Date.now() + LOCKOUT_SECS * 1000;
-              saveBF(bf); startLockoutUI(LOCKOUT_SECS);
-            } else {
-              saveBF(bf);
-              showError('Username atau Password Salah', `Kredensial tidak sesuai. Sisa percobaan: ${left} kali sebelum akun dikunci.`);
-              shake(form); usernameInput.focus();
-            }
-          }
-        } catch (err) {
-          setLoading(false);
-          showError('Terjadi Kesalahan Koneksi', 'Tidak dapat terhubung ke server. Periksa koneksi Anda dan coba lagi.');
-        }
-      });
-
-      /* ════════════════════════════════════════════════════════
-         GOOGLE SIGN-IN
-         Callback dipanggil oleh Google Identity Services
-         setelah user berhasil memilih akun Google.
-      ════════════════════════════════════════════════════════ */
-
-      /** Decode JWT payload dari Google credential response */
-      function decodeJWT(token) {
-        try {
-          const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-          return JSON.parse(atob(base64));
-        } catch { return {}; }
-      }
-
-      /** Callback global dipanggil oleh GIS library */
-      window.handleGoogleCredential = function(response) {
-        const payload = decodeJWT(response.credential);
-
-        // Tentukan role default untuk akun Google (bisa disesuaikan logika backend)
-        const role = 'Dokter'; // default role untuk login Google
-        const dashboard = '/dashboard/dokter';
-
-        showSuccess({
-          name:      payload.name || payload.email || 'Pengguna Google',
-          email:     payload.email || '',
-          role:      role,
-          dashboard: dashboard,
-          avatar:    payload.picture || null,
-          method:    'google',
-        });
-      };
-
-      /** Inisialisasi Google Identity Services */
-      function initGoogleSignIn() {
-        const googleContainer = document.getElementById('googleButtonContainer');
-        const customBtn = document.getElementById('btnGoogleSignIn');
-
-        function setupGIS() {
-          if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-            setTimeout(setupGIS, 300);
-            return;
-          }
-
-          try {
-            google.accounts.id.initialize({
-              client_id: GOOGLE_CLIENT_ID,
-              callback: window.handleGoogleCredential,
-              auto_select: false,
-              cancel_on_tap_outside: true
-            });
-
-            // Render tombol resmi Google GIS ke dalam container
-            if (googleContainer) {
-              google.accounts.id.renderButton(googleContainer, {
-                theme: 'outline',
-                size: 'large',
-                text: 'signin_with',
-                shape: 'rectangular',
-                width: 320,
-                logo_alignment: 'left'
-              });
-              // Jika renderButton berhasil terpasang, sembunyikan custom button fallback
-              if (customBtn) customBtn.style.display = 'none';
-            }
-
-            // Jalankan Google One Tap prompt
-            google.accounts.id.prompt();
-          } catch (err) {
-            console.warn('[SIMKLINIK] GIS init warning:', err);
-          }
-        }
-
-        // Jalankan setup GIS
-        setupGIS();
-
-        // Handler untuk tombol custom jika diklik user
-        if (customBtn) {
-          customBtn.addEventListener('click', () => {
-            if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-              google.accounts.id.prompt((notification) => {
-                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                  // Jika One-Tap terhalang, render tombol resmi secara paksa
-                  if (googleContainer) {
-                    google.accounts.id.renderButton(googleContainer, {
-                      theme: 'outline',
-                      size: 'large',
-                      text: 'signin_with',
-                      width: 320
-                    });
-                    customBtn.style.display = 'none';
-                  }
-                }
-              });
-            } else {
-              alert('Layanan Google Identity Services sedang dimuat. Pastikan koneksi internet aktif.');
-            }
-          });
-        }
-      }
-
-      initGoogleSignIn();
-
-      /* Tombol Google jika CLIENT_ID belum dikonfigurasi → tampilkan panduan */
-      function showGoogleConfigModal() {
-        const msg = [
-          '🔧 Konfigurasi Google Sign-In',
-          '',
-          'Untuk mengaktifkan login Google, Anda perlu:',
-          '',
-          '1. Buka: https://console.cloud.google.com/',
-          '2. Buat project baru atau pilih yang sudah ada',
-          '3. Aktifkan "Google Identity Services"',
-          '4. Buat OAuth 2.0 Client ID:',
-          '   → APIs & Services → Credentials',
-          '   → Create Credentials → OAuth 2.0 Client ID',
-          '   → Application type: Web application',
-          '   → Authorized origins: http://localhost:8080',
-          '',
-          '5. Salin Client ID, lalu buka index.html',
-          '   dan ganti nilai GOOGLE_CLIENT_ID di baris konfigurasi.',
-          '',
-          'Format: xxxxxxxxxx.apps.googleusercontent.com',
-        ].join('\n');
-        alert(msg);
-      }
-
-      /* ── Remember me: restore on load ──────────────────────── */
-      try {
-        const saved = localStorage.getItem('simklinik_remember');
-        if (saved) {
-          usernameInput.value = saved;
-          document.getElementById('rememberMe').checked = true;
-          passwordInput.focus();
-        }
-      } catch {}
-
-      /* ── Check lockout on page load ─────────────────────────── */
-      checkLockout();
-
-      /* ── Forgot password ─────────────────────────────────────── */
-      document.getElementById('forgotLink').addEventListener('click', e => {
-        e.preventDefault();
-        alert('Silakan hubungi administrator sistem untuk reset password.\n\nEmail  : admin@simklinik.id\nTelp   : (021) 1234-5678\nJam kerja: 08.00–17.00 WIB');
-      });
-
-    })();
-  </script>
+    <script src="script.js"></script>
 </body>
 </html>
