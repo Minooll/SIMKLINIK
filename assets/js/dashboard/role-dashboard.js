@@ -409,12 +409,33 @@
         if (agendaTitle) agendaTitle.textContent = 'Daftar Reservasi';
 
         if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Jam</th><th>Dokter / Layanan</th><th>Keluhan</th><th>Status</th>';
+        
+        let appointments = [];
+        if (patientId) {
+          const apptRes = await window.appointmentService.getPatientAppointments(patientId);
+          if (apptRes.success && apptRes.data.length > 0) {
+            appointments = apptRes.data;
+          }
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr><td class="table-primary">Hari ini</td><td>09:30</td><td>dr. Ayu Rahma · Poli Umum</td><td>Demam & batuk</td><td>${statusBadge('Terjadwal')}</td></tr>
-            <tr><td class="table-primary">02 Okt 2026</td><td>10:00</td><td>Laboratorium Klinik</td><td>Tes darah lengkap</td><td>${statusBadge('Terjadwal')}</td></tr>
-            <tr><td class="table-primary">18 Sep 2026</td><td>08:30</td><td>dr. Dimas · Poli Umum</td><td>Pemeriksaan tensi</td><td>${statusBadge('Selesai')}</td></tr>
-          `;
+          if (appointments.length > 0) {
+            tableBody.innerHTML = appointments.map(a => `
+              <tr>
+                <td class="table-primary">${a.appointment_date}</td>
+                <td>${a.appointment_time ? a.appointment_time.slice(0, 5) : '09:00'}</td>
+                <td>${a.doctor?.profile?.full_name || 'Dokter Spesialis'} (${a.service?.name || 'Poli'})</td>
+                <td>${a.chief_complaint || '-'}</td>
+                <td>${statusBadge(a.status)}</td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr><td class="table-primary">Hari ini</td><td>09:30</td><td>dr. Ayu Rahma · Poli Umum</td><td>Demam &amp; batuk</td><td>${statusBadge('Terjadwal')}</td></tr>
+              <tr><td class="table-primary">02 Okt 2026</td><td>10:00</td><td>Laboratorium Klinik</td><td>Tes darah lengkap</td><td>${statusBadge('Terjadwal')}</td></tr>
+              <tr><td class="table-primary">18 Sep 2026</td><td>08:30</td><td>dr. Dimas · Poli Umum</td><td>Pemeriksaan tensi</td><td>${statusBadge('Selesai')}</td></tr>
+            `;
+          }
         }
       } else if (currentView === 'rekam-medis') {
         if (welcomeTitle) welcomeTitle.textContent = 'Rekam Medis Elektronik (RME)';
@@ -423,23 +444,44 @@
         if (agendaTitle) agendaTitle.textContent = 'Riwayat Catatan Medis';
 
         if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Dokter Pemeriksa</th><th>Diagnosa</th><th>Status</th><th>Aksi</th>';
+        
+        let records = [];
+        if (patientId) {
+          const recRes = await window.medicalRecordService.getPatientHistory(patientId);
+          if (recRes.success && recRes.data.length > 0) {
+            records = recRes.data;
+          }
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary">18 Sep 2026</td>
-              <td>dr. Dimas Putra (Poli Umum)</td>
-              <td>Cephalgia Tension Type (G44.2)</td>
-              <td>${statusBadge('FINAL')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('18 Sep 2026', 'dr. Dimas Putra', 'Pusing berdenyut di bagian pelipis', 'TD: 120/80 mmHg, N: 78x/m, S: 36.6 C', 'Tension-Type Headache (ICD-10 G44.2)', 'Paracetamol 500mg 3x1 p.c.', 'FINAL')">Lihat RME</button></td>
-            </tr>
-            <tr>
-              <td class="table-primary">07 Agu 2026</td>
-              <td>dr. Ayu Rahma (Poli Umum)</td>
-              <td>Essential Hypertension (I10)</td>
-              <td>${statusBadge('FINAL')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('07 Agu 2026', 'dr. Ayu Rahma', 'Kontrol tekanan darah rutin', 'TD: 135/85 mmHg, N: 82x/m, S: 36.5 C', 'Hipertensi Primer (ICD-10 I10)', 'Amlodipine 5mg 1x1 malam', 'FINAL')">Lihat RME</button></td>
-            </tr>
-          `;
+          if (records.length > 0) {
+            tableBody.innerHTML = records.map(r => `
+              <tr>
+                <td class="table-primary">${r.record_date ? new Date(r.record_date).toLocaleDateString('id-ID') : 'Hari ini'}</td>
+                <td>${r.doctor?.profile?.full_name || 'Dokter Pemeriksa'}</td>
+                <td>${r.assessment || r.diagnosis_icd10 || 'Pemeriksaan Rutin'}</td>
+                <td>${statusBadge(r.finalized_at ? 'FINAL' : 'DRAFT')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${r.record_date || 'Hari ini'}', '${r.doctor?.profile?.full_name || 'Dokter'}', '${r.subjective || '-'}', '${r.objective || '-'}', '${r.assessment || r.diagnosis_icd10 || '-'}', '${r.treatment_plan || '-'}', '${r.finalized_at ? 'FINAL' : 'DRAFT'}')">Lihat RME</button></td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">18 Sep 2026</td>
+                <td>dr. Dimas Putra (Poli Umum)</td>
+                <td>Cephalgia Tension Type (G44.2)</td>
+                <td>${statusBadge('FINAL')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('18 Sep 2026', 'dr. Dimas Putra', 'Pusing berdenyut di bagian pelipis', 'TD: 120/80 mmHg, N: 78x/m, S: 36.6 C', 'Tension-Type Headache (ICD-10 G44.2)', 'Paracetamol 500mg 3x1 p.c.', 'FINAL')">Lihat RME</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary">07 Agu 2026</td>
+                <td>dr. Ayu Rahma (Poli Umum)</td>
+                <td>Essential Hypertension (I10)</td>
+                <td>${statusBadge('FINAL')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('07 Agu 2026', 'dr. Ayu Rahma', 'Kontrol tekanan darah rutin', 'TD: 135/85 mmHg, N: 82x/m, S: 36.5 C', 'Hipertensi Primer (ICD-10 I10)', 'Amlodipine 5mg 1x1 malam', 'FINAL')">Lihat RME</button></td>
+              </tr>
+            `;
+          }
         }
       } else if (currentView === 'resep') {
         if (welcomeTitle) welcomeTitle.textContent = 'Resep Obat Elektronik';
@@ -448,23 +490,47 @@
         if (agendaTitle) agendaTitle.textContent = 'Resep &amp; Aturan Minum';
 
         if (tableHead) tableHead.innerHTML = '<th>No. Resep</th><th>Tanggal</th><th>Dokter</th><th>Obat &amp; Aturan Pakai</th><th>Status</th>';
+        
+        let rxList = [];
+        if (patientId) {
+          const rxRes = await window.prescriptionService.getPatientActivePrescriptions(patientId);
+          if (rxRes.success && rxRes.data.length > 0) {
+            rxList = rxRes.data;
+          }
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary">RX-2609-0012</td>
-              <td>18 Sep 2026</td>
-              <td>dr. Dimas Putra</td>
-              <td><strong>Paracetamol 500mg</strong><br/><small>3x sehari 1 tablet sesudah makan (10 tablet)</small></td>
-              <td>${statusBadge('Aktif')}</td>
-            </tr>
-            <tr>
-              <td class="table-primary">RX-2608-0044</td>
-              <td>07 Agu 2026</td>
-              <td>dr. Ayu Rahma</td>
-              <td><strong>Amlodipine 5mg</strong><br/><small>1x sehari 1 tablet malam hari (30 tablet)</small></td>
-              <td>${statusBadge('Selesai')}</td>
-            </tr>
-          `;
+          if (rxList.length > 0) {
+            tableBody.innerHTML = rxList.map(rx => {
+              const itemsText = (rx.prescription_items || []).map(i => `<strong>${i.medicine_name}</strong> (${i.dosage}) - ${i.frequency} [${i.quantity} pcs]`).join('<br/>') || 'Obat terlampir';
+              return `
+                <tr>
+                  <td class="table-primary">${rx.prescription_number}</td>
+                  <td>${new Date(rx.created_at).toLocaleDateString('id-ID')}</td>
+                  <td>${rx.doctor?.profile?.full_name || 'Dokter'}</td>
+                  <td>${itemsText}</td>
+                  <td>${statusBadge(rx.status)}</td>
+                </tr>
+              `;
+            }).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">RX-2609-0012</td>
+                <td>18 Sep 2026</td>
+                <td>dr. Dimas Putra</td>
+                <td><strong>Paracetamol 500mg</strong><br/><small>3x sehari 1 tablet sesudah makan (10 tablet)</small></td>
+                <td>${statusBadge('Aktif')}</td>
+              </tr>
+              <tr>
+                <td class="table-primary">RX-2608-0044</td>
+                <td>07 Agu 2026</td>
+                <td>dr. Ayu Rahma</td>
+                <td><strong>Amlodipine 5mg</strong><br/><small>1x sehari 1 tablet malam hari (30 tablet)</small></td>
+                <td>${statusBadge('Selesai')}</td>
+              </tr>
+            `;
+          }
         }
       } else if (currentView === 'profil') {
         if (welcomeTitle) welcomeTitle.textContent = 'Profil Kesehatan Pasien';
@@ -472,15 +538,41 @@
         if (statsGrid) statsGrid.innerHTML = '';
         if (agendaTitle) agendaTitle.textContent = 'Ringkasan Kesehatan Mandiri';
 
+        // Pre-fill modal form if record exists
+        if (currentPatientRecord) {
+          if (healthBloodType) healthBloodType.value = currentPatientRecord.blood_type || '';
+          if (healthAllergies) healthAllergies.value = currentPatientRecord.allergies || '';
+          if (healthEmergencyContact) healthEmergencyContact.value = currentPatientRecord.emergency_contact || '';
+          if (healthEmergencyPhone) healthEmergencyPhone.value = currentPatientRecord.emergency_phone || '';
+        }
+
+        const bType = currentPatientRecord?.blood_type || 'O Rhesus Positif';
+        const alg = currentPatientRecord?.allergies || 'Tidak ada riwayat alergi obat';
+        const emContact = currentPatientRecord?.emergency_contact ? `${currentPatientRecord.emergency_contact} (${currentPatientRecord.emergency_phone || '-'})` : 'Budi Rahma (Keluarga) - 08123456789';
+
         if (tableHead) tableHead.innerHTML = '<th>Parameter</th><th>Data Klinis</th><th>Status</th><th>Aksi</th>';
         if (tableBody) {
           tableBody.innerHTML = `
-            <tr><td class="table-primary">Golongan Darah</td><td>O Rhesus Positif</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
-            <tr><td class="table-primary">Riwayat Alergi</td><td>Tidak ada riwayat alergi obat</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
-            <tr><td class="table-primary">Kontak Darurat</td><td>Budi Rahma (Keluarga) - 08123456789</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+            <tr><td class="table-primary">Golongan Darah</td><td>${bType}</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+            <tr><td class="table-primary">Riwayat Alergi</td><td>${alg}</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+            <tr><td class="table-primary">Kontak Darurat</td><td>${emContact}</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
           `;
         }
       }
+    }
+
+    const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
+    if (btnViewAllAgenda) {
+      btnViewAllAgenda.addEventListener('click', () => {
+        location.href = `${location.pathname}?view=janji`;
+      });
+    }
+
+    const btnViewAllLower = document.getElementById('btnViewAllLower');
+    if (btnViewAllLower) {
+      btnViewAllLower.addEventListener('click', () => {
+        location.href = `${location.pathname}?view=rekam-medis`;
+      });
     }
 
     refreshPasienDashboard();
