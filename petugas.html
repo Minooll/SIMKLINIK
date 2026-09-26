@@ -1,123 +1,296 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Dashboard Petugas - Sistem Informasi Manajemen Klinik (SIMKLINIK)" />
-    <title>Dashboard Petugas — SIMKLINIK</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230ea5e9'><path d='M19 10.5h-5.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z'/></svg>" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="assets/css/dashboard.css" />
-    <link rel="stylesheet" href="assets/css/role-pages.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config/supabase.js"></script>
-  </head>
-  <body data-role="petugas">
-    <div class="app-shell">
-      <aside class="sidebar" id="sidebar">
-        <div class="brand">
-          <span class="brand-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard Petugas - Sistem Informasi Manajemen Klinik (SIMKLINIK)" />
+  <title>Dashboard Petugas — SIMKLINIK</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230ea5e9'><path d='M19 10.5h-5.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/role-pages.css" />
+  <link rel="stylesheet" href="assets/css/modal.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase.js"></script>
+</head>
+
+<body data-role="petugas">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </span>
+        <span><strong>SIMKLINIK</strong><small>Manajemen Klinik</small></span>
+      </div>
+      <div class="sidebar-label">Menu petugas</div>
+      <nav class="main-nav" id="mainNav"></nav>
+      <div class="sidebar-footer">
+        <div class="help-box">
+          <span class="help-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
           </span>
-          <span><strong>SIMKLINIK</strong><small>Manajemen Klinik</small></span>
+          <div>
+            <strong>Butuh bantuan?</strong><small>Hubungi administrator</small>
+          </div>
         </div>
-        <div class="sidebar-label">Menu petugas</div>
-        <nav class="main-nav" id="mainNav"></nav>
-        <div class="sidebar-footer">
-          <div class="help-box">
-            <span class="help-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            </span>
-            <div>
-              <strong>Butuh bantuan?</strong><small>Hubungi administrator</small>
-            </div>
-          </div>
-          <button class="logout-button" id="logoutButton">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            Keluar
-          </button>
+        <button class="logout-button" id="logoutButton">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Keluar
+        </button>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle" aria-label="Buka menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" width="20" height="20">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="breadcrumb">
+          <span>SIMKLINIK</span><b>/</b><strong>Petugas</strong>
         </div>
-      </aside>
-      <main class="main-content">
-        <header class="topbar">
-          <button class="menu-toggle" id="menuToggle" aria-label="Buka menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <div class="topbar-actions">
+          <button class="icon-button" aria-label="Notifikasi">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" width="18" height="18">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
           </button>
-          <div class="breadcrumb">
-            <span>SIMKLINIK</span><b>/</b><strong>Petugas</strong>
-          </div>
-          <div class="topbar-actions">
-            <button class="icon-button" aria-label="Notifikasi">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            </button>
-            <div class="profile-menu">
-              <div class="avatar" id="headerAvatar"></div>
-              <div>
-                <strong id="headerName"></strong><small id="headerRole"></small>
-              </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" class="chevron"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </div>
-          </div>
-        </header>
-        <div class="content-wrap">
-          <section class="welcome-row">
+          <div class="profile-menu">
+            <div class="avatar" id="headerAvatar"></div>
             <div>
-              <p class="eyebrow" id="dateLabel"></p>
-              <h1 id="welcomeTitle"></h1>
-              <p class="welcome-copy" id="welcomeCopy"></p>
+              <strong id="headerName"></strong><small id="headerRole"></small>
             </div>
-            <button class="primary-button" id="primaryAction">
-              <span id="primaryActionText"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" width="14" height="14" class="chevron">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+      </header>
+      <div class="content-wrap">
+        <section class="welcome-row">
+          <div>
+            <p class="eyebrow" id="dateLabel"></p>
+            <h1 id="welcomeTitle"></h1>
+            <p class="welcome-copy" id="welcomeCopy"></p>
+          </div>
+          <div class="welcome-actions">
+            <button class="primary-button" id="primaryAction" data-modal-target="modalNewPatient">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span id="primaryActionText">Tambah Pasien Walk-in</span>
             </button>
-          </section>
-          <section class="stats-grid" id="statsGrid"></section>
-          <section class="dashboard-grid">
-            <div class="panel schedule-panel">
-              <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">AGENDA</p>
-                  <h2 id="agendaTitle"></h2>
-                </div>
-                <button class="text-button">Lihat semua <span>&rarr;</span></button>
-              </div>
-              <div class="schedule-list" id="scheduleList"></div>
-            </div>
-            <div class="panel insight-panel">
-              <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">RINGKASAN</p>
-                  <h2 id="insightTitle"></h2>
-                </div>
-                <span class="live-badge"><i></i> Live</span>
-              </div>
-              <div id="insightContent"></div>
-            </div>
-          </section>
-          <section class="panel lower-panel">
+          </div>
+        </section>
+        <section class="stats-grid" id="statsGrid"></section>
+        <section class="dashboard-grid">
+          <div class="panel schedule-panel">
             <div class="panel-heading">
               <div>
-                <p class="eyebrow">DATA</p>
-                <h2 id="lowerTitle">Ringkasan</h2>
+                <p class="eyebrow">AGENDA</p>
+                <h2 id="agendaTitle"></h2>
               </div>
-              <button class="text-button">Buka daftar <span>&rarr;</span></button>
+              <button class="text-button" id="btnViewAllAgenda">Lihat semua <span>&rarr;</span></button>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr id="tableHead"></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-              </table>
+            <div class="schedule-list" id="scheduleList"></div>
+          </div>
+          <div class="panel insight-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">RINGKASAN</p>
+                <h2 id="insightTitle"></h2>
+              </div>
+              <span class="live-badge"><i></i> Live</span>
             </div>
-          </section>
+            <div id="insightContent"></div>
+          </div>
+        </section>
+        <section class="panel lower-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">DATA</p>
+              <h2 id="lowerTitle">Ringkasan</h2>
+            </div>
+            <button class="text-button" id="btnViewAllLower">Buka daftar <span>&rarr;</span></button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr id="tableHead"></tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL 1: REGISTRASI PASIEN BARU / WALK-IN
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modalNewPatient" role="dialog" aria-modal="true" aria-labelledby="modalNewPatientTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalNewPatientTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          Pendaftaran Pasien Baru (Admisi)
+        </h3>
+        <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="formNewPatient" novalidate>
+        <div class="modal-body">
+          <div class="modal-grid-2">
+            <div class="modal-form-group">
+              <label for="newPatientNik">Nomor Induk Kependudukan (NIK 16 Digit)</label>
+              <input type="text" id="newPatientNik" placeholder="Contoh: 3201234567890001" maxlength="16" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="newPatientName">Nama Lengkap Pasien</label>
+              <input type="text" id="newPatientName" placeholder="Nama sesuai KTP" required />
+            </div>
+          </div>
+          <div class="modal-grid-3">
+            <div class="modal-form-group">
+              <label for="newPatientBirth">Tanggal Lahir</label>
+              <input type="date" id="newPatientBirth" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="newPatientGender">Jenis Kelamin</label>
+              <select id="newPatientGender" required>
+                <option value="L">Laki-Laki</option>
+                <option value="P">Perempuan</option>
+              </select>
+            </div>
+            <div class="modal-form-group">
+              <label for="newPatientBlood">Gol. Darah</label>
+              <select id="newPatientBlood">
+                <option value="">-</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="AB">AB</option>
+                <option value="O">O</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-grid-2">
+            <div class="modal-form-group">
+              <label for="newPatientPhone">Nomor WhatsApp / HP</label>
+              <input type="tel" id="newPatientPhone" placeholder="08xxxxxxxxxx" />
+            </div>
+            <div class="modal-form-group">
+              <label for="newPatientAllergies">Riwayat Alergi Obat</label>
+              <input type="text" id="newPatientAllergies" placeholder="Contoh: Penisilin, Ibuprofen" />
+            </div>
+          </div>
+          <div class="modal-form-group">
+            <label for="newPatientAddress">Alamat Domisili</label>
+            <textarea id="newPatientAddress" rows="2" placeholder="Alamat lengkap tempat tinggal"></textarea>
+          </div>
+          <div class="modal-grid-2">
+            <div class="modal-form-group">
+              <label for="newPatientEmergency">Nama Kontak Darurat</label>
+              <input type="text" id="newPatientEmergency" placeholder="Nama kerabat terdekat" />
+            </div>
+            <div class="modal-form-group">
+              <label for="newPatientEmergencyPhone">No. Telp Kontak Darurat</label>
+              <input type="tel" id="newPatientEmergencyPhone" placeholder="08xxxxxxxxxx" />
+            </div>
+          </div>
         </div>
-      </main>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" data-modal-close>Batal</button>
+          <button type="submit" class="btn-modal-submit" id="btnSubmitNewPatient">
+            <span class="btn-spinner"></span>
+            <span>Terbitkan No. Rekam Medis (RM)</span>
+          </button>
+        </div>
+      </form>
     </div>
-    <script src="assets/js/dashboard/role-dashboard.js"></script>
-  </body>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL 2: KASIR & PELUNASAN PEMBAYARAN
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modalPayment" role="dialog" aria-modal="true" aria-labelledby="modalPaymentTitle" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalPaymentTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          Kasir Pelunasan Pembayaran
+        </h3>
+        <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="formPayment" novalidate>
+        <input type="hidden" id="paymentTargetId" value="" />
+        <div class="modal-body">
+          <div class="modal-info-box">
+            <div>Nomor Invoice: <strong id="paymentInvoiceDisplay">INV-2026-0041</strong></div>
+            <div>Nama Pasien: <strong id="paymentPatientDisplay">Siti Aminah</strong></div>
+            <div>Total Tagihan: <strong id="paymentAmountDisplay">Rp 85.000</strong></div>
+          </div>
+          <div class="modal-form-group">
+            <label for="paymentMethodSelect">Metode Pembayaran</label>
+            <select id="paymentMethodSelect" required>
+              <option value="TUNAI">Tunai (Cash)</option>
+              <option value="QRIS">QRIS Dinamis / Statis</option>
+              <option value="TRANSFER">Transfer Bank Virtual Account</option>
+              <option value="DEBIT">Kartu Debit EDC</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label for="paymentNotes">Catatan / Keterangan Transaksi</label>
+            <input type="text" id="paymentNotes" placeholder="Contoh: Diterima uang pas / Lunas melalui QRIS" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" data-modal-close>Batal</button>
+          <button type="submit" class="btn-modal-submit" id="btnSubmitPayment">
+            <span class="btn-spinner"></span>
+            <span>Konfirmasi Pelunasan &amp; Cetak</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- UI Components & Supabase Data Services -->
+  <script src="assets/js/components/modal.js"></script>
+  <script src="assets/js/components/toast.js"></script>
+  <script src="assets/js/services/patientService.js"></script>
+  <script src="assets/js/services/appointmentService.js"></script>
+  <script src="assets/js/services/queueService.js"></script>
+  <script src="assets/js/services/medicalRecordService.js"></script>
+  <script src="assets/js/services/prescriptionService.js"></script>
+  <script src="assets/js/services/billingService.js"></script>
+  <script src="assets/js/dashboard/role-dashboard.js"></script>
+</body>
 </html>
