@@ -688,7 +688,7 @@
       });
     }
 
-    function renderPetugasDashboard() {
+    async function renderPetugasDashboard() {
       if (currentView === 'dashboard') {
         if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
@@ -760,33 +760,55 @@
         if (agendaTitle) agendaTitle.textContent = 'Monitor Antrean Live';
 
         if (tableHead) tableHead.innerHTML = '<th>No. Antrean</th><th>Pasien / No. RM</th><th>Layanan / Dokter</th><th>Status</th><th>Kontrol Petugas</th>';
+        
+        let queues = [];
+        const queueRes = await window.queueService.getTodayQueue();
+        if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
+          queues = queueRes.data;
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary"><strong>A-021</strong></td>
-              <td>Budi Santoso (RM-000021)</td>
-              <td>Poli Umum · dr. Ayu</td>
-              <td>${statusBadge('Dipanggil')}</td>
-              <td>
-                <button class="action-btn-sm action-btn-success" onclick="window.Toast.info('Antrean A-021 masuk ruang pemeriksaan')">Layani</button>
-                <button class="action-btn-sm action-btn-primary" onclick="window.Toast.info('Memanggil ulang A-021')">Panggil Ulang</button>
-              </td>
-            </tr>
-            <tr>
-              <td class="table-primary"><strong>A-022</strong></td>
-              <td>Siti Aminah (RM-000022)</td>
-              <td>Poli Umum · dr. Ayu</td>
-              <td>${statusBadge('Menunggu')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.success('Memanggil nomor antrean A-022')">Panggil</button></td>
-            </tr>
-            <tr>
-              <td class="table-primary"><strong>B-008</strong></td>
-              <td>Rizky Pratama (RM-000019)</td>
-              <td>Laboratorium</td>
-              <td>${statusBadge('Menunggu')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.success('Memanggil nomor antrean B-008')">Panggil</button></td>
-            </tr>
-          `;
+          if (queues.length > 0) {
+            tableBody.innerHTML = queues.map(q => `
+              <tr>
+                <td class="table-primary"><strong>${q.queue_number}</strong></td>
+                <td>${q.patient?.profile?.full_name || 'Pasien'} (${q.patient?.no_rm || '-'})</td>
+                <td>${q.service?.name || 'Poli'} · ${q.doctor?.profile?.full_name || 'Dokter'}</td>
+                <td>${statusBadge(q.status)}</td>
+                <td>
+                  <button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('${q.id}', '${q.queue_number}')">Panggil</button>
+                  <button class="action-btn-sm action-btn-success" onclick="window.layaniAntrean('${q.id}', '${q.queue_number}')">Layani</button>
+                </td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary"><strong>A-021</strong></td>
+                <td>Budi Santoso (RM-000021)</td>
+                <td>Poli Umum · dr. Ayu</td>
+                <td>${statusBadge('Dipanggil')}</td>
+                <td>
+                  <button class="action-btn-sm action-btn-success" onclick="window.layaniAntrean('demo-1', 'A-021')">Layani</button>
+                  <button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('demo-1', 'A-021')">Panggil Ulang</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="table-primary"><strong>A-022</strong></td>
+                <td>Siti Aminah (RM-000022)</td>
+                <td>Poli Umum · dr. Ayu</td>
+                <td>${statusBadge('Menunggu')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('demo-2', 'A-022')">Panggil</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary"><strong>B-008</strong></td>
+                <td>Rizky Pratama (RM-000019)</td>
+                <td>Laboratorium</td>
+                <td>${statusBadge('Menunggu')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('demo-3', 'B-008')">Panggil</button></td>
+              </tr>
+            `;
+          }
         }
       } else if (currentView === 'pembayaran') {
         if (welcomeTitle) welcomeTitle.textContent = 'Kasir & Pembayaran';
@@ -794,26 +816,48 @@
         if (statsGrid) statsGrid.innerHTML = '';
         if (agendaTitle) agendaTitle.textContent = 'Daftar Tagihan Hari Ini';
 
-        if (tableHead) tableHead.innerHTML = '<th>No. Invoice</th><th>Pasien</th><th>Rincian Layanan</th><th>Total Tagihan</th><th>Status</th><th>Aksi Kasir</th>';
+        if (tableHead) tableHead.innerHTML = '<th>No. Invoice</th><th>Pasien</th><th>Total Tagihan</th><th>Status</th><th>Aksi Kasir</th>';
+        
+        let payments = [];
+        const payRes = await window.billingService.getTodayPayments();
+        if (payRes.success && payRes.data && payRes.data.length > 0) {
+          payments = payRes.data;
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary">INV-2026-0041</td>
-              <td>Siti Aminah</td>
-              <td>Konsultasi Dokter + Resep Obat</td>
-              <td><strong>Rp 85.000</strong></td>
-              <td>${statusBadge('Menunggu')}</td>
-              <td><button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('INV-2026-0041', 'Siti Aminah', 85000)">Proses Bayar</button></td>
-            </tr>
-            <tr>
-              <td class="table-primary">INV-2026-0040</td>
-              <td>Budi Santoso</td>
-              <td>Konsultasi Dokter Spesialis</td>
-              <td>Rp 75.000</td>
-              <td>${statusBadge('Lunas')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.info('Mencetak struk pembayaran...')">Cetak Bukti</button></td>
-            </tr>
-          `;
+          if (payments.length > 0) {
+            tableBody.innerHTML = payments.map(p => `
+              <tr>
+                <td class="table-primary">${p.invoice_number}</td>
+                <td>${p.patient?.profile?.full_name || 'Pasien'} (${p.patient?.no_rm || '-'})</td>
+                <td><strong>Rp ${Number(p.total_amount).toLocaleString('id-ID')}</strong></td>
+                <td>${statusBadge(p.status)}</td>
+                <td>
+                  ${p.status === 'Lunas'
+                    ? '<span class="status-badge status-done">Lunas</span>'
+                    : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${p.invoice_number}', '${p.patient?.profile?.full_name || 'Pasien'}', ${p.total_amount}, '${p.id}')">Proses Bayar</button>`
+                  }
+                </td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">INV-2026-0041</td>
+                <td>Siti Aminah</td>
+                <td><strong>Rp 85.000</strong></td>
+                <td>${statusBadge('Menunggu')}</td>
+                <td><button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('INV-2026-0041', 'Siti Aminah', 85000, 'demo-p-1')">Proses Bayar</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary">INV-2026-0040</td>
+                <td>Budi Santoso</td>
+                <td><strong>Rp 75.000</strong></td>
+                <td>${statusBadge('Lunas')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.info('Mencetak struk pembayaran...')">Cetak Bukti</button></td>
+              </tr>
+            `;
+          }
         }
       } else if (currentView === 'pasien') {
         if (welcomeTitle) welcomeTitle.textContent = 'Data Induk Pasien';
@@ -822,39 +866,89 @@
         if (agendaTitle) agendaTitle.textContent = 'Daftar Pasien Terdaftar';
 
         if (tableHead) tableHead.innerHTML = '<th>No. RM</th><th>NIK</th><th>Nama Lengkap</th><th>Gol. Darah</th><th>Status</th><th>Aksi</th>';
+        
+        let patients = [];
+        const ptRes = await window.patientService.searchPatients('');
+        if (ptRes.success && ptRes.data && ptRes.data.length > 0) {
+          patients = ptRes.data;
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary">RM-000001</td>
-              <td>3201234567890001</td>
-              <td>Budi Santoso</td>
-              <td>O</td>
-              <td>${statusBadge('Aktif')}</td>
-              <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
-            </tr>
-            <tr>
-              <td class="table-primary">RM-000002</td>
-              <td>3201234567890002</td>
-              <td>Siti Aminah</td>
-              <td>A</td>
-              <td>${statusBadge('Aktif')}</td>
-              <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
-            </tr>
-          `;
+          if (patients.length > 0) {
+            tableBody.innerHTML = patients.map(pt => `
+              <tr>
+                <td class="table-primary">${pt.no_rm}</td>
+                <td>${pt.nik || '-'}</td>
+                <td>${pt.profile?.full_name || 'Pasien'}</td>
+                <td>${pt.blood_type || '-'}</td>
+                <td>${statusBadge('Aktif')}</td>
+                <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">RM-000001</td>
+                <td>3201234567890001</td>
+                <td>Budi Santoso</td>
+                <td>O</td>
+                <td>${statusBadge('Aktif')}</td>
+                <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary">RM-000002</td>
+                <td>3201234567890002</td>
+                <td>Siti Aminah</td>
+                <td>A</td>
+                <td>${statusBadge('Aktif')}</td>
+                <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
+              </tr>
+            `;
+          }
         }
       }
+    }
+
+    const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
+    if (btnViewAllAgenda) {
+      btnViewAllAgenda.addEventListener('click', () => {
+        location.href = `${location.pathname}?view=antrean`;
+      });
+    }
+
+    const btnViewAllLower = document.getElementById('btnViewAllLower');
+    if (btnViewAllLower) {
+      btnViewAllLower.addEventListener('click', () => {
+        location.href = `${location.pathname}?view=pasien`;
+      });
     }
 
     renderPetugasDashboard();
   }
 
-  window.openPaymentModal = function(inv, name, amount) {
+  window.panggilAntrean = async function(queueId, queueNumber) {
+    if (window.queueService && queueId && !queueId.startsWith('demo-')) {
+      await window.queueService.updateQueueStatus(queueId, 'CALLED');
+    }
+    window.Toast.success(`Nomor Antrean ${queueNumber} dipanggil ke loket poli!`);
+  };
+
+  window.layaniAntrean = async function(queueId, queueNumber) {
+    if (window.queueService && queueId && !queueId.startsWith('demo-')) {
+      await window.queueService.updateQueueStatus(queueId, 'SERVING');
+    }
+    window.Toast.info(`Pasien dengan nomor antrean ${queueNumber} sedang dilayani dokter.`);
+  };
+
+  window.openPaymentModal = function(inv, name, amount, paymentId = '') {
     const invEl = document.getElementById('paymentInvoiceDisplay');
     const nameEl = document.getElementById('paymentPatientDisplay');
     const amtEl = document.getElementById('paymentAmountDisplay');
+    const targetInput = document.getElementById('paymentTargetId');
     if (invEl) invEl.textContent = inv;
     if (nameEl) nameEl.textContent = name;
     if (amtEl) amtEl.textContent = `Rp ${Number(amount).toLocaleString('id-ID')}`;
+    if (targetInput) targetInput.value = paymentId;
     window.Modal.open('modalPayment');
   };
 
