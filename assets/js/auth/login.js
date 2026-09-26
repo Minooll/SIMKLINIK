@@ -426,7 +426,7 @@
           '   → Application type: Web application',
           '   → Authorized origins: http://localhost:8080',
           '',
-          '5. Salin Client ID, lalu buka index.html',
+          '5. Salin Client ID, lalu buka login.html',
           '   dan ganti nilai GOOGLE_CLIENT_ID di baris konfigurasi.',
           '',
           'Format: xxxxxxxxxx.apps.googleusercontent.com',
