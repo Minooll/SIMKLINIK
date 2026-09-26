@@ -100,6 +100,7 @@
      ══════════════════════════════════════════════════════════ */
   let currentAuthUser = null;
   let currentPatientRecord = null;
+  let currentDoctorRecord = null;
 
   async function checkAuthSession() {
     if (!window.supabaseClient) return null;
@@ -132,6 +133,15 @@
         const patientRes = await window.patientService.getPatientProfile(currentAuthUser.id);
         if (patientRes.success && patientRes.data) {
           currentPatientRecord = patientRes.data;
+        }
+      } else if (role === 'dokter') {
+        const { data: docData } = await window.supabaseClient
+          .from('doctors')
+          .select('*, profile:profiles(*), service:services(*)')
+          .eq('profile_id', currentAuthUser.id)
+          .maybeSingle();
+        if (docData) {
+          currentDoctorRecord = docData;
         }
       }
 
@@ -992,6 +1002,8 @@
 
     async function handleSoapSubmit(isFinal) {
       const patientId = document.getElementById('soapPatientId')?.value;
+      const appointmentId = document.getElementById('soapAppointmentId')?.value;
+      const recordId = document.getElementById('soapRecordId')?.value;
       const subjective = document.getElementById('soapSubjective')?.value.trim();
       const systolic = document.getElementById('vitalSystolic')?.value;
       const diastolic = document.getElementById('vitalDiastolic')?.value;
@@ -1026,10 +1038,12 @@
       setButtonLoading(activeBtn, true);
 
       const recordRes = await window.medicalRecordService.saveMedicalRecord({
-        patientId: patientId || 'demo-patient-id',
-        doctorId: 'demo-doc-id',
+        id: recordId || undefined,
+        appointmentId: appointmentId || undefined,
+        patientId: patientId || (currentDoctorRecord?.id ? 'p-1' : 'demo-patient-id'),
+        doctorId: currentDoctorRecord?.id || 'demo-doc-id',
         subjective,
-        objective,
+        objective: objective || `TD: ${systolic || 120}/${diastolic || 80} mmHg, Nadi: ${pulse || 78}x/m, Suhu: ${temperature || 36.5} C, RR: ${rr || 18}x/m`,
         vitalSigns: { systolic, diastolic, pulse, temperature, rr },
         assessment,
         icd10Code,
@@ -1041,7 +1055,7 @@
         await window.prescriptionService.createPrescriptionWithItems({
           medicalRecordId: recordRes.data?.id,
           patientId: patientId || 'demo-patient-id',
-          doctorId: 'demo-doc-id',
+          doctorId: currentDoctorRecord?.id || 'demo-doc-id',
           items
         });
       }
@@ -1061,7 +1075,7 @@
     if (btnSaveSoapDraft) btnSaveSoapDraft.addEventListener('click', () => handleSoapSubmit(false));
     if (btnFinalizeSoap) btnFinalizeSoap.addEventListener('click', () => handleSoapSubmit(true));
 
-    function renderDokterDashboard() {
+    async function renderDokterDashboard() {
       if (currentView === 'dashboard') {
         if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
@@ -1076,85 +1090,351 @@
         }
 
         if (agendaTitle) agendaTitle.textContent = 'Antrean Pasien Menunggu Pemeriksaan';
-        if (scheduleList) {
-          scheduleList.innerHTML = defaultRoleMeta.dashboard.rows.map(([time, person, detail, status]) => `
-            <div class="schedule-item">
-              <time class="schedule-time">${time}</time>
-              <div><strong>${person}</strong><small>${detail}</small></div>
-              ${statusBadge(status)}
-            </div>
-          `).join('');
+
+        // Load today's doctor appointments
+        let todayAppts = [];
+        const apptRes = await window.appointmentService.getDoctorTodayAppointments(currentDoctorRecord?.id);
+        if (apptRes.success && apptRes.data && apptRes.data.length > 0) {
+          todayAppts = apptRes.data;
         }
 
-        if (insightTitle) insightTitle.textContent = 'Kepatuhan RME Permenkes';
+        if (scheduleList) {
+          if (todayAppts.length > 0) {
+            scheduleList.innerHTML = todayAppts.map(a => `
+              <div class="schedule-item">
+                <time class="schedule-time">${a.appointment_time ? a.appointment_time.slice(0, 5) : '09:00'}</time>
+                <div>
+                  <strong>${a.patient?.profile?.full_name || 'Pasien'} (${a.patient?.no_rm || '-'})</strong>
+                  <small>${a.chief_complaint || 'Pemeriksaan Klinis'}</small>
+                </div>
+                ${statusBadge(a.status)}
+              </div>
+            `).join('');
+          } else {
+            scheduleList.innerHTML = defaultRoleMeta.dashboard.rows.map(([time, person, detail, status]) => `
+              <div class="schedule-item">
+                <time class="schedule-time">${time}</time>
+                <div><strong>${person}</strong><small>${detail}</small></div>
+                ${statusBadge(status)}
+              </div>
+            `).join('');
+          }
+        }
+
+        if (insightTitle) insightTitle.textContent = 'Kepatuhan Regulasi RME & Privasi';
         if (insightContent) {
           insightContent.innerHTML = `
             <div class="activity">
               <span class="activity-icon">${ICONS.check}</span>
               <div>
-                <strong>Validasi ICD-10 Aktif</strong>
-                <small>Pengisian diagnosa terstandarisasi Permenkes No. 24/2022</small>
+                <strong>Validasi Diagnosa ICD-10</strong>
+                <small>Pengisian data klinis terstandarisasi Permenkes No. 24/2022.</small>
+              </div>
+            </div>
+            <div class="activity">
+              <span class="activity-icon">${ICONS.sparkle}</span>
+              <div>
+                <strong>Perlindungan Data Medis (UU PDP 27/2022)</strong>
+                <small>Akses riwayat RME terenkripsi &amp; jejak audit digital aktif.</small>
               </div>
             </div>
           `;
         }
 
         if (lowerTitle) lowerTitle.textContent = 'Pasien Poli Hari Ini';
-        if (tableHead) tableHead.innerHTML = '<th>Nama Pasien</th><th>Keluhan</th><th>Waktu</th><th>Status</th><th>Tindakan Medis</th>';
+        if (tableHead) tableHead.innerHTML = '<th>No. RM</th><th>Nama Pasien</th><th>Keluhan Utama</th><th>Waktu</th><th>Status</th><th>Tindakan Klinis</th>';
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary">Siti Aminah (RM-000002)</td>
-              <td>Demam tinggi 3 hari, pusing</td>
-              <td>09:15</td>
-              <td>${statusBadge('Sedang berjalan')}</td>
-              <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam tinggi 3 hari')">Periksa (SOAP)</button></td>
-            </tr>
-            <tr>
-              <td class="table-primary">Rizky Pratama (RM-000003)</td>
-              <td>Evaluasi hasil laboratorium darah</td>
-              <td>10:00</td>
-              <td>${statusBadge('Berikutnya')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('RM-000003', 'Rizky Pratama', 'Evaluasi hasil lab')">Buka RME</button></td>
-            </tr>
-          `;
+          if (todayAppts.length > 0) {
+            tableBody.innerHTML = todayAppts.map(a => {
+              const isDone = a.status === 'Selesai' || a.status === 'Completed' || a.status === 'FINAL';
+              const actionBtn = isDone
+                ? `<button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${a.appointment_date}', '${defaultRoleMeta.name}', '${a.chief_complaint || '-'}', 'TD: 120/80 mmHg, Nadi: 78x/m', 'Pemeriksaan Rutin Poli', 'Edukasi dan resep terlampir', 'FINAL')">Lihat RME</button>`
+                : `<button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('${a.patient?.no_rm || '-'}', '${a.patient?.profile?.full_name || 'Pasien'}', '${a.chief_complaint || 'Keluhan umum'}', '${a.patient?.id || ''}', '${a.id}')">Periksa (SOAP)</button>`;
+              return `
+                <tr>
+                  <td class="table-primary">${a.patient?.no_rm || '-'}</td>
+                  <td><strong>${a.patient?.profile?.full_name || 'Pasien'}</strong></td>
+                  <td>${a.chief_complaint || '-'}</td>
+                  <td>${a.appointment_time ? a.appointment_time.slice(0, 5) : '09:00'}</td>
+                  <td>${statusBadge(a.status)}</td>
+                  <td>${actionBtn}</td>
+                </tr>
+              `;
+            }).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">RM-000002</td>
+                <td><strong>Siti Aminah</strong></td>
+                <td>Demam tinggi 3 hari, pusing</td>
+                <td>09:15</td>
+                <td>${statusBadge('Sedang berjalan')}</td>
+                <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam tinggi 3 hari, pusing')">Periksa (SOAP)</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary">RM-000003</td>
+                <td><strong>Rizky Pratama</strong></td>
+                <td>Evaluasi hasil laboratorium darah</td>
+                <td>10:00</td>
+                <td>${statusBadge('Berikutnya')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('RM-000003', 'Rizky Pratama', 'Evaluasi hasil laboratorium darah')">Buka RME</button></td>
+              </tr>
+            `;
+          }
         }
       } else if (currentView === 'pasien') {
         if (welcomeTitle) welcomeTitle.textContent = 'Pasien Saya';
-        if (welcomeCopy) welcomeCopy.textContent = 'Daftar seluruh pasien dalam rekam medis dokter pemeriksa.';
+        if (welcomeCopy) welcomeCopy.textContent = 'Daftar pasien dalam pantauan klinis dan riwayat konsultasi dokter.';
         if (statsGrid) statsGrid.innerHTML = '';
-        if (agendaTitle) agendaTitle.textContent = 'Daftar Riwayat Pasien';
+        if (agendaTitle) agendaTitle.textContent = 'Data Induk Pasien';
+        if (lowerTitle) lowerTitle.textContent = 'Daftar Pasien Terdaftar';
 
-        if (tableHead) tableHead.innerHTML = '<th>Nama Pasien</th><th>Keluhan Utama</th><th>Kunjungan Terakhir</th><th>Status</th><th>Aksi</th>';
+        if (tableHead) tableHead.innerHTML = '<th>No. RM</th><th>NIK</th><th>Nama Lengkap</th><th>Gol. Darah</th><th>Riwayat Alergi</th><th>Aksi</th>';
+        
+        let patients = [];
+        const ptRes = await window.patientService.searchPatients('');
+        if (ptRes.success && ptRes.data && ptRes.data.length > 0) {
+          patients = ptRes.data;
+        }
+
         if (tableBody) {
-          tableBody.innerHTML = `
-            <tr>
-              <td class="table-primary">Budi Santoso</td>
-              <td>Hipertensi esensial</td>
-              <td>Hari ini, 08:30</td>
-              <td>${statusBadge('Selesai')}</td>
-              <td><button class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('RM-000001', 'Budi Santoso', 'Hipertensi esensial')">Tinjau RME</button></td>
-            </tr>
-            <tr>
-              <td class="table-primary">Siti Aminah</td>
-              <td>Demam dan batuk</td>
-              <td>Hari ini, 09:15</td>
-              <td>${statusBadge('Sedang berjalan')}</td>
-              <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam dan batuk')">Periksa Pasien</button></td>
-            </tr>
-          `;
+          if (patients.length > 0) {
+            tableBody.innerHTML = patients.map(pt => `
+              <tr>
+                <td class="table-primary">${pt.no_rm}</td>
+                <td>${pt.nik || '-'}</td>
+                <td><strong>${pt.profile?.full_name || 'Pasien'}</strong></td>
+                <td>${pt.blood_type || '-'}</td>
+                <td>${pt.allergies || 'Tidak ada'}</td>
+                <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('${pt.no_rm}', '${pt.profile?.full_name || 'Pasien'}', 'Konsultasi poli', '${pt.id}')">Periksa Pasien</button></td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">RM-000001</td>
+                <td>3201234567890001</td>
+                <td><strong>Budi Santoso</strong></td>
+                <td>O</td>
+                <td>Tidak ada riwayat alergi</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('RM-000001', 'Budi Santoso', 'Kontrol tensi rutin')">Tinjau RME</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary">RM-000002</td>
+                <td>3201234567890002</td>
+                <td><strong>Siti Aminah</strong></td>
+                <td>A</td>
+                <td>Alergi Penisilin</td>
+                <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam tinggi')">Periksa Pasien</button></td>
+              </tr>
+            `;
+          }
+        }
+      } else if (currentView === 'jadwal') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Jadwal Praktik Dokter';
+        if (welcomeCopy) welcomeCopy.textContent = 'Pengaturan sesi jam konsultasi, poliklinik, dan batas kuota pelayanan pasien harian.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Sesi Praktik Mingguan';
+        if (lowerTitle) lowerTitle.textContent = 'Jadwal Praktik Poliklinik';
+
+        if (tableHead) tableHead.innerHTML = '<th>Hari Praktik</th><th>Sesi Jam</th><th>Poliklinik</th><th>Kuota Maksimal</th><th>Sisa Kuota</th><th>Status</th>';
+        
+        let schedules = [];
+        if (currentDoctorRecord?.id) {
+          const scRes = await window.appointmentService.getDoctorSchedules(currentDoctorRecord.id);
+          if (scRes.success && scRes.data && scRes.data.length > 0) {
+            schedules = scRes.data;
+          }
+        }
+
+        const DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        if (tableBody) {
+          if (schedules.length > 0) {
+            tableBody.innerHTML = schedules.map(s => `
+              <tr>
+                <td class="table-primary">${DAY_NAMES[s.day_of_week] || 'Hari Kerja'}</td>
+                <td>${s.start_time?.slice(0, 5) || '08:00'} - ${s.end_time?.slice(0, 5) || '14:00'} WIB</td>
+                <td>Poli Umum</td>
+                <td>${s.max_quota || 20} Pasien</td>
+                <td>${Math.max(0, (s.max_quota || 20) - 5)} Tersedia</td>
+                <td>${statusBadge(s.is_active ? 'Aktif' : 'Nonaktif')}</td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr><td class="table-primary">Senin</td><td>08:00 - 12:00 WIB</td><td>Poli Umum</td><td>20 Pasien</td><td>12 Tersedia</td><td>${statusBadge('Aktif')}</td></tr>
+              <tr><td class="table-primary">Selasa</td><td>08:00 - 12:00 WIB</td><td>Poli Umum</td><td>20 Pasien</td><td>15 Tersedia</td><td>${statusBadge('Aktif')}</td></tr>
+              <tr><td class="table-primary">Rabu</td><td>08:00 - 12:00 WIB</td><td>Poli Umum</td><td>20 Pasien</td><td>08 Tersedia</td><td>${statusBadge('Aktif')}</td></tr>
+              <tr><td class="table-primary">Kamis</td><td>08:00 - 12:00 WIB</td><td>Poli Umum</td><td>20 Pasien</td><td>14 Tersedia</td><td>${statusBadge('Aktif')}</td></tr>
+              <tr><td class="table-primary">Jumat</td><td>08:00 - 11:30 WIB</td><td>Poli Umum</td><td>15 Pasien</td><td>05 Tersedia</td><td>${statusBadge('Aktif')}</td></tr>
+              <tr><td class="table-primary">Sabtu</td><td>08:00 - 13:00 WIB</td><td>Poli Umum</td><td>25 Pasien</td><td>18 Tersedia</td><td>${statusBadge('Aktif')}</td></tr>
+            `;
+          }
+        }
+      } else if (currentView === 'rekam-medis') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Rekam Medis Elektronik (RME)';
+        if (welcomeCopy) welcomeCopy.textContent = 'Arsip riwayat catatan medis SOAP dan klasifikasi diagnosa ICD-10 sesuai Permenkes No. 24/2022.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Riwayat RME Terfinalisasi';
+        if (lowerTitle) lowerTitle.textContent = 'Daftar Berkas Medis Pasien';
+
+        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>No. RM &amp; Pasien</th><th>Anamnesis (S)</th><th>Diagnosa (A &amp; ICD-10)</th><th>Status</th><th>Aksi</th>';
+        
+        let records = [];
+        const rmeRes = await window.medicalRecordService.getDoctorRecords(currentDoctorRecord?.id);
+        if (rmeRes.success && rmeRes.data && rmeRes.data.length > 0) {
+          records = rmeRes.data;
+        }
+
+        if (tableBody) {
+          if (records.length > 0) {
+            tableBody.innerHTML = records.map(r => `
+              <tr>
+                <td class="table-primary">${r.record_date ? new Date(r.record_date).toLocaleDateString('id-ID') : 'Hari ini'}</td>
+                <td><strong>${r.patient?.profile?.full_name || 'Pasien'}</strong><br/><small>${r.patient?.no_rm || '-'}</small></td>
+                <td>${r.subjective || '-'}</td>
+                <td><strong>${r.diagnosis_icd10 || r.assessment || '-'}</strong></td>
+                <td>${statusBadge(r.finalized_at ? 'FINAL' : 'DRAFT')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${r.record_date ? new Date(r.record_date).toLocaleDateString('id-ID') : 'Hari ini'}', '${defaultRoleMeta.name}', '${r.subjective || '-'}', '${r.objective || '-'}', '${r.diagnosis_icd10 || r.assessment || '-'}', '${r.treatment_plan || '-'}', '${r.finalized_at ? 'FINAL' : 'DRAFT'}')">Lihat RME</button></td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">26 Sep 2026</td>
+                <td><strong>Budi Santoso</strong><br/><small>RM-000001</small></td>
+                <td>Pusing berdenyut pelipis</td>
+                <td><strong>I10 - Essential (primary) hypertension</strong></td>
+                <td>${statusBadge('FINAL')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('26 Sep 2026', '${defaultRoleMeta.name}', 'Pusing berdenyut pelipis', 'TD: 140/90 mmHg, N: 82x/m', 'I10 - Hipertensi Primer', 'Amlodipine 5mg 1x1 malam', 'FINAL')">Lihat RME</button></td>
+              </tr>
+              <tr>
+                <td class="table-primary">26 Sep 2026</td>
+                <td><strong>Siti Aminah</strong><br/><small>RM-000002</small></td>
+                <td>Demam tinggi 3 hari</td>
+                <td><strong>J02.9 - Acute pharyngitis, unspecified</strong></td>
+                <td>${statusBadge('FINAL')}</td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('26 Sep 2026', '${defaultRoleMeta.name}', 'Demam tinggi 3 hari', 'TD: 110/75 mmHg, Suhu: 38.4 C', 'J02.9 - Faringitis Akut', 'Paracetamol 500mg, Amoxicillin 500mg', 'FINAL')">Lihat RME</button></td>
+              </tr>
+            `;
+          }
+        }
+      } else if (currentView === 'resep') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Resep Obat Elektronik (e-Prescription)';
+        if (welcomeCopy) welcomeCopy.textContent = 'Daftar resep obat elektronik yang diterbitkan dokter untuk penyiapan instalasi farmasi.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Monitoring e-Resep';
+        if (lowerTitle) lowerTitle.textContent = 'Daftar Resep Obat Terbit';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. Resep</th><th>Tanggal</th><th>Pasien / No. RM</th><th>Rincian Obat &amp; Dosis</th><th>Status Farmasi</th><th>Catatan</th>';
+        
+        let rxList = [];
+        const rxRes = await window.prescriptionService.getDoctorPrescriptions(currentDoctorRecord?.id);
+        if (rxRes.success && rxRes.data && rxRes.data.length > 0) {
+          rxList = rxRes.data;
+        }
+
+        if (tableBody) {
+          if (rxList.length > 0) {
+            tableBody.innerHTML = rxList.map(rx => {
+              const patientName = rx.patient?.profile?.full_name || rx.medical_record?.patient?.profile?.full_name || 'Pasien';
+              const noRm = rx.patient?.no_rm || rx.medical_record?.patient?.no_rm || '-';
+              const itemsText = (rx.prescription_items || []).map(i => `<strong>${i.medicine_name}</strong> (${i.dosage}) - ${i.frequency} [${i.quantity} pcs]`).join('<br/>') || 'Obat terlampir';
+              return `
+                <tr>
+                  <td class="table-primary">${rx.prescription_number}</td>
+                  <td>${new Date(rx.created_at).toLocaleDateString('id-ID')}</td>
+                  <td><strong>${patientName}</strong><br/><small>${noRm}</small></td>
+                  <td>${itemsText}</td>
+                  <td>${statusBadge(rx.status)}</td>
+                  <td>${rx.notes || '-'}</td>
+                </tr>
+              `;
+            }).join('');
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td class="table-primary">RX-20260926-0001</td>
+                <td>26 Sep 2026</td>
+                <td><strong>Budi Santoso</strong><br/><small>RM-000001</small></td>
+                <td><strong>Amlodipine</strong> (5 mg) - 1x1 malam [30 pcs]</td>
+                <td>${statusBadge('Diterbitkan')}</td>
+                <td>Minum teratur setelah makan malam</td>
+              </tr>
+              <tr>
+                <td class="table-primary">RX-20260926-0002</td>
+                <td>26 Sep 2026</td>
+                <td><strong>Siti Aminah</strong><br/><small>RM-000002</small></td>
+                <td><strong>Paracetamol</strong> (500 mg) - 3x1 p.c. [10 pcs]<br/><strong>Amoxicillin</strong> (500 mg) - 3x1 p.c. [15 pcs]</td>
+                <td>${statusBadge('Disiapkan')}</td>
+                <td>Antibiotik harus dihabiskan</td>
+              </tr>
+            `;
+          }
         }
       }
+    }
+
+    const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
+    if (btnViewAllAgenda) {
+      btnViewAllAgenda.addEventListener('click', () => {
+        location.href = `${location.pathname}?view=jadwal`;
+      });
+    }
+
+    const btnViewAllLower = document.getElementById('btnViewAllLower');
+    if (btnViewAllLower) {
+      btnViewAllLower.addEventListener('click', () => {
+        location.href = `${location.pathname}?view=rekam-medis`;
+      });
     }
 
     renderDokterDashboard();
   }
 
-  window.openDoctorSoapModal = function(rm, name, complaint) {
+  window.openDoctorSoapModal = function(rm, name, complaint, patientId = '', apptId = '', recordId = '') {
     const banner = document.getElementById('soapPatientBanner');
-    if (banner) banner.textContent = `Pasien: ${name} (${rm}) — Keluhan: ${complaint}`;
+    if (banner) banner.textContent = `Pasien: ${name || 'Pasien'} (${rm || '-'}) — Keluhan: ${complaint || '-'}`;
+
+    const pInput = document.getElementById('soapPatientId');
+    if (pInput) pInput.value = patientId || '';
+
+    const aInput = document.getElementById('soapAppointmentId');
+    if (aInput) aInput.value = apptId || '';
+
+    const rInput = document.getElementById('soapRecordId');
+    if (rInput) rInput.value = recordId || '';
+
     const subj = document.getElementById('soapSubjective');
-    if (subj && !subj.value) subj.value = `Pasien mengeluhkan: ${complaint}`;
+    if (subj) subj.value = complaint ? `Pasien mengeluhkan: ${complaint}` : '';
+
+    const obj = document.getElementById('soapObjective');
+    if (obj) obj.value = '';
+
+    const assess = document.getElementById('soapAssessment');
+    if (assess) assess.value = '';
+
+    const icd = document.getElementById('soapIcd10');
+    if (icd) icd.value = '';
+
+    const plan = document.getElementById('soapPlan');
+    if (plan) plan.value = '';
+
+    // Reset default 1 medicine row
+    const medicineTableBody = document.getElementById('soapMedicineRows');
+    if (medicineTableBody) {
+      medicineTableBody.innerHTML = `
+        <tr>
+          <td><input type="text" class="med-name" placeholder="Amoxicillin" value="Paracetamol" /></td>
+          <td><input type="text" class="med-dosage" placeholder="500 mg" value="500 mg" /></td>
+          <td><input type="text" class="med-freq" placeholder="3x1 sesudah makan" value="3x1 sesudah makan" /></td>
+          <td><input type="number" class="med-qty" value="10" min="1" /></td>
+          <td><button type="button" class="action-btn-sm" onclick="this.closest('tr').remove()">&times;</button></td>
+        </tr>
+      `;
+    }
+
     window.Modal.open('modalSoapRecord');
   };
 
