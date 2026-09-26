@@ -5,728 +5,588 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Login - Sistem Informasi Manajemen Klinik (SIMKLINIK)"
+      content="SIMKLINIK - Sistem Informasi Manajemen Pelayanan Klinik Modern Terpadu dengan Rekam Medis Elektronik (RME) dan Antrean Real-time."
     />
-    <title>Login — SIMKLINIK</title>
+    <title>SIMKLINIK — Sistem Informasi Manajemen Klinik Terpadu</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config/supabase.js"></script>
-
-    <link rel="stylesheet" href="assets/css/auth.css" />
+    <link rel="stylesheet" href="assets/css/landing.css" />
   </head>
 
   <body>
-    <div class="bg-deco" aria-hidden="true"></div>
-
     <!-- ============================================================
-       SUCCESS OVERLAY — shown after login
-  ============================================================ -->
-    <div
-      class="success-overlay"
-      id="successOverlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="successTitle"
-    >
-      <div class="success-card">
-        <div class="success-card-topbar"></div>
+         NAVBAR
+    ============================================================ -->
+    <header class="navbar">
+      <div class="container nav-container">
+        <a href="index.html" class="brand" aria-label="Beranda SIMKLINIK">
+          <div class="brand-icon">+</div>
+          <div class="brand-text">
+            <span>SIMKLINIK</span>
+            <small>Manajemen Klinik</small>
+          </div>
+        </a>
 
-        <!-- Check icon -->
-        <div class="success-check">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        </div>
+        <nav class="nav-links" id="navLinks" aria-label="Navigasi Utama">
+          <a href="#hero" class="nav-link">Beranda</a>
+          <a href="#layanan" class="nav-link">Layanan Poli</a>
+          <a href="#alur" class="nav-link">Alur Layanan</a>
+          <a href="#dokter" class="nav-link">Jadwal Dokter</a>
+          <a href="#rme" class="nav-link">Standar RME</a>
+        </nav>
 
-        <div>
-          <p id="successTitle" class="success-title">Login Berhasil ✓</p>
-          <p class="success-subtitle">Selamat datang di SIMKLINIK</p>
-        </div>
-
-        <!-- Avatar (photo for Google, initials for manual) -->
-        <div id="userAvatarWrap">
-          <img src="" alt="" class="user-avatar" id="userAvatarImg" />
-          <div
-            class="user-avatar-placeholder"
-            id="userAvatarInitial"
-            aria-hidden="true"
-          ></div>
-        </div>
-
-        <!-- User info -->
-        <div class="user-info">
-          <p class="user-name" id="userNameDisplay">—</p>
-          <p class="user-email" id="userEmailDisplay"></p>
-        </div>
-
-        <!-- Role badge -->
-        <div class="user-role-badge" id="userRoleBadge">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-          <span id="userRoleText">—</span>
-        </div>
-
-        <!-- Login method -->
-        <div class="login-method" id="loginMethodBadge">
-          <!-- content filled by JS -->
-        </div>
-
-        <!-- Dashboard redirect info -->
-        <div class="dashboard-info">
-          <p class="dashboard-info-title">🚀 Siap diarahkan ke:</p>
-          <p class="dashboard-info-url" id="dashboardUrlDisplay">
-            /dashboard/...
-          </p>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="success-actions">
-          <button class="btn-go-dashboard" id="btnGoDashboard">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="14" y="14" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
-            Buka Dashboard
-          </button>
-          <button class="btn-back-login" id="btnBackLogin">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Kembali ke Halaman Login
-          </button>
-        </div>
-
-        <p class="session-note">Sesi Anda aman. Token JWT telah dibuat.</p>
-      </div>
-    </div>
-
-    <!-- ============================================================
-       MAIN LAYOUT
-  ============================================================ -->
-    <main class="page-wrapper">
-      <!-- Illustration Panel (desktop) -->
-      <aside class="illustration-panel" aria-hidden="true">
-        <svg
-          class="illus-svg"
-          viewBox="0 0 220 220"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="110" cy="110" r="100" fill="rgba(255,255,255,0.12)" />
-          <rect
-            x="50"
-            y="100"
-            width="120"
-            height="80"
-            rx="6"
-            fill="white"
-            fill-opacity="0.95"
-          />
-          <rect x="65" y="115" width="25" height="20" rx="3" fill="#BAE6FD" />
-          <rect x="100" y="115" width="25" height="20" rx="3" fill="#BAE6FD" />
-          <rect x="135" y="115" width="25" height="20" rx="3" fill="#BAE6FD" />
-          <rect x="93" y="145" width="34" height="35" rx="4" fill="#7DD3FC" />
-          <rect
-            x="42"
-            y="90"
-            width="136"
-            height="18"
-            rx="5"
-            fill="white"
-            fill-opacity="0.9"
-          />
-          <rect x="97" y="60" width="26" height="26" rx="5" fill="white" />
-          <rect x="107" y="64" width="6" height="18" rx="2" fill="#0EA5E9" />
-          <rect x="101" y="70" width="18" height="6" rx="2" fill="#0EA5E9" />
-          <circle cx="168" cy="68" r="14" fill="rgba(255,255,255,0.2)" />
-          <path
-            d="M161 62 Q161 74 168 74 Q175 74 175 62"
-            stroke="white"
-            stroke-width="2.5"
-            fill="none"
-            stroke-linecap="round"
-          />
-          <circle cx="168" cy="76" r="4" fill="white" />
-          <path
-            d="M168 80 Q168 90 178 90"
-            stroke="white"
-            stroke-width="2.5"
-            fill="none"
-            stroke-linecap="round"
-          />
-          <circle
-            cx="180"
-            cy="90"
-            r="3.5"
-            stroke="white"
-            stroke-width="2"
-            fill="none"
-          />
-          <rect
-            x="32"
-            y="70"
-            width="22"
-            height="10"
-            rx="5"
-            fill="rgba(255,255,255,0.85)"
-            transform="rotate(-20 32 70)"
-          />
-          <line
-            x1="43"
-            y1="68"
-            x2="43"
-            y2="79"
-            stroke="#0EA5E9"
-            stroke-width="1.5"
-            transform="rotate(-20 43 70)"
-          />
-          <polyline
-            points="28,145 40,145 46,130 54,160 62,138 68,145 82,145"
-            stroke="white"
-            stroke-width="2"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            opacity="0.7"
-          />
-          <circle cx="45" cy="55" r="3" fill="rgba(255,255,255,0.6)" />
-          <circle cx="185" cy="130" r="2.5" fill="rgba(255,255,255,0.5)" />
-          <circle cx="170" cy="160" r="2" fill="rgba(255,255,255,0.4)" />
-        </svg>
-        <h2 class="illus-title">Selamat Datang di<br />SIMKLINIK</h2>
-        <p class="illus-subtitle">
-          Sistem Informasi Manajemen Klinik<br />terintegrasi untuk pelayanan
-          terbaik.
-        </p>
-        <div class="illus-badges">
-          <span class="badge">Dokter</span>
-          <span class="badge">Petugas</span>
-          <span class="badge">Pasien</span>
-        </div>
-      </aside>
-
-      <!-- ── Login Card ── -->
-      <section class="login-card" aria-label="Form Login">
-        <header class="login-header">
-          <a href="#" class="logo-wrap" tabindex="-1" aria-hidden="true">
-            <div class="logo-icon">
-              <svg viewBox="0 0 28 28" aria-hidden="true">
-                <rect x="11" y="3" width="6" height="22" rx="2" />
-                <rect x="3" y="11" width="22" height="6" rx="2" />
-              </svg>
-            </div>
-            <div class="logo-text">
-              <span class="logo-text-main">SIMKLINIK</span>
-              <span class="logo-text-sub">Manajemen Klinik</span>
-            </div>
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-primary btn-sm" id="navLoginBtn">
+            Masuk Portal <span>&rarr;</span>
           </a>
-          <p class="auth-mode-label" id="authModeLabel">
-            Akses aman untuk tim klinik
-          </p>
-          <h1 class="login-title" id="authTitle">Masuk ke Akun Anda</h1>
-          <p class="login-subtitle" id="authSubtitle">
-            Pilih akses Anda, lalu masuk dengan akun yang terdaftar.
-          </p>
-          <div
-            class="role-switcher"
-            role="tablist"
-            aria-label="Pilih jenis akun"
-          >
-            <button
-              type="button"
-              class="role-option is-selected"
-              data-role="dokter"
-              role="tab"
-              aria-selected="true"
-            >
-              <span>＋</span> Dokter
-            </button>
-            <button
-              type="button"
-              class="role-option"
-              data-role="petugas"
-              role="tab"
-              aria-selected="false"
-            >
-              <span>▣</span> Petugas
-            </button>
-            <button
-              type="button"
-              class="role-option"
-              data-role="pasien"
-              role="tab"
-              aria-selected="false"
-            >
-              <span>♡</span> Pasien
-            </button>
-          </div>
-        </header>
-
-        <!-- ── Google Sign-In Button ── -->
-        <div
-          class="google-signin-wrap auth-form-hidden"
-          id="googleSignInSection"
-        >
-          <!-- Container untuk tombol resmi Google GIS -->
-          <div id="googleButtonContainer" class="google-button-container"></div>
-
-          <!-- Tombol custom interaktif sebagai tombol utama & fallback -->
-          <button type="button" class="btn-google" id="btnGoogleSignIn">
-            <!-- Google "G" logo SVG -->
-            <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
-              <path
-                fill="#EA4335"
-                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-              />
-              <path
-                fill="#34A853"
-                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-              />
-              <path fill="none" d="M0 0h48v48H0z" />
-            </svg>
-            <span>Masuk dengan Google</span>
-          </button>
-        </div>
-
-        <!-- Divider -->
-        <div
-          class="divider"
-          id="authDivider"
-          role="separator"
-          aria-label="akses akun"
-        >
-          Akses akun
-        </div>
-
-        <!-- ── Login Form ── -->
-        <form
-          id="loginForm"
-          method="post"
-          action="#"
-          novalidate
-          autocomplete="on"
-          aria-label="Form login manual"
-        >
-          <input type="hidden" name="_csrf" id="csrfToken" value="" />
-
-          <!-- Alert Error -->
-          <div
-            class="alert alert-error"
-            id="alertError"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <div class="alert-content">
-              <p class="alert-title" id="alertErrTitle">
-                Username atau password salah
-              </p>
-              <p class="alert-desc" id="alertErrDesc">
-                Periksa kembali username dan password Anda.
-              </p>
-            </div>
-          </div>
-
-          <!-- Alert Lockout -->
-          <div
-            class="alert alert-warning"
-            id="alertWarn"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path
-                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-              ></path>
-              <line x1="12" y1="9" x2="12" y2="13"></line>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            <div class="alert-content">
-              <p class="alert-title">Akun Terkunci Sementara</p>
-              <p class="alert-desc">
-                Terlalu banyak percobaan gagal. Coba lagi dalam
-                <span class="lockout-timer" id="lockdownTimer">30</span> detik.
-              </p>
-            </div>
-          </div>
-
-          <!-- Username -->
-          <div class="form-group">
-            <label class="form-label" for="username">
-              <span id="usernameLabel">Username</span>
-              <span class="required-star" aria-hidden="true">*</span>
-            </label>
-            <div class="input-wrapper">
-              <svg
-                class="input-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                class="form-input"
-                placeholder="Masukkan username dokter"
-                required
-                maxlength="254"
-                autocomplete="username"
-                autocapitalize="none"
-                autocorrect="off"
-                spellcheck="false"
-                aria-required="true"
-                aria-describedby="username-err"
-                aria-invalid="false"
-              />
-              <span id="username-err" class="field-error" role="alert">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                Masukkan username atau email yang valid.
-              </span>
-            </div>
-          </div>
-
-          <!-- Password -->
-          <div class="form-group">
-            <label class="form-label" for="password">
-              Password <span class="required-star" aria-hidden="true">*</span>
-            </label>
-            <div class="input-wrapper">
-              <svg
-                class="input-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                class="form-input"
-                placeholder="Masukkan password Anda"
-                required
-                minlength="6"
-                maxlength="128"
-                autocomplete="current-password"
-                aria-required="true"
-                aria-describedby="password-err"
-                aria-invalid="false"
-              />
-              <button
-                type="button"
-                class="btn-toggle-pw"
-                id="togglePw"
-                aria-label="Tampilkan password"
-                aria-pressed="false"
-              >
-                <svg
-                  class="icon-eye"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <svg
-                  class="icon-eye-off"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-                  ></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-              </button>
-              <span id="password-err" class="field-error" role="alert">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                Password tidak boleh kosong (min. 6 karakter).
-              </span>
-            </div>
-          </div>
-
-          <!-- Remember Me + Forgot -->
-          <div class="form-options">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                name="remember_me"
-                autocomplete="off"
-              />
-              Ingat Saya
-            </label>
-            <a href="#lupa-password" class="forgot-link" id="forgotLink"
-              >Lupa Password?</a
-            >
-          </div>
-
-          <p class="demo-hint" id="demoHint">
-            <span>i</span> Demo dokter: <strong>dokter</strong> /
-            <strong>dokter123</strong>
-          </p>
-
-          <!-- Submit -->
-          <button type="submit" class="btn-submit" id="btnSubmit">
-            <span class="spinner" aria-hidden="true"></span>
-            <span class="btn-text">Masuk</span>
-          </button>
-        </form>
-
-        <form
-          id="registerForm"
-          class="auth-form-hidden"
-          method="post"
-          action="#"
-          novalidate
-          autocomplete="on"
-          aria-label="Form registrasi akun"
-        >
-          <div class="form-group">
-            <label class="form-label" for="registerFullName"
-              >Nama Lengkap
-              <span class="required-star" aria-hidden="true">*</span></label
-            >
-            <input
-              type="text"
-              id="registerFullName"
-              class="form-input form-input-plain"
-              placeholder="Masukkan nama lengkap"
-              required
-              minlength="2"
-              maxlength="100"
-              autocomplete="name"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="registerUsername"
-              >Username
-              <span class="required-star" aria-hidden="true">*</span></label
-            >
-            <input
-              type="text"
-              id="registerUsername"
-              class="form-input form-input-plain"
-              placeholder="Pilih username"
-              required
-              minlength="3"
-              maxlength="64"
-              autocomplete="username"
-              autocapitalize="none"
-              autocorrect="off"
-              spellcheck="false"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="registerEmail"
-              >Email
-              <span class="required-star" aria-hidden="true">*</span></label
-            >
-            <input
-              type="email"
-              id="registerEmail"
-              class="form-input form-input-plain"
-              placeholder="nama@email.com"
-              required
-              maxlength="254"
-              autocomplete="email"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="registerPassword"
-              >Password
-              <span class="required-star" aria-hidden="true">*</span></label
-            >
-            <input
-              type="password"
-              id="registerPassword"
-              class="form-input form-input-plain"
-              placeholder="Minimal 6 karakter"
-              required
-              minlength="6"
-              maxlength="128"
-              autocomplete="new-password"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="registerPasswordConfirm"
-              >Konfirmasi Password
-              <span class="required-star" aria-hidden="true">*</span></label
-            >
-            <input
-              type="password"
-              id="registerPasswordConfirm"
-              class="form-input form-input-plain"
-              placeholder="Ulangi password"
-              required
-              minlength="6"
-              maxlength="128"
-              autocomplete="new-password"
-            />
-          </div>
-          <button type="submit" class="btn-submit" id="btnRegisterSubmit">
-            <span class="spinner" aria-hidden="true"></span>
-            <span class="btn-text">Daftar</span>
-          </button>
-          <p class="registration-note">
-            <span class="registration-note-icon" aria-hidden="true">i</span>Akun
-            baru akan dibuat dengan role <strong>Pasien</strong>.
-          </p>
-        </form>
-
-        <p class="auth-switch" id="authSwitchLogin">
-          Belum punya akun?
           <button
-            type="button"
-            class="auth-switch-button"
-            id="showRegisterButton"
+            class="mobile-menu-toggle"
+            id="mobileMenuToggle"
+            aria-label="Buka menu navigasi"
           >
-            Daftar sekarang
+            &#9776;
           </button>
-        </p>
-        <p class="auth-switch auth-form-hidden" id="authSwitchRegister">
-          Sudah punya akun?
-          <button type="button" class="auth-switch-button" id="showLoginButton">
-            Masuk di sini
-          </button>
-        </p>
+        </div>
+      </div>
+    </header>
 
-        <footer class="login-footer">
-          <p>
-            Butuh bantuan? Hubungi
-            <a href="mailto:support@simklinik.id">support@simklinik.id</a>
-          </p>
-          <p class="footer-links">
-            <a href="#">Kebijakan Privasi</a>
-            <span class="footer-dot">·</span>
-            <a href="#">Syarat &amp; Ketentuan</a>
-          </p>
-          <p class="footer-copyright">
-            &copy; 2026 SIMKLINIK. Hak cipta dilindungi.
-          </p>
-        </footer>
+    <main>
+      <!-- ============================================================
+           HERO SECTION
+      ============================================================ -->
+      <section class="hero-section" id="hero">
+        <div class="container hero-grid">
+          <div class="hero-content">
+            <div class="hero-tag">
+              <span class="hero-tag-pulse" aria-hidden="true"></span>
+              <span>Platform Klinik Digital Terintegrasi</span>
+            </div>
+
+            <h1 class="hero-title">
+              Pelayanan Medis Modern, Cepat &amp;
+              <span class="hero-title-highlight">Terhubung Real-Time</span>
+            </h1>
+
+            <p class="hero-desc">
+              SIMKLINIK menyatukan pendaftaran mandiri pasien, alur antrean loket
+              yang transparan, pencatatan Rekam Medis Elektronik (RME) berstandar
+              Kemenkes, hingga penerbitan e-resep dan kasir digital dalam satu
+              ekosistem terpadu.
+            </p>
+
+            <div class="hero-cta">
+              <a
+                href="login.html?role=pasien"
+                class="btn btn-primary btn-lg"
+                id="heroPatientCta"
+              >
+                Reservasi Pasien Mandiri
+              </a>
+              <a href="login.html" class="btn btn-secondary btn-lg" id="heroLoginCta">
+                Masuk ke Sistem
+              </a>
+            </div>
+
+            <div class="hero-badges">
+              <div class="badge-item">
+                <strong>PMK No. 24/2022</strong>
+                <span>Standar Rekam Medis Elektronik</span>
+              </div>
+              <div class="badge-item">
+                <strong>Multi-Peran</strong>
+                <span>Pasien, Dokter, Petugas &amp; Kasir</span>
+              </div>
+              <div class="badge-item">
+                <strong>100% Cloud RLS</strong>
+                <span>Keamanan Data Medis Terisolasi</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Widget Preview -->
+          <div class="hero-widget">
+            <!-- Decorative floating cards -->
+            <div class="float-card float-card-top" aria-hidden="true">
+              <div class="float-icon">&check;</div>
+              <div>
+                <strong>E-Resep Diterbitkan</strong>
+                <small>dr. Ayu Rahma &middot; Farmasi Siap</small>
+              </div>
+            </div>
+
+            <div class="preview-card">
+              <div class="preview-card-header">
+                <div>
+                  <strong>Monitoring Operasional Klinik</strong>
+                  <p class="preview-footer-note">Status Pelayanan Hari Ini</p>
+                </div>
+                <div class="preview-status">
+                  <span class="preview-status-dot" aria-hidden="true"></span>
+                  <span>Aktif Melayani</span>
+                </div>
+              </div>
+
+              <div class="preview-card-body">
+                <div class="queue-highlight">
+                  <div>
+                    <span class="queue-highlight-label">Antrean Dipanggil</span>
+                    <p>Poli Umum &middot; dr. Ayu</p>
+                  </div>
+                  <div class="queue-highlight-num">A-021</div>
+                </div>
+
+                <div class="queue-mini-list">
+                  <div class="mini-row">
+                    <div class="mini-row-left">
+                      <strong>A-022</strong>
+                      <span>Siti Aminah &middot; Poli Umum</span>
+                    </div>
+                    <span class="pill-status pill-called">Dipanggil</span>
+                  </div>
+
+                  <div class="mini-row">
+                    <div class="mini-row-left">
+                      <strong>B-008</strong>
+                      <span>Andi Wijaya &middot; Poli Gigi</span>
+                    </div>
+                    <span class="pill-status pill-waiting">Menunggu</span>
+                  </div>
+
+                  <div class="mini-row">
+                    <div class="mini-row-left">
+                      <strong>A-020</strong>
+                      <span>Budi Santoso &middot; Poli Umum</span>
+                    </div>
+                    <span class="pill-status pill-done">Selesai Poli</span>
+                  </div>
+                </div>
+
+                <p class="preview-footer-note">
+                  Sistem tersinkronisasi langsung dengan Supabase PostgreSQL
+                </p>
+              </div>
+            </div>
+
+            <div class="float-card float-card-bottom" aria-hidden="true">
+              <div class="float-icon">&#9877;</div>
+              <div>
+                <strong>3 Dokter Bertugas</strong>
+                <small>Poli Umum, Gigi &amp; Anak</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SERVICES SECTION (LAYANAN POLI)
+      ============================================================ -->
+      <section class="section" id="layanan">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Pelayanan Kesehatan Primer</span>
+            <h2 class="section-title">Layanan Poliklinik &amp; Fasilitas Terpadu</h2>
+            <p class="section-desc">
+              Pilihan layanan kesehatan menyeluruh yang didukung oleh dokter
+              kompeten dan fasilitas diagnostik modern.
+            </p>
+          </div>
+
+          <div class="services-grid">
+            <article class="service-card">
+              <div class="service-icon-box">&#9877;</div>
+              <h3>Poli Umum</h3>
+              <p>
+                Pemeriksaan kesehatan umum, diagnosis awal, penanganan penyakit
+                akut dan kronis, serta rujukan medis terstandar.
+              </p>
+              <ul class="service-features">
+                <li>Anamnesis &amp; vital signs lengkap</li>
+                <li>Pemeriksaan fisik komprehensif</li>
+                <li>Konsultasi pola hidup sehat</li>
+              </ul>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9879;</div>
+              <h3>Poli Gigi &amp; Mulut</h3>
+              <p>
+                Perawatan kesehatan gigi menyeluruh untuk pencegahan gigi
+                berlubang, pembersihan karang gigi (scaling), dan tambal estetis.
+              </p>
+              <ul class="service-features">
+                <li>Pemeriksaan periodik &amp; scaling</li>
+                <li>Penambalan &amp; perawatan saraf gigi</li>
+                <li>Pencabutan &amp; konsultasi ortodonti</li>
+              </ul>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9825;</div>
+              <h3>Poli Spesialis Anak</h3>
+              <p>
+                Pelayanan kesehatan ramah anak mulai dari imunisasi wajib,
+                pemantauan tumbuh kembang, hingga penanganan demam dan infeksi.
+              </p>
+              <ul class="service-features">
+                <li>Jadwal imunisasi berkala</li>
+                <li>Skrining gizi dan tumbuh kembang</li>
+                <li>Konsultasi laktasi dan MPASI</li>
+              </ul>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9745;</div>
+              <h3>Farmasi &amp; E-Resep</h3>
+              <p>
+                Penulisan resep obat digital langsung dari ruang dokter tanpa
+                kertas. Obat disiapkan apotek secara akurat dan tepat waktu.
+              </p>
+              <ul class="service-features">
+                <li>Instruksi dosis &amp; aturan minum jelas</li>
+                <li>Riwayat obat terekam di akun pasien</li>
+                <li>Pencegahan interaksi obat berbahaya</li>
+              </ul>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9881;</div>
+              <h3>Laboratorium Klinik</h3>
+              <p>
+                Pemeriksaan penunjang diagnostik cepat meliputi darah lengkap,
+                kolesterol, asam urat, gula darah puasa, dan tes urine.
+              </p>
+              <ul class="service-features">
+                <li>Hasil lab digital terhubung ke RME</li>
+                <li>Pengambilan sampel higienis</li>
+                <li>Waktu hasil cepat di hari yang sama</li>
+              </ul>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9830;</div>
+              <h3>Kasir &amp; Billing Terintegrasi</h3>
+              <p>
+                Kalkulasi tagihan otomatis dari pendaftaran, tindakan poli,
+                hingga farmasi dengan kwitansi resmi yang transparan.
+              </p>
+              <ul class="service-features">
+                <li>Rincian tarif biaya terbuka</li>
+                <li>Pembayaran tunai atau transfer terverifikasi</li>
+                <li>Bukti invoice tersimpan di riwayat pasien</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           WORKFLOW SECTION (ALUR LAYANAN)
+      ============================================================ -->
+      <section class="section workflow-section" id="alur">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Pengalaman Tanpa Hambatan</span>
+            <h2 class="section-title">Alur Pelayanan Pasien di SIMKLINIK</h2>
+            <p class="section-desc">
+              Menghilangkan antrean manual yang berbelit-belit dengan alur kerja
+              digital yang transparan dan efisien.
+            </p>
+          </div>
+
+          <div class="workflow-steps">
+            <div class="workflow-step">
+              <div class="step-number">1</div>
+              <h4>Reservasi / Daftar</h4>
+              <p>
+                Pasien memesan jadwal janji temu secara mandiri melalui website
+                atau mendaftar langsung di loket pendaftaran klinik.
+              </p>
+            </div>
+
+            <div class="workflow-step">
+              <div class="step-number">2</div>
+              <h4>Antrean Layanan</h4>
+              <p>
+                Sistem memberikan nomor antrean otomatis. Pasien dapat memantau
+                status panggilan antrean secara langsung di ruang tunggu.
+              </p>
+            </div>
+
+            <div class="workflow-step">
+              <div class="step-number">3</div>
+              <h4>Pemeriksaan Medis (RME)</h4>
+              <p>
+                Dokter memeriksa pasien, mencatat tanda vital &amp; diagnosis
+                ke dalam rekam medis elektronik, serta menerbitkan e-resep.
+              </p>
+            </div>
+
+            <div class="workflow-step">
+              <div class="step-number">4</div>
+              <h4>Kasir &amp; Obat</h4>
+              <p>
+                Pasien menyelesaikan administrasi di kasir, menerima obat di
+                apotek, dan dapat melihat salinan resep di akun pribadinya.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           DOCTORS SECTION (DOKTER & JADWAL)
+      ============================================================ -->
+      <section class="section" id="dokter">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Tenaga Medis Profesional</span>
+            <h2 class="section-title">Jadwal Praktik Dokter</h2>
+            <p class="section-desc">
+              Dokter berpengalaman yang berdedikasi memberikan konsultasi dan
+              penanganan terbaik untuk Anda dan keluarga.
+            </p>
+          </div>
+
+          <div class="doctors-grid">
+            <article class="doctor-card">
+              <div class="doctor-card-top">
+                <div class="doctor-avatar-circle">AR</div>
+              </div>
+              <div class="doctor-card-body">
+                <h3 class="doctor-name">dr. Ayu Rahma, Sp.A</h3>
+                <p class="doctor-spec">Dokter Spesialis Anak</p>
+                <div class="doctor-schedule-box">
+                  <strong>Senin - Kamis:</strong> 08:30 - 12:00 WIB<br />
+                  <small>Poli Spesialis Anak &middot; Ruang 102</small>
+                </div>
+                <a
+                  href="login.html?role=pasien"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Pilih Jadwal Konsultasi &rarr;
+                </a>
+              </div>
+            </article>
+
+            <article class="doctor-card">
+              <div class="doctor-card-top">
+                <div class="doctor-avatar-circle">DP</div>
+              </div>
+              <div class="doctor-card-body">
+                <h3 class="doctor-name">dr. Dimas Putra</h3>
+                <p class="doctor-spec">Dokter Pelayanan Umum</p>
+                <div class="doctor-schedule-box">
+                  <strong>Senin - Jumat:</strong> 09:00 - 14:00 WIB<br />
+                  <small>Poli Umum &middot; Ruang 101</small>
+                </div>
+                <a
+                  href="login.html?role=pasien"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Pilih Jadwal Konsultasi &rarr;
+                </a>
+              </div>
+            </article>
+
+            <article class="doctor-card">
+              <div class="doctor-card-top">
+                <div class="doctor-avatar-circle">RS</div>
+              </div>
+              <div class="doctor-card-body">
+                <h3 class="doctor-name">drg. Rani Sari</h3>
+                <p class="doctor-spec">Dokter Gigi &amp; Mulut</p>
+                <div class="doctor-schedule-box">
+                  <strong>Selasa, Kamis, Sabtu:</strong> 10:00 - 15:00 WIB<br />
+                  <small>Poli Gigi &middot; Ruang 103</small>
+                </div>
+                <a
+                  href="login.html?role=pasien"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Pilih Jadwal Konsultasi &rarr;
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           RME COMPLIANCE SECTION
+      ============================================================ -->
+      <section class="section" id="rme">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Regulasi &amp; Privasi Data</span>
+            <h2 class="section-title">
+              Kepatuhan Rekam Medis Elektronik (RME)
+            </h2>
+            <p class="section-desc">
+              Dirancang dengan standar hukum tertinggi untuk menjamin keamanan
+              informasi kesehatan pribadi setiap pasien.
+            </p>
+          </div>
+
+          <div class="services-grid">
+            <article class="service-card">
+              <div class="service-icon-box">&#9878;</div>
+              <h3>Permenkes No. 24 Tahun 2022</h3>
+              <p>
+                Mendukung standarisasi struktur data klinis SOAP (Subjektif,
+                Objektif, Asesmen, Plan) dan pengkodean diagnosa ICD-10 yang sah.
+              </p>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9884;</div>
+              <h3>UU PDP No. 27 Tahun 2022</h3>
+              <p>
+                Perlindungan data pribadi pasien dengan enkripsi saat transit
+                (TLS 1.3) dan isolasi hak akses setingkat baris (Row Level
+                Security).
+              </p>
+            </article>
+
+            <article class="service-card">
+              <div class="service-icon-box">&#9889;</div>
+              <h3>Jejak Audit Sistem Terpercaya</h3>
+              <p>
+                Setiap akses, perubahan diagnosa, dan penerbitan resep tercatat
+                dalam tabel audit trail yang tidak dapat dimanipulasi.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           ROLES PORTAL CTA
+      ============================================================ -->
+      <section class="roles-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Akses Multi-Peran</span>
+            <h2 class="section-title">Pilih Portal Kerja Anda</h2>
+            <p class="section-desc">
+              Masuk ke lingkungan kerja terpersonalisasi yang disesuaikan dengan
+              tanggung jawab dan kebutuhan Anda.
+            </p>
+          </div>
+
+          <div class="roles-grid">
+            <div class="role-portal-card">
+              <div class="role-portal-icon">&#9829;</div>
+              <h3>Portal Pasien</h3>
+              <p>
+                Reservasi janji temu dokter, tinjau riwayat rekam medis, lihat
+                resep obat aktif, dan pantau nomor antrean klinik.
+              </p>
+              <a
+                href="login.html?role=pasien"
+                class="btn btn-primary btn-sm"
+                id="portalPasienBtn"
+              >
+                Masuk sebagai Pasien &rarr;
+              </a>
+            </div>
+
+            <div class="role-portal-card">
+              <div class="role-portal-icon">&#9877;</div>
+              <h3>Portal Dokter</h3>
+              <p>
+                Kelola antrean periksa, akses riwayat medis terdahulu, input form
+                RME terstandar, dan terbitkan e-resep digital.
+              </p>
+              <a
+                href="login.html?role=dokter"
+                class="btn btn-secondary btn-sm"
+                id="portalDokterBtn"
+              >
+                Masuk sebagai Dokter &rarr;
+              </a>
+            </div>
+
+            <div class="role-portal-card">
+              <div class="role-portal-icon">&#9881;</div>
+              <h3>Portal Petugas &amp; Kasir</h3>
+              <p>
+                Pendaftaran loket pasien baru/lama, kontrol panggil nomor
+                antrean, pengaturan jadwal poli, dan pencatatan pembayaran.
+              </p>
+              <a
+                href="login.html?role=petugas"
+                class="btn btn-secondary btn-sm"
+                id="portalPetugasBtn"
+              >
+                Masuk sebagai Petugas &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
 
-    <script src="assets/js/auth/login.js"></script>
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <h4>SIMKLINIK</h4>
+            <p>
+              Sistem Informasi Manajemen Fasilitas Pelayanan Kesehatan Tingkat
+              Pertama terintegrasi Rekam Medis Elektronik (RME) dan Antrean
+              Awan.
+            </p>
+          </div>
+
+          <div class="footer-col">
+            <h5>Navigasi</h5>
+            <ul>
+              <li><a href="#hero">Beranda</a></li>
+              <li><a href="#layanan">Layanan Poli</a></li>
+              <li><a href="#alur">Alur Layanan</a></li>
+              <li><a href="#dokter">Jadwal Praktik</a></li>
+              <li><a href="#rme">Kepatuhan RME</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h5>Akses Sistem</h5>
+            <ul>
+              <li><a href="login.html?role=pasien">Login Pasien</a></li>
+              <li><a href="login.html?role=dokter">Login Dokter</a></li>
+              <li><a href="login.html?role=petugas">Login Petugas</a></li>
+              <li><a href="login.html">Registrasi Pasien Baru</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h5>Kontak &amp; Bantuan</h5>
+            <ul>
+              <li>Jl. Kaliurang KM 14.5, Sleman, D.I. Yogyakarta</li>
+              <li>Telepon: (0274) 898444</li>
+              <li>Email: <a href="mailto:support@simklinik.id">support@simklinik.id</a></li>
+              <li>Status Server: <span class="preview-status">Operasional</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2026 SIMKLINIK. Seluruh hak cipta dilindungi undang-undang.</p>
+          <p>Kepatuhan Permenkes No. 24/2022 &middot; UU PDP No. 27/2022</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/landing.js"></script>
   </body>
 </html>
