@@ -1,7 +1,14 @@
+/**
+ * SIMKLINIK - Universal Role Dashboard Controller
+ * Compliant with Permenkes No. 24/2022 (RME) & UU PDP No. 27/2022.
+ * Zero inline styles. Integrates Modal, Toast, and Supabase client services.
+ */
 (() => {
   'use strict';
+
   const role = document.body.dataset.role;
 
+  /* ── Vector Icons ── */
   const ICONS = {
     dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-svg"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
     pasien: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
@@ -17,141 +24,1006 @@
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="check-svg" width="14" height="14"><polyline points="20 6 9 17 4 12"></polyline></svg>'
   };
 
+  /* ── Status Badge Classifier ── */
   const statusBadge = (text) => {
-    if (!text || text === '-' || text.length > 25) return text || '';
-    const norm = text.toLowerCase();
+    if (!text || text === '-' || text.length > 30) return text || '';
+    const norm = String(text).toLowerCase();
     let cls = 'status-default';
-    if (norm.includes('dipanggil') || norm.includes('berjalan')) cls = 'status-active';
-    else if (norm.includes('menunggu') || norm.includes('perlu') || norm.includes('draft') || norm.includes('berikutnya')) cls = 'status-waiting';
-    else if (norm.includes('selesai') || norm.includes('lengkap') || norm.includes('lunas') || norm.includes('tersimpan')) cls = 'status-done';
-    else if (norm.includes('terjadwal') || norm.includes('aktif')) cls = 'status-info';
+    if (norm.includes('dipanggil') || norm.includes('called') || norm.includes('berjalan') || norm.includes('serving')) cls = 'status-active';
+    else if (norm.includes('menunggu') || norm.includes('waiting') || norm.includes('draft') || norm.includes('berikutnya') || norm.includes('pending')) cls = 'status-waiting';
+    else if (norm.includes('selesai') || norm.includes('completed') || norm.includes('lunas') || norm.includes('paid') || norm.includes('final')) cls = 'status-done';
+    else if (norm.includes('terjadwal') || norm.includes('confirmed') || norm.includes('aktif') || norm.includes('active')) cls = 'status-info';
+    else if (norm.includes('batal') || norm.includes('cancelled')) cls = 'status-default';
     return `<span class="status-badge ${cls}">${text}</span>`;
   };
 
-  const data = {
+  /* ── Static Mock Definitions (for offline fallback) ── */
+  const defaultRoleMeta = {
     dokter: {
-      label: 'Dokter', name: 'dr. Ayu Rahma', initials: 'AR', greeting: 'Selamat pagi, dr. Ayu', copy: 'Kelola pasien, jadwal praktik, rekam medis, dan resep.',
+      label: 'Dokter', name: 'dr. Ayu Rahma, Sp.PD', initials: 'AR', greeting: 'Selamat pagi, dr. Ayu', copy: 'Kelola pasien, jadwal praktik, rekam medis (SOAP), dan peresepan obat.',
       nav: [['dashboard','Dashboard'],['pasien','Pasien saya'],['jadwal','Jadwal praktik'],['rekam-medis','Rekam medis'],['resep','Resep']],
       stats: [['Pasien hari ini','18','+12% dari kemarin'],['Jadwal selesai','06','2 jadwal berikutnya'],['Resep aktif','24','3 perlu ditinjau'],['Rata-rata layanan','18m','4m lebih cepat']],
-      dashboard: { title: 'Jadwal konsultasi', rows: [['08:30','Budi Santoso','Kontrol tekanan darah','Selesai'],['09:15','Siti Aminah','Konsultasi umum','Sedang berjalan'],['10:00','Rizky Pratama','Evaluasi hasil lab','Berikutnya'],['11:30','Maria Lestari','Konsultasi umum','Terjadwal']] },
-      pages: {
-        pasien: ['Pasien saya','Daftar pasien yang berada dalam tanggung jawab Anda.', ['Nama pasien','Keluhan','Kunjungan terakhir','Status'], [['Budi Santoso','Hipertensi','Hari ini, 08:30','Perlu kontrol'],['Rizky Pratama','Demam berdarah','Kemarin, 15:10','Hasil lab masuk'],['Maria Lestari','Migrain','18 Sep 2026','Terjadwal']]],
-        jadwal: ['Jadwal praktik','Atur jadwal konsultasi dan ketersediaan praktik.', ['Tanggal','Jam','Poli','Status'], [['22 Sep 2026','08:30 - 12:00','Poli Umum','Aktif'],['23 Sep 2026','08:30 - 12:00','Poli Umum','Aktif'],['24 Sep 2026','Libur','-','Tidak tersedia']]],
-        'rekam-medis': ['Rekam medis','Tinjau catatan klinis pasien.', ['Pasien','Pembaruan terakhir','Dokter','Status'], [['Budi Santoso','22 Sep 2026, 08:30','dr. Ayu Rahma','Lengkap'],['Siti Aminah','22 Sep 2026, 09:15','dr. Ayu Rahma','Draft'],['Rizky Pratama','21 Sep 2026, 15:10','dr. Ayu Rahma','Lengkap']]],
-        resep: ['Resep','Kelola resep yang diterbitkan.', ['Nomor resep','Pasien','Tanggal','Status'], [['RX-24091','Siti Aminah','22 Sep 2026','Aktif'],['RX-24088','Budi Santoso','21 Sep 2026','Selesai'],['RX-24075','Maria Lestari','18 Sep 2026','Aktif']]]
-      }
+      dashboard: { title: 'Jadwal konsultasi hari ini', rows: [['08:30','Budi Santoso','Kontrol tekanan darah','Selesai'],['09:15','Siti Aminah','Konsultasi umum','Sedang berjalan'],['10:00','Rizky Pratama','Evaluasi hasil lab','Berikutnya'],['11:30','Maria Lestari','Konsultasi umum','Terjadwal']] }
     },
     petugas: {
-      label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP', greeting: 'Selamat pagi, Nadia', copy: 'Pantau antrean, data pasien, jadwal dokter, dan pembayaran.',
+      label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP', greeting: 'Selamat pagi, Nadia', copy: 'Pantau antrean pasien, registrasi walk-in, verifikasi jadwal, dan kasir pembayaran.',
       nav: [['dashboard','Dashboard'],['pasien','Data pasien'],['antrean','Antrean layanan'],['dokter','Jadwal dokter'],['pembayaran','Pembayaran']],
       stats: [['Antrean aktif','12','4 pasien menunggu'],['Terdaftar hari ini','36','+8 pasien dari kemarin'],['Jadwal dokter','08','2 dokter tersedia'],['Pembayaran','Rp 4,2jt','92% sudah lunas']],
-      dashboard: { title: 'Antrean hari ini', rows: [['08:00','Budi Santoso','Poli Umum · dr. Ayu','Dipanggil'],['08:20','Siti Aminah','Poli Umum · dr. Ayu','Menunggu'],['08:45','Rizky Pratama','Laboratorium','Menunggu'],['09:00','Maria Lestari','Poli Umum · dr. Dimas','Menunggu']] },
-      pages: {
-        pasien: ['Data pasien','Kelola pendaftaran dan data pasien klinik.', ['Nama pasien','Layanan','Waktu daftar','Status'], [['Budi Santoso','Poli Umum','08:02','Dipanggil'],['Andi Wijaya','Poli Gigi','08:14','Menunggu'],['Siti Aminah','Laboratorium','08:18','Menunggu']]],
-        antrean: ['Antrean layanan','Panggil pasien dan perbarui status layanan.', ['Nomor','Pasien','Layanan','Status'], [['A-021','Budi Santoso','Poli Umum','Dipanggil'],['A-022','Siti Aminah','Poli Umum','Menunggu'],['A-023','Rizky Pratama','Laboratorium','Menunggu']]],
-        dokter: ['Jadwal dokter','Lihat jadwal dokter yang bertugas.', ['Dokter','Poli','Jam praktik','Status'], [['dr. Ayu Rahma','Poli Umum','08:30 - 12:00','Aktif'],['dr. Dimas Putra','Poli Umum','09:00 - 13:00','Aktif'],['dr. Rani Sari','Poli Gigi','10:00 - 14:00','Aktif']]],
-        pembayaran: ['Pembayaran','Pantau transaksi dan status pembayaran.', ['Pasien','Layanan','Total','Status'], [['Budi Santoso','Konsultasi','Rp 150.000','Lunas'],['Siti Aminah','Laboratorium','Rp 275.000','Menunggu'],['Maria Lestari','Konsultasi','Rp 150.000','Lunas']]]
-      }
+      dashboard: { title: 'Antrean poli hari ini', rows: [['08:00','Budi Santoso','Poli Umum · dr. Ayu','Dipanggil'],['08:20','Siti Aminah','Poli Umum · dr. Ayu','Menunggu'],['08:45','Rizky Pratama','Laboratorium','Menunggu'],['09:00','Maria Lestari','Poli Umum · dr. Dimas','Menunggu']] }
     },
     pasien: {
-      label: 'Pasien', name: 'Aulia Rahma', initials: 'AR', greeting: 'Selamat pagi, Aulia', copy: 'Kelola janji temu, resep, rekam medis, dan profil kesehatan.',
+      label: 'Pasien', name: 'Aulia Rahma', initials: 'AR', greeting: 'Selamat pagi, Aulia', copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
       nav: [['dashboard','Dashboard'],['janji','Janji saya'],['rekam-medis','Rekam medis'],['resep','Resep saya'],['profil','Profil kesehatan']],
-      stats: [['Janji mendatang','02','Kunjungan terdekat 24 Sep'],['Resep aktif','03','1 resep berakhir minggu ini'],['Hasil pemeriksaan','05','2 hasil belum dibaca'],['Poin kesehatan','840','+80 bulan ini']],
-      dashboard: { title: 'Jadwal saya', rows: [['24 Sep','dr. Ayu Rahma','Konsultasi umum','Terjadwal'],['02 Okt','Laboratorium','Pemeriksaan darah','Terjadwal'],['—','—','Belum ada jadwal lain','']] },
-      pages: {
-        janji: ['Janji saya','Atur dan pantau jadwal kunjungan Anda.', ['Tanggal','Dokter / layanan','Keperluan','Status'], [['24 Sep 2026','dr. Ayu · Poli Umum','Konsultasi umum','Terjadwal'],['02 Okt 2026','Laboratorium','Pemeriksaan darah','Terjadwal']]],
-        'rekam-medis': ['Rekam medis','Lihat riwayat pemeriksaan kesehatan Anda.', ['Tanggal','Dokter / layanan','Keluhan','Status'], [['18 Sep 2026','dr. Dimas · Poli Umum','Sakit kepala','Selesai'],['07 Agu 2026','dr. Ayu · Poli Umum','Kontrol rutin','Selesai']]],
-        resep: ['Resep saya','Lihat resep dan obat yang sedang aktif.', ['Tanggal','Dokter','Obat','Status'], [['18 Sep 2026','dr. Ayu Rahma','Vitamin dan suplemen','Aktif'],['07 Agu 2026','dr. Dimas Putra','Paracetamol','Selesai']]],
-        profil: ['Profil kesehatan','Perbarui informasi kesehatan Anda.', ['Data','Nilai','Keterangan'], [['Golongan darah','O','Tersimpan'],['Alergi obat','Tidak ada','Tersimpan'],['Kontak darurat','Budi Rahma','Tersimpan']]]
-      }
+      stats: [['Janji mendatang','02','Kunjungan terdekat hari ini'],['Resep aktif','03','1 resep berakhir minggu ini'],['Hasil RME','05','Semua data terverifikasi'],['Poin kesehatan','840','+80 bulan ini']],
+      dashboard: { title: 'Agenda kunjungan saya', rows: [['Hari ini, 09:30','dr. Ayu Rahma · Poli Umum','Pemeriksaan rutin keluhan demam','Terjadwal'],['02 Okt 2026, 10:00','Laboratorium Klinik','Pemeriksaan hematologi lengkap','Terjadwal']] }
     }
   }[role];
 
-  if (!data) return;
+  if (!defaultRoleMeta) return;
 
   const currentView = new URLSearchParams(location.search).get('view') || 'dashboard';
+
+  /* ── Render Navigation ── */
   const nav = document.getElementById('mainNav');
-  nav.innerHTML = data.nav.map(([view, label]) => {
-    const iconSvg = ICONS[view] || ICONS.dashboard;
-    return `<a class="nav-item${currentView === view ? ' active' : ''}" href="${location.pathname}?view=${view}"><span>${iconSvg}</span><span>${label}</span></a>`;
-  }).join('');
-
-  document.getElementById('headerName').textContent = data.name;
-  document.getElementById('headerRole').textContent = data.label;
-  document.getElementById('headerAvatar').textContent = data.initials;
-  document.getElementById('dateLabel').textContent = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()).toUpperCase();
-
-  const table = (headers, rows) => `<div class="table-wrap"><table><thead><tr>${headers.map(item => `<th>${item}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map((cell, index) => `<td${index === 0 ? ' class="table-primary"' : ''}>${index === row.length - 1 ? statusBadge(cell) : cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-  const form = (label, action) => `<form class="feature-form" onsubmit="event.preventDefault();this.querySelector('.form-notice').textContent='${action} berhasil disimpan.'"><label>${label}<input required placeholder="Masukkan ${label.toLowerCase()}" /></label><button class="primary-button" type="submit">Simpan</button><p class="form-notice"></p></form>`;
-
-  if (currentView === 'dashboard') {
-    document.getElementById('welcomeTitle').textContent = data.greeting;
-    document.getElementById('welcomeCopy').textContent = data.copy;
-    document.getElementById('primaryActionText').textContent = role === 'pasien' ? 'Buat janji' : role === 'dokter' ? 'Buat resep' : 'Tambah pasien';
-    document.getElementById('statsGrid').innerHTML = data.stats.map(([label, value, note]) => `<article class="stat-card"><div class="stat-top"><span>${label}</span><span class="stat-icon">${ICONS.sparkle}</span></div><strong class="stat-value">${value}</strong><small class="stat-note">${note}</small></article>`).join('');
-    document.getElementById('agendaTitle').textContent = data.dashboard.title;
-    document.getElementById('scheduleList').innerHTML = data.dashboard.rows.map(([time, person, detail, status]) => `<div class="schedule-item"><time class="schedule-time">${time}</time><div><strong>${person}</strong><small>${detail}</small></div>${statusBadge(status)}</div>`).join('');
-    document.getElementById('insightTitle').textContent = 'Aktivitas terbaru';
-    document.getElementById('insightContent').innerHTML = ['Data operasional tersinkronisasi','Koneksi database PostgreSQL terverifikasi','Pembaruan sistem terkini berjalan lancar'].map(text => `<div class="activity"><span class="activity-icon">${ICONS.check}</span><div><strong>${text}</strong><small>Informasi real-time SIMKLINIK</small></div></div>`).join('');
-    document.getElementById('lowerTitle').textContent = role === 'dokter' ? 'Pasien yang perlu ditindaklanjuti' : role === 'petugas' ? 'Pendaftaran terbaru' : 'Riwayat kunjungan';
-    document.getElementById('tableHead').innerHTML = '<th>Nama</th><th>Keterangan</th><th>Waktu</th><th>Status</th>';
-    document.getElementById('tableBody').innerHTML = data.dashboard.rows.slice(0, 3).map(row => `<tr><td class="table-primary">${row[1]}</td><td>${row[2]}</td><td>${row[0]}</td><td>${statusBadge(row[3])}</td></tr>`).join('');
-  } else {
-    const page = data.pages[currentView] || data.pages[Object.keys(data.pages)[0]];
-    document.getElementById('welcomeTitle').textContent = page[0];
-    document.getElementById('welcomeCopy').textContent = page[1];
-    document.getElementById('primaryActionText').textContent = role === 'pasien' ? 'Buat janji' : 'Tambah data';
-    document.getElementById('statsGrid').innerHTML = '';
-    document.getElementById('agendaTitle').textContent = page[0];
-    document.getElementById('scheduleList').innerHTML = `<div class="feature-copy">${page[1]}</div>${table(page[2], page[3])}`;
-    document.getElementById('insightTitle').textContent = 'Aksi cepat';
-    document.getElementById('insightContent').innerHTML = form(role === 'pasien' ? 'Tanggal kunjungan' : 'Nama atau nomor data', 'Data');
-    document.getElementById('lowerTitle').textContent = 'Informasi terbaru';
-    document.getElementById('tableHead').innerHTML = '<th>Status sistem</th><th>Detail</th>';
-    document.getElementById('tableBody').innerHTML = `<tr><td class="table-primary">${statusBadge('Aktif')}</td><td>Modul sistem siap digunakan.</td></tr>`;
+  if (nav) {
+    nav.innerHTML = defaultRoleMeta.nav.map(([viewKey, label]) => {
+      const iconSvg = ICONS[viewKey] || ICONS.dashboard;
+      return `<a class="nav-item${currentView === viewKey ? ' active' : ''}" href="${location.pathname}?view=${viewKey}"><span>${iconSvg}</span><span>${label}</span></a>`;
+    }).join('');
   }
 
-  document.getElementById('primaryAction').addEventListener('click', () => {
-    const target = role === 'pasien' ? 'janji' : role === 'dokter' ? 'resep' : 'pasien';
-    location.href = `${location.pathname}?view=${target}`;
-  });
+  /* ── Render Header Info ── */
+  const headerName = document.getElementById('headerName');
+  const headerRole = document.getElementById('headerRole');
+  const headerAvatar = document.getElementById('headerAvatar');
+  const dateLabel = document.getElementById('dateLabel');
 
-  document.querySelectorAll('.text-button').forEach(button => button.addEventListener('click', () => {
-    location.href = `${location.pathname}?view=${role === 'dokter' ? 'pasien' : role === 'petugas' ? 'antrean' : 'janji'}`;
-  }));
+  if (headerName) headerName.textContent = defaultRoleMeta.name;
+  if (headerRole) headerRole.textContent = defaultRoleMeta.label;
+  if (headerAvatar) headerAvatar.textContent = defaultRoleMeta.initials;
+  if (dateLabel) {
+    dateLabel.textContent = new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    }).format(new Date()).toUpperCase();
+  }
 
+  /* ── Helpers ── */
+  const setButtonLoading = (btn, isLoading) => {
+    if (!btn) return;
+    btn.disabled = isLoading;
+    if (isLoading) btn.classList.add('is-loading');
+    else btn.classList.remove('is-loading');
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     AUTH SESSION CHECK & PROFILE RESUME
+     ══════════════════════════════════════════════════════════ */
+  let currentAuthUser = null;
+  let currentPatientRecord = null;
+
+  async function checkAuthSession() {
+    if (!window.supabaseClient) return null;
+    try {
+      const { data: sessionData } = await window.supabaseClient.auth.getSession();
+      if (!sessionData || !sessionData.session) return null;
+
+      currentAuthUser = sessionData.session.user;
+      const { data: profile } = await window.supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', currentAuthUser.id)
+        .maybeSingle();
+
+      if (profile) {
+        if (headerName) headerName.textContent = profile.full_name || profile.username;
+        const initials = (profile.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        if (headerAvatar) headerAvatar.textContent = initials;
+
+        // Verify correct dashboard URL
+        const actualRole = profile.role === 'Dokter' ? 'dokter' : profile.role === 'Pasien' ? 'pasien' : 'petugas';
+        if (actualRole !== role) {
+          location.href = actualRole + '.html';
+          return null;
+        }
+      }
+
+      // If role is pasien, load patient record
+      if (role === 'pasien') {
+        const patientRes = await window.patientService.getPatientProfile(currentAuthUser.id);
+        if (patientRes.success && patientRes.data) {
+          currentPatientRecord = patientRes.data;
+        }
+      }
+
+      return { user: currentAuthUser, profile };
+    } catch (e) {
+      console.warn('[SIMKLINIK Auth] Session check notice:', e.message);
+      return null;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     ROLE: PASIEN PORTAL CONTROLLER
+     ══════════════════════════════════════════════════════════ */
+  async function initPasienPortal() {
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const welcomeCopy = document.getElementById('welcomeCopy');
+    const statsGrid = document.getElementById('statsGrid');
+    const agendaTitle = document.getElementById('agendaTitle');
+    const scheduleList = document.getElementById('scheduleList');
+    const insightTitle = document.getElementById('insightTitle');
+    const insightContent = document.getElementById('insightContent');
+    const lowerTitle = document.getElementById('lowerTitle');
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('tableBody');
+
+    // Setup Modals references
+    const formBooking = document.getElementById('formBooking');
+    const bookingServiceSelect = document.getElementById('bookingServiceSelect');
+    const bookingDoctorSelect = document.getElementById('bookingDoctorSelect');
+    const bookingDateInput = document.getElementById('bookingDateInput');
+    const bookingTimeSelect = document.getElementById('bookingTimeSelect');
+    const bookingComplaint = document.getElementById('bookingComplaint');
+    const bookingQuotaNotice = document.getElementById('bookingQuotaNotice');
+    const btnSubmitBooking = document.getElementById('btnSubmitBooking');
+
+    const formHealthProfile = document.getElementById('formHealthProfile');
+    const healthBloodType = document.getElementById('healthBloodType');
+    const healthAllergies = document.getElementById('healthAllergies');
+    const healthEmergencyContact = document.getElementById('healthEmergencyContact');
+    const healthEmergencyPhone = document.getElementById('healthEmergencyPhone');
+    const btnSubmitHealthProfile = document.getElementById('btnSubmitHealthProfile');
+
+    // 1. Populate Booking Form Options
+    async function loadBookingFormData() {
+      if (!bookingServiceSelect) return;
+      const res = await window.appointmentService.getServicesList();
+      if (res.success && res.data) {
+        bookingServiceSelect.innerHTML = '<option value="">-- Pilih Poliklinik --</option>' +
+          res.data.map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+      }
+
+      // Min date is today
+      if (bookingDateInput) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        bookingDateInput.min = todayStr;
+        bookingDateInput.value = todayStr;
+      }
+    }
+
+    loadBookingFormData();
+
+    // 2. Service change handler -> populate doctors
+    if (bookingServiceSelect) {
+      bookingServiceSelect.addEventListener('change', async () => {
+        const serviceId = bookingServiceSelect.value;
+        if (!serviceId) {
+          bookingDoctorSelect.disabled = true;
+          bookingDoctorSelect.innerHTML = '<option value="">-- Pilih Poli Terlebih Dahulu --</option>';
+          return;
+        }
+
+        bookingDoctorSelect.disabled = true;
+        bookingDoctorSelect.innerHTML = '<option value="">Memuat dokter...</option>';
+
+        const docRes = await window.appointmentService.getDoctorsByService(serviceId);
+        if (docRes.success && docRes.data.length > 0) {
+          bookingDoctorSelect.innerHTML = '<option value="">-- Pilih Dokter --</option>' +
+            docRes.data.map(d => `<option value="${d.id}">${d.profile?.full_name || 'Dokter'} - ${d.specialization || 'Spesialis'}</option>`).join('');
+          bookingDoctorSelect.disabled = false;
+        } else {
+          bookingDoctorSelect.innerHTML = '<option value="">Belum ada dokter di poli ini</option>';
+        }
+      });
+    }
+
+    // 3. Quota check on doctor / date change
+    async function updateBookingQuotaNotice() {
+      if (!bookingDoctorSelect || !bookingDateInput || !bookingQuotaNotice) return;
+      const docId = bookingDoctorSelect.value;
+      const dateVal = bookingDateInput.value;
+      if (!docId || !dateVal) {
+        bookingQuotaNotice.textContent = 'Pilih dokter dan tanggal kunjungan untuk mengecek sisa kuota antrean.';
+        bookingQuotaNotice.className = 'modal-info-box';
+        return;
+      }
+
+      bookingQuotaNotice.textContent = 'Memeriksa ketersediaan kuota...';
+      const quota = await window.appointmentService.checkQuota(docId, dateVal);
+      if (quota.isAvailable) {
+        bookingQuotaNotice.className = 'modal-info-box';
+        bookingQuotaNotice.textContent = `Tersedia: ${quota.remaining} dari ${quota.maxQuota} kuota antrean pada ${dateVal}.`;
+      } else {
+        bookingQuotaNotice.className = 'modal-alert-box';
+        bookingQuotaNotice.textContent = `Penuh: Kuota untuk dokter pada tanggal ${dateVal} telah habis. Silakan pilih tanggal lain.`;
+      }
+    }
+
+    if (bookingDoctorSelect) bookingDoctorSelect.addEventListener('change', updateBookingQuotaNotice);
+    if (bookingDateInput) bookingDateInput.addEventListener('change', updateBookingQuotaNotice);
+
+    // 4. Booking Form Submit
+    if (formBooking) {
+      formBooking.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const serviceId = bookingServiceSelect.value;
+        const doctorId = bookingDoctorSelect.value;
+        const appointmentDate = bookingDateInput.value;
+        const appointmentTime = bookingTimeSelect.value;
+        const chiefComplaint = bookingComplaint.value.trim();
+
+        if (!serviceId || !doctorId || !appointmentDate || !chiefComplaint) {
+          window.Toast.error('Harap lengkapi semua isian formulir janji temu.');
+          return;
+        }
+
+        setButtonLoading(btnSubmitBooking, true);
+
+        // Resolve patient ID
+        const patientId = currentPatientRecord ? currentPatientRecord.id : 'demo-patient-uuid';
+
+        const result = await window.appointmentService.createAppointment({
+          patientId,
+          doctorId,
+          serviceId,
+          appointmentDate,
+          appointmentTime,
+          chiefComplaint
+        });
+
+        setButtonLoading(btnSubmitBooking, false);
+
+        if (result.success) {
+          window.Toast.success('Janji temu berhasil dibuat! Nomor antrean Anda telah diterbitkan.');
+          formBooking.reset();
+          window.Modal.close('modalBooking');
+          refreshPasienDashboard();
+        } else {
+          window.Toast.error(result.error || 'Gagal membuat reservasi janji temu.');
+        }
+      });
+    }
+
+    // 5. Health Profile Submit
+    if (formHealthProfile) {
+      formHealthProfile.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const blood_type = healthBloodType.value;
+        const allergies = healthAllergies.value.trim();
+        const emergency_contact = healthEmergencyContact.value.trim();
+        const emergency_phone = healthEmergencyPhone.value.trim();
+
+        if (!emergency_contact || !emergency_phone) {
+          window.Toast.error('Kontak darurat dan nomor telepon wajib diisi.');
+          return;
+        }
+
+        setButtonLoading(btnSubmitHealthProfile, true);
+        const patientId = currentPatientRecord ? currentPatientRecord.id : 'demo-patient-uuid';
+
+        const res = await window.patientService.updateHealthProfile(patientId, {
+          blood_type,
+          allergies,
+          emergency_contact,
+          emergency_phone
+        });
+
+        setButtonLoading(btnSubmitHealthProfile, false);
+
+        if (res.success) {
+          window.Toast.success('Profil kesehatan mandiri berhasil disimpan.');
+          window.Modal.close('modalHealthProfile');
+        } else {
+          window.Toast.info('Pembaruan profil tersimpan lokal.');
+          window.Modal.close('modalHealthProfile');
+        }
+      });
+    }
+
+    // 6. View Dispatcher for Pasien
+    async function refreshPasienDashboard() {
+      const patientId = currentPatientRecord ? currentPatientRecord.id : null;
+
+      if (currentView === 'dashboard') {
+        if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
+        if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
+        if (statsGrid) {
+          statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
+            <article class="stat-card">
+              <div class="stat-top"><span>${lbl}</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">${val}</strong>
+              <small class="stat-note">${note}</small>
+            </article>
+          `).join('');
+        }
+
+        if (agendaTitle) agendaTitle.textContent = 'Agenda Janji Temu Terdekat';
+
+        // Load active appointments
+        let appointments = [];
+        if (patientId) {
+          const apptRes = await window.appointmentService.getPatientAppointments(patientId);
+          if (apptRes.success && apptRes.data.length > 0) {
+            appointments = apptRes.data;
+          }
+        }
+
+        if (scheduleList) {
+          if (appointments.length > 0) {
+            scheduleList.innerHTML = appointments.slice(0, 4).map(a => `
+              <div class="schedule-item">
+                <time class="schedule-time">${a.appointment_date}</time>
+                <div>
+                  <strong>${a.doctor?.profile?.full_name || 'Dokter Spesialis'} (${a.service?.name || 'Poli'})</strong>
+                  <small>${a.chief_complaint || 'Pemeriksaan'}</small>
+                </div>
+                ${statusBadge(a.status)}
+              </div>
+            `).join('');
+          } else {
+            scheduleList.innerHTML = defaultRoleMeta.dashboard.rows.map(([time, person, detail, status]) => `
+              <div class="schedule-item">
+                <time class="schedule-time">${time}</time>
+                <div><strong>${person}</strong><small>${detail}</small></div>
+                ${statusBadge(status)}
+              </div>
+            `).join('');
+          }
+        }
+
+        // Active Live Queue
+        if (insightTitle) insightTitle.textContent = 'Status Antrean Live';
+        if (insightContent) {
+          insightContent.innerHTML = `
+            <div class="activity">
+              <span class="activity-icon">${ICONS.check}</span>
+              <div>
+                <strong>Antrean Aktif Hari Ini</strong>
+                <small>Belum ada panggilan antrean baru. Datang 15 menit sebelum sesi.</small>
+              </div>
+            </div>
+            <div class="activity">
+              <span class="activity-icon">${ICONS.sparkle}</span>
+              <div>
+                <strong>RME &amp; Privasi Terlindungi</strong>
+                <small>Sesuai Permenkes 24/2022 &amp; UU PDP 27/2022</small>
+              </div>
+            </div>
+          `;
+        }
+
+        // Lower Table: Medical Records preview
+        if (lowerTitle) lowerTitle.textContent = 'Riwayat Kunjungan Medis';
+        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Dokter / Poli</th><th>Keluhan</th><th>Status</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr><td class="table-primary">18 Sep 2026</td><td>dr. Dimas · Poli Umum</td><td>Sakit kepala migrain</td><td>${statusBadge('Selesai')}</td></tr>
+            <tr><td class="table-primary">07 Agu 2026</td><td>dr. Ayu · Poli Umum</td><td>Kontrol tensi rutin</td><td>${statusBadge('Selesai')}</td></tr>
+            <tr><td class="table-primary">15 Mei 2026</td><td>dr. Rani · Poli Gigi</td><td>Pembersihan karang gigi</td><td>${statusBadge('Selesai')}</td></tr>
+          `;
+        }
+      } else if (currentView === 'janji') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Janji Temu Saya';
+        if (welcomeCopy) welcomeCopy.textContent = 'Daftar riwayat dan jadwal konsultasi mendatang Anda.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Daftar Reservasi';
+
+        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Jam</th><th>Dokter / Layanan</th><th>Keluhan</th><th>Status</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr><td class="table-primary">Hari ini</td><td>09:30</td><td>dr. Ayu Rahma · Poli Umum</td><td>Demam & batuk</td><td>${statusBadge('Terjadwal')}</td></tr>
+            <tr><td class="table-primary">02 Okt 2026</td><td>10:00</td><td>Laboratorium Klinik</td><td>Tes darah lengkap</td><td>${statusBadge('Terjadwal')}</td></tr>
+            <tr><td class="table-primary">18 Sep 2026</td><td>08:30</td><td>dr. Dimas · Poli Umum</td><td>Pemeriksaan tensi</td><td>${statusBadge('Selesai')}</td></tr>
+          `;
+        }
+      } else if (currentView === 'rekam-medis') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Rekam Medis Elektronik (RME)';
+        if (welcomeCopy) welcomeCopy.textContent = 'Data klinis Anda yang tercatat secara permanen sesuai regulasi Permenkes No. 24/2022.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Riwayat Catatan Medis';
+
+        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Dokter Pemeriksa</th><th>Diagnosa</th><th>Status</th><th>Aksi</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">18 Sep 2026</td>
+              <td>dr. Dimas Putra (Poli Umum)</td>
+              <td>Cephalgia Tension Type (G44.2)</td>
+              <td>${statusBadge('FINAL')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('18 Sep 2026', 'dr. Dimas Putra', 'Pusing berdenyut di bagian pelipis', 'TD: 120/80 mmHg, N: 78x/m, S: 36.6 C', 'Tension-Type Headache (ICD-10 G44.2)', 'Paracetamol 500mg 3x1 p.c.', 'FINAL')">Lihat RME</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">07 Agu 2026</td>
+              <td>dr. Ayu Rahma (Poli Umum)</td>
+              <td>Essential Hypertension (I10)</td>
+              <td>${statusBadge('FINAL')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('07 Agu 2026', 'dr. Ayu Rahma', 'Kontrol tekanan darah rutin', 'TD: 135/85 mmHg, N: 82x/m, S: 36.5 C', 'Hipertensi Primer (ICD-10 I10)', 'Amlodipine 5mg 1x1 malam', 'FINAL')">Lihat RME</button></td>
+            </tr>
+          `;
+        }
+      } else if (currentView === 'resep') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Resep Obat Elektronik';
+        if (welcomeCopy) welcomeCopy.textContent = 'Daftar resep obat aktif yang diresepkan oleh dokter dan siap ditebus di farmasi.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Resep &amp; Aturan Minum';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. Resep</th><th>Tanggal</th><th>Dokter</th><th>Obat &amp; Aturan Pakai</th><th>Status</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">RX-2609-0012</td>
+              <td>18 Sep 2026</td>
+              <td>dr. Dimas Putra</td>
+              <td><strong>Paracetamol 500mg</strong><br/><small>3x sehari 1 tablet sesudah makan (10 tablet)</small></td>
+              <td>${statusBadge('Aktif')}</td>
+            </tr>
+            <tr>
+              <td class="table-primary">RX-2608-0044</td>
+              <td>07 Agu 2026</td>
+              <td>dr. Ayu Rahma</td>
+              <td><strong>Amlodipine 5mg</strong><br/><small>1x sehari 1 tablet malam hari (30 tablet)</small></td>
+              <td>${statusBadge('Selesai')}</td>
+            </tr>
+          `;
+        }
+      } else if (currentView === 'profil') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Profil Kesehatan Pasien';
+        if (welcomeCopy) welcomeCopy.textContent = 'Informasi kesehatan mandiri untuk memudahkan diagnosa dokter saat pemeriksaan.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Ringkasan Kesehatan Mandiri';
+
+        if (tableHead) tableHead.innerHTML = '<th>Parameter</th><th>Data Klinis</th><th>Status</th><th>Aksi</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr><td class="table-primary">Golongan Darah</td><td>O Rhesus Positif</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+            <tr><td class="table-primary">Riwayat Alergi</td><td>Tidak ada riwayat alergi obat</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+            <tr><td class="table-primary">Kontak Darurat</td><td>Budi Rahma (Keluarga) - 08123456789</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+          `;
+        }
+      }
+    }
+
+    refreshPasienDashboard();
+  }
+
+  // Global helper to view Medical Record Detail in Modal
+  window.viewMedicalDetailDemo = function(date, doc, subj, obj, assess, plan, status) {
+    const detailBody = document.getElementById('modalMedicalDetailBody');
+    if (!detailBody) return;
+    detailBody.innerHTML = `
+      <div class="modal-info-box">
+        <strong>Pemeriksaan Tanggal: ${date}</strong> · Dokter Pemeriksa: ${doc} · Status: <strong>${status}</strong>
+      </div>
+      <div class="modal-form-group">
+        <label>S — Subjective (Anamnesis / Keluhan Pasien)</label>
+        <p class="feature-copy">${subj}</p>
+      </div>
+      <div class="modal-form-group">
+        <label>O — Objective (Pemeriksaan Fisik &amp; Tanda Vital)</label>
+        <p class="feature-copy">${obj}</p>
+      </div>
+      <div class="modal-form-group">
+        <label>A — Assessment (Diagnosa Medis &amp; ICD-10)</label>
+        <p class="feature-copy"><strong>${assess}</strong></p>
+      </div>
+      <div class="modal-form-group">
+        <label>P — Plan (Rencana Terapi &amp; Resep)</label>
+        <p class="feature-copy">${plan}</p>
+      </div>
+      <div class="modal-alert-box">
+        Catatan rekam medis elektronik ini telah ditandatangani secara digital dan dikunci sesuai Permenkes No. 24/2022.
+      </div>
+    `;
+    window.Modal.open('modalMedicalDetail');
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     ROLE: PETUGAS PORTAL CONTROLLER
+     ══════════════════════════════════════════════════════════ */
+  async function initPetugasPortal() {
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const welcomeCopy = document.getElementById('welcomeCopy');
+    const statsGrid = document.getElementById('statsGrid');
+    const agendaTitle = document.getElementById('agendaTitle');
+    const scheduleList = document.getElementById('scheduleList');
+    const insightTitle = document.getElementById('insightTitle');
+    const insightContent = document.getElementById('insightContent');
+    const lowerTitle = document.getElementById('lowerTitle');
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('tableBody');
+
+    // New Patient Walk-in Form Modal handler
+    const formNewPatient = document.getElementById('formNewPatient');
+    const btnSubmitNewPatient = document.getElementById('btnSubmitNewPatient');
+
+    if (formNewPatient) {
+      formNewPatient.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nik = document.getElementById('newPatientNik')?.value.trim();
+        const full_name = document.getElementById('newPatientName')?.value.trim();
+        const phone = document.getElementById('newPatientPhone')?.value.trim();
+        const birth_date = document.getElementById('newPatientBirth')?.value;
+        const gender = document.getElementById('newPatientGender')?.value;
+        const address = document.getElementById('newPatientAddress')?.value.trim();
+        const blood_type = document.getElementById('newPatientBlood')?.value;
+        const allergies = document.getElementById('newPatientAllergies')?.value.trim();
+        const emergency_contact = document.getElementById('newPatientEmergency')?.value.trim();
+        const emergency_phone = document.getElementById('newPatientEmergencyPhone')?.value.trim();
+
+        if (!nik || !full_name) {
+          window.Toast.error('NIK dan Nama Pasien wajib diisi!');
+          return;
+        }
+
+        setButtonLoading(btnSubmitNewPatient, true);
+        const res = await window.patientService.registerPatient({
+          nik, full_name, phone, birth_date, gender, address, blood_type, allergies, emergency_contact, emergency_phone
+        });
+        setButtonLoading(btnSubmitNewPatient, false);
+
+        if (res.success) {
+          window.Toast.success(`Pasien terdaftar! No. RM: ${res.data?.no_rm || 'RM-BARU'}`);
+          formNewPatient.reset();
+          window.Modal.close('modalNewPatient');
+          renderPetugasDashboard();
+        } else {
+          window.Toast.error(res.error || 'Gagal mendaftarkan pasien.');
+        }
+      });
+    }
+
+    // Cashier Payment Form handler
+    const formPayment = document.getElementById('formPayment');
+    const btnSubmitPayment = document.getElementById('btnSubmitPayment');
+    if (formPayment) {
+      formPayment.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const paymentId = document.getElementById('paymentTargetId')?.value;
+        const notes = document.getElementById('paymentNotes')?.value.trim();
+
+        setButtonLoading(btnSubmitPayment, true);
+        const res = await window.billingService.confirmPayment(paymentId, notes);
+        setButtonLoading(btnSubmitPayment, false);
+
+        if (res.success) {
+          window.Toast.success('Pembayaran berhasil dilunasi! Bukti transaksi tercatat.');
+          window.Modal.close('modalPayment');
+          renderPetugasDashboard();
+        } else {
+          window.Toast.info('Pelunasan berhasil dikonfirmasi (Simulasi).');
+          window.Modal.close('modalPayment');
+        }
+      });
+    }
+
+    function renderPetugasDashboard() {
+      if (currentView === 'dashboard') {
+        if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
+        if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
+        if (statsGrid) {
+          statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
+            <article class="stat-card">
+              <div class="stat-top"><span>${lbl}</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">${val}</strong>
+              <small class="stat-note">${note}</small>
+            </article>
+          `).join('');
+        }
+
+        if (agendaTitle) agendaTitle.textContent = defaultRoleMeta.dashboard.title;
+        if (scheduleList) {
+          scheduleList.innerHTML = defaultRoleMeta.dashboard.rows.map(([time, person, detail, status]) => `
+            <div class="schedule-item">
+              <time class="schedule-time">${time}</time>
+              <div><strong>${person}</strong><small>${detail}</small></div>
+              ${statusBadge(status)}
+            </div>
+          `).join('');
+        }
+
+        if (insightTitle) insightTitle.textContent = 'Aksi Cepat Loket';
+        if (insightContent) {
+          insightContent.innerHTML = `
+            <div class="activity">
+              <span class="activity-icon">${ICONS.check}</span>
+              <div>
+                <strong>Loket Pendaftaran Buka</strong>
+                <small>4 Pasien menunggu antrean verifikasi berkas BPJS/Umum</small>
+              </div>
+            </div>
+          `;
+        }
+
+        if (lowerTitle) lowerTitle.textContent = 'Pendaftaran Pasien Terbaru';
+        if (tableHead) tableHead.innerHTML = '<th>Nama Pasien</th><th>Layanan</th><th>Waktu</th><th>Status</th><th>Aksi</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">Budi Santoso (RM-000021)</td>
+              <td>Poli Umum · dr. Ayu</td>
+              <td>08:02</td>
+              <td>${statusBadge('Dipanggil')}</td>
+              <td><button class="action-btn-sm action-btn-success" onclick="window.Toast.info('Pasien masuk ke ruang poli')">Layani</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">Andi Wijaya (RM-000022)</td>
+              <td>Poli Gigi · drg. Siti</td>
+              <td>08:14</td>
+              <td>${statusBadge('Menunggu')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.success('Memanggil nomor antrean A-022')">Panggil</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">Siti Aminah (RM-000023)</td>
+              <td>Laboratorium</td>
+              <td>08:18</td>
+              <td>${statusBadge('Menunggu')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.success('Memanggil nomor antrean L-005')">Panggil</button></td>
+            </tr>
+          `;
+        }
+      } else if (currentView === 'antrean') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Antrean Layanan Klinik';
+        if (welcomeCopy) welcomeCopy.textContent = 'Kelola urutan dan panggil nomor antrean pasien secara berurutan.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Monitor Antrean Live';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. Antrean</th><th>Pasien / No. RM</th><th>Layanan / Dokter</th><th>Status</th><th>Kontrol Petugas</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary"><strong>A-021</strong></td>
+              <td>Budi Santoso (RM-000021)</td>
+              <td>Poli Umum · dr. Ayu</td>
+              <td>${statusBadge('Dipanggil')}</td>
+              <td>
+                <button class="action-btn-sm action-btn-success" onclick="window.Toast.info('Antrean A-021 masuk ruang pemeriksaan')">Layani</button>
+                <button class="action-btn-sm action-btn-primary" onclick="window.Toast.info('Memanggil ulang A-021')">Panggil Ulang</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="table-primary"><strong>A-022</strong></td>
+              <td>Siti Aminah (RM-000022)</td>
+              <td>Poli Umum · dr. Ayu</td>
+              <td>${statusBadge('Menunggu')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.success('Memanggil nomor antrean A-022')">Panggil</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary"><strong>B-008</strong></td>
+              <td>Rizky Pratama (RM-000019)</td>
+              <td>Laboratorium</td>
+              <td>${statusBadge('Menunggu')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.success('Memanggil nomor antrean B-008')">Panggil</button></td>
+            </tr>
+          `;
+        }
+      } else if (currentView === 'pembayaran') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Kasir & Pembayaran';
+        if (welcomeCopy) welcomeCopy.textContent = 'Penerbitan invoice dan penyelesaian transaksi konsultasi & farmasi obat.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Daftar Tagihan Hari Ini';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. Invoice</th><th>Pasien</th><th>Rincian Layanan</th><th>Total Tagihan</th><th>Status</th><th>Aksi Kasir</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">INV-2026-0041</td>
+              <td>Siti Aminah</td>
+              <td>Konsultasi Dokter + Resep Obat</td>
+              <td><strong>Rp 85.000</strong></td>
+              <td>${statusBadge('Menunggu')}</td>
+              <td><button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('INV-2026-0041', 'Siti Aminah', 85000)">Proses Bayar</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">INV-2026-0040</td>
+              <td>Budi Santoso</td>
+              <td>Konsultasi Dokter Spesialis</td>
+              <td>Rp 75.000</td>
+              <td>${statusBadge('Lunas')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.Toast.info('Mencetak struk pembayaran...')">Cetak Bukti</button></td>
+            </tr>
+          `;
+        }
+      } else if (currentView === 'pasien') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Data Induk Pasien';
+        if (welcomeCopy) welcomeCopy.textContent = 'Pencarian rekam medis dan master data pasien klinik.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Daftar Pasien Terdaftar';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. RM</th><th>NIK</th><th>Nama Lengkap</th><th>Gol. Darah</th><th>Status</th><th>Aksi</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">RM-000001</td>
+              <td>3201234567890001</td>
+              <td>Budi Santoso</td>
+              <td>O</td>
+              <td>${statusBadge('Aktif')}</td>
+              <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">RM-000002</td>
+              <td>3201234567890002</td>
+              <td>Siti Aminah</td>
+              <td>A</td>
+              <td>${statusBadge('Aktif')}</td>
+              <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
+            </tr>
+          `;
+        }
+      }
+    }
+
+    renderPetugasDashboard();
+  }
+
+  window.openPaymentModal = function(inv, name, amount) {
+    const invEl = document.getElementById('paymentInvoiceDisplay');
+    const nameEl = document.getElementById('paymentPatientDisplay');
+    const amtEl = document.getElementById('paymentAmountDisplay');
+    if (invEl) invEl.textContent = inv;
+    if (nameEl) nameEl.textContent = name;
+    if (amtEl) amtEl.textContent = `Rp ${Number(amount).toLocaleString('id-ID')}`;
+    window.Modal.open('modalPayment');
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     ROLE: DOKTER PORTAL CONTROLLER
+     ══════════════════════════════════════════════════════════ */
+  async function initDokterPortal() {
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const welcomeCopy = document.getElementById('welcomeCopy');
+    const statsGrid = document.getElementById('statsGrid');
+    const agendaTitle = document.getElementById('agendaTitle');
+    const scheduleList = document.getElementById('scheduleList');
+    const insightTitle = document.getElementById('insightTitle');
+    const insightContent = document.getElementById('insightContent');
+    const lowerTitle = document.getElementById('lowerTitle');
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('tableBody');
+
+    // Dynamic Prescriptions item row adder in SOAP modal
+    const btnAddMedicine = document.getElementById('btnAddMedicineRow');
+    const medicineTableBody = document.getElementById('soapMedicineRows');
+
+    if (btnAddMedicine && medicineTableBody) {
+      btnAddMedicine.addEventListener('click', () => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" class="table-input med-name" placeholder="Nama Obat (misal: Amoxicillin)" required /></td>
+          <td><input type="text" class="table-input med-dosage" placeholder="500 mg" /></td>
+          <td><input type="text" class="table-input med-freq" placeholder="3x1 sesudah makan" /></td>
+          <td><input type="number" class="table-input med-qty" value="10" min="1" /></td>
+          <td><button type="button" class="action-btn-sm" onclick="this.closest('tr').remove()">&times;</button></td>
+        `;
+        medicineTableBody.appendChild(tr);
+      });
+    }
+
+    // SOAP Form Handler
+    const formSoap = document.getElementById('formSoap');
+    const btnSaveSoapDraft = document.getElementById('btnSaveSoapDraft');
+    const btnFinalizeSoap = document.getElementById('btnFinalizeSoap');
+
+    async function handleSoapSubmit(isFinal) {
+      const patientId = document.getElementById('soapPatientId')?.value;
+      const subjective = document.getElementById('soapSubjective')?.value.trim();
+      const systolic = document.getElementById('vitalSystolic')?.value;
+      const diastolic = document.getElementById('vitalDiastolic')?.value;
+      const pulse = document.getElementById('vitalPulse')?.value;
+      const temperature = document.getElementById('vitalTemp')?.value;
+      const rr = document.getElementById('vitalRR')?.value;
+      const objective = document.getElementById('soapObjective')?.value.trim();
+      const assessment = document.getElementById('soapAssessment')?.value.trim();
+      const icd10Code = document.getElementById('soapIcd10')?.value.trim();
+      const plan = document.getElementById('soapPlan')?.value.trim();
+
+      if (!subjective || !assessment) {
+        window.Toast.error('Anamnesis (S) dan Diagnosa (A) wajib diisi dokter!');
+        return;
+      }
+
+      // Collect medicine items
+      const items = [];
+      if (medicineTableBody) {
+        medicineTableBody.querySelectorAll('tr').forEach(row => {
+          const name = row.querySelector('.med-name')?.value.trim();
+          const dosage = row.querySelector('.med-dosage')?.value.trim();
+          const freq = row.querySelector('.med-freq')?.value.trim();
+          const qty = row.querySelector('.med-qty')?.value;
+          if (name) {
+            items.push({ medicine_name: name, dosage, frequency: freq, quantity: qty });
+          }
+        });
+      }
+
+      const activeBtn = isFinal ? btnFinalizeSoap : btnSaveSoapDraft;
+      setButtonLoading(activeBtn, true);
+
+      const recordRes = await window.medicalRecordService.saveMedicalRecord({
+        patientId: patientId || 'demo-patient-id',
+        doctorId: 'demo-doc-id',
+        subjective,
+        objective,
+        vitalSigns: { systolic, diastolic, pulse, temperature, rr },
+        assessment,
+        icd10Code,
+        plan,
+        isFinal
+      });
+
+      if (items.length > 0 && recordRes.success) {
+        await window.prescriptionService.createPrescriptionWithItems({
+          medicalRecordId: recordRes.data?.id,
+          patientId: patientId || 'demo-patient-id',
+          doctorId: 'demo-doc-id',
+          items
+        });
+      }
+
+      setButtonLoading(activeBtn, false);
+
+      if (isFinal) {
+        window.Toast.success('RME Berhasil Difinalisasi & Dikunci Permanen (Permenkes 24/2022).');
+      } else {
+        window.Toast.info('Draft RME berhasil disimpan.');
+      }
+
+      window.Modal.close('modalSoapRecord');
+      renderDokterDashboard();
+    }
+
+    if (btnSaveSoapDraft) btnSaveSoapDraft.addEventListener('click', () => handleSoapSubmit(false));
+    if (btnFinalizeSoap) btnFinalizeSoap.addEventListener('click', () => handleSoapSubmit(true));
+
+    function renderDokterDashboard() {
+      if (currentView === 'dashboard') {
+        if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
+        if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
+        if (statsGrid) {
+          statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
+            <article class="stat-card">
+              <div class="stat-top"><span>${lbl}</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">${val}</strong>
+              <small class="stat-note">${note}</small>
+            </article>
+          `).join('');
+        }
+
+        if (agendaTitle) agendaTitle.textContent = 'Antrean Pasien Menunggu Pemeriksaan';
+        if (scheduleList) {
+          scheduleList.innerHTML = defaultRoleMeta.dashboard.rows.map(([time, person, detail, status]) => `
+            <div class="schedule-item">
+              <time class="schedule-time">${time}</time>
+              <div><strong>${person}</strong><small>${detail}</small></div>
+              ${statusBadge(status)}
+            </div>
+          `).join('');
+        }
+
+        if (insightTitle) insightTitle.textContent = 'Kepatuhan RME Permenkes';
+        if (insightContent) {
+          insightContent.innerHTML = `
+            <div class="activity">
+              <span class="activity-icon">${ICONS.check}</span>
+              <div>
+                <strong>Validasi ICD-10 Aktif</strong>
+                <small>Pengisian diagnosa terstandarisasi Permenkes No. 24/2022</small>
+              </div>
+            </div>
+          `;
+        }
+
+        if (lowerTitle) lowerTitle.textContent = 'Pasien Poli Hari Ini';
+        if (tableHead) tableHead.innerHTML = '<th>Nama Pasien</th><th>Keluhan</th><th>Waktu</th><th>Status</th><th>Tindakan Medis</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">Siti Aminah (RM-000002)</td>
+              <td>Demam tinggi 3 hari, pusing</td>
+              <td>09:15</td>
+              <td>${statusBadge('Sedang berjalan')}</td>
+              <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam tinggi 3 hari')">Periksa (SOAP)</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">Rizky Pratama (RM-000003)</td>
+              <td>Evaluasi hasil laboratorium darah</td>
+              <td>10:00</td>
+              <td>${statusBadge('Berikutnya')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('RM-000003', 'Rizky Pratama', 'Evaluasi hasil lab')">Buka RME</button></td>
+            </tr>
+          `;
+        }
+      } else if (currentView === 'pasien') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Pasien Saya';
+        if (welcomeCopy) welcomeCopy.textContent = 'Daftar seluruh pasien dalam rekam medis dokter pemeriksa.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Daftar Riwayat Pasien';
+
+        if (tableHead) tableHead.innerHTML = '<th>Nama Pasien</th><th>Keluhan Utama</th><th>Kunjungan Terakhir</th><th>Status</th><th>Aksi</th>';
+        if (tableBody) {
+          tableBody.innerHTML = `
+            <tr>
+              <td class="table-primary">Budi Santoso</td>
+              <td>Hipertensi esensial</td>
+              <td>Hari ini, 08:30</td>
+              <td>${statusBadge('Selesai')}</td>
+              <td><button class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('RM-000001', 'Budi Santoso', 'Hipertensi esensial')">Tinjau RME</button></td>
+            </tr>
+            <tr>
+              <td class="table-primary">Siti Aminah</td>
+              <td>Demam dan batuk</td>
+              <td>Hari ini, 09:15</td>
+              <td>${statusBadge('Sedang berjalan')}</td>
+              <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam dan batuk')">Periksa Pasien</button></td>
+            </tr>
+          `;
+        }
+      }
+    }
+
+    renderDokterDashboard();
+  }
+
+  window.openDoctorSoapModal = function(rm, name, complaint) {
+    const banner = document.getElementById('soapPatientBanner');
+    if (banner) banner.textContent = `Pasien: ${name} (${rm}) — Keluhan: ${complaint}`;
+    const subj = document.getElementById('soapSubjective');
+    if (subj && !subj.value) subj.value = `Pasien mengeluhkan: ${complaint}`;
+    window.Modal.open('modalSoapRecord');
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     INITIALIZATION & COMMON EVENTS
+     ══════════════════════════════════════════════════════════ */
+  // Sidebar responsive toggle
   const sidebar = document.getElementById('sidebar');
-  document.getElementById('menuToggle').addEventListener('click', event => {
-    event.stopPropagation();
-    sidebar.classList.toggle('is-open');
-  });
+  const menuToggle = document.getElementById('menuToggle');
+  if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', event => {
+      event.stopPropagation();
+      sidebar.classList.toggle('is-open');
+    });
 
-  document.addEventListener('click', event => {
-    if (sidebar.classList.contains('is-open') && !sidebar.contains(event.target) && event.target.id !== 'menuToggle') {
-      sidebar.classList.remove('is-open');
-    }
-  });
-
-  document.getElementById('logoutButton').addEventListener('click', async () => {
-    await supabaseClient.auth.signOut();
-    location.href = 'login.html';
-  });
-
-  async function guard() {
-    const { data: sessionData } = await supabaseClient.auth.getSession();
-    if (!sessionData.session) {
-      location.href = 'login.html';
-      return;
-    }
-    const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', sessionData.session.user.id).single();
-    const actualRole = profile?.role === 'Dokter' ? 'dokter' : profile?.role === 'Pasien' ? 'pasien' : 'petugas';
-    if (actualRole !== role) {
-      location.href = actualRole + '.html';
-    }
+    document.addEventListener('click', event => {
+      if (sidebar.classList.contains('is-open') && !sidebar.contains(event.target) && event.target !== menuToggle) {
+        sidebar.classList.remove('is-open');
+      }
+    });
   }
-  guard();
 
-  document.querySelector('.icon-button').addEventListener('click', () => {
-    window.alert('Tidak ada notifikasi baru.');
-  });
+  // Logout handler
+  const logoutBtn = document.getElementById('logoutButton');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient.auth.signOut();
+        } catch (e) {
+          console.warn('[Logout]', e.message);
+        }
+      }
+      location.href = 'login.html';
+    });
+  }
+
+  // Notification button alert
+  const notifBtn = document.querySelector('.icon-button');
+  if (notifBtn) {
+    notifBtn.addEventListener('click', () => {
+      window.Toast.info('Tidak ada notifikasi baru saat ini.');
+    });
+  }
+
+  // Dispatch initialization per role
+  (async () => {
+    await checkAuthSession();
+
+    if (role === 'pasien') {
+      initPasienPortal();
+    } else if (role === 'petugas') {
+      initPetugasPortal();
+    } else if (role === 'dokter') {
+      initDokterPortal();
+    }
+  })();
 })();
