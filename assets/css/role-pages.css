@@ -113,3 +113,216 @@
 .action-btn-success:hover {
   background: #bbf7d0;
 }
+
+/* ── Petugas Search Bar & Filter Pills ── */
+.petugas-search-bar-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 22px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.search-input-box {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 260px;
+  gap: 10px;
+  position: relative;
+}
+
+.search-svg-icon {
+  color: #718394;
+  flex-shrink: 0;
+}
+
+.petugas-search-field {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font: 14px "DM Sans", -apple-system, sans-serif;
+  color: var(--ink);
+  outline: none;
+  padding: 6px 0;
+}
+
+.petugas-search-field::placeholder {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.search-clear-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.search-clear-btn:hover {
+  background: #e2e8f0;
+  color: var(--ink);
+}
+
+.search-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-pill:hover {
+  background: #f1f5f9;
+  color: var(--ink);
+}
+
+.filter-pill.active {
+  background: var(--teal);
+  color: #ffffff;
+  border-color: var(--teal);
+}
+
+/* Quick Search Dropdown / Live Preview */
+.search-dropdown-container {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-top: -14px;
+  margin-bottom: 22px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.search-results-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #718394;
+  margin: 10px 0 6px;
+}
+
+.search-results-section-title:first-child {
+  margin-top: 0;
+}
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.search-result-row:hover {
+  background: #f8fafc;
+}
+
+.search-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-result-info strong {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.search-result-info small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.search-empty-text {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  padding: 14px 0;
+}
+
+/* ── Doctor Switcher in Doctor Dashboard ── */
+.doctor-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.doctor-select-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.doctor-select-dropdown {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: 13px "DM Sans", -apple-system, sans-serif;
+  color: var(--ink);
+  background: #f8fafc;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.doctor-select-dropdown:focus {
+  border-color: var(--teal);
+}
+
+/* Empty State Cards & Table Rows (Zero Inline Styles) */
+.empty-state-card {
+  padding: 24px;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 10px 0;
+}
+
+.table-empty-row {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
