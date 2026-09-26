@@ -325,4 +325,71 @@
   text-align: center;
 }
 
+/* ── Petugas Dashboard: Scrollable Queue & Schedule List ── */
+body[data-role="petugas"] .schedule-list,
+.schedule-panel .schedule-list {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 8px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+body[data-role="petugas"] .schedule-list::-webkit-scrollbar,
+.schedule-panel .schedule-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+body[data-role="petugas"] .schedule-list::-webkit-scrollbar-track,
+.schedule-panel .schedule-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body[data-role="petugas"] .schedule-list::-webkit-scrollbar-thumb,
+.schedule-panel .schedule-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+body[data-role="petugas"] .schedule-list::-webkit-scrollbar-thumb:hover,
+.schedule-panel .schedule-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--teal);
+}
+
+/* Petugas Dashboard: Scrollable Lower Table with Sticky Header */
+body[data-role="petugas"] .lower-panel .table-wrap {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+body[data-role="petugas"] .lower-panel .table-wrap::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body[data-role="petugas"] .lower-panel .table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body[data-role="petugas"] .lower-panel .table-wrap::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+body[data-role="petugas"] .lower-panel .table-wrap::-webkit-scrollbar-thumb:hover {
+  background-color: var(--teal);
+}
+
+body[data-role="petugas"] .lower-panel .table-wrap table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--paper, #ffffff);
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+
 
