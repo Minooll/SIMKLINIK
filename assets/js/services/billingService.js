@@ -101,27 +101,32 @@
     /**
      * Create payment invoice / transaction
      */
-    async createPayment({ appointmentId, patientId, amount, paymentMethod, paymentType = 'KONSULTASI_DAN_OBAT' }) {
+    async createPayment({ appointmentId, amount, paymentMethod = 'Tunai' }) {
       const client = getClient();
       if (!client) return { success: false, error: 'Database client not initialized' };
 
       try {
+        const methodMap = {
+          'TUNAI': 'Tunai',
+          'TRANSFER': 'Transfer',
+          'QRIS': 'QRIS',
+          'DEBIT': 'Transfer'
+        };
+        const method = methodMap[paymentMethod.toUpperCase()] || 'Tunai';
+
         const { data, error } = await client
           .from('payments')
           .insert({
-            appointment_id: appointmentId || null,
-            patient_id: patientId,
-            amount: amount,
-            payment_method: paymentMethod || 'TUNAI',
-            payment_type: paymentType,
-            status: 'PENDING'
+            appointment_id: appointmentId,
+            total_amount: amount || 0,
+            payment_method: method,
+            status: 'Menunggu'
           })
           .select(`
             id,
             invoice_number,
-            amount,
+            total_amount,
             payment_method,
-            payment_type,
             status,
             created_at
           `)
@@ -146,9 +151,8 @@
         const { data, error } = await client
           .from('payments')
           .update({
-            status: 'PAID',
-            paid_at: new Date().toISOString(),
-            notes: notes
+            status: 'Lunas',
+            paid_at: new Date().toISOString()
           })
           .eq('id', paymentId)
           .select()

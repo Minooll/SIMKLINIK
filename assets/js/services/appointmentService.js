@@ -182,7 +182,7 @@
             appointment_date: appointmentDate,
             appointment_time: appointmentTime || '09:00:00',
             chief_complaint: chiefComplaint || '',
-            status: 'CONFIRMED'
+            status: 'Terjadwal'
           })
           .select(`
             id, appointment_date, appointment_time, status, chief_complaint,
@@ -199,22 +199,17 @@
         // 3. Create queue entry
         const todayStr = new Date().toISOString().split('T')[0];
         if (appointmentDate === todayStr) {
-          // Calculate next queue number for service today
           const { count } = await client
             .from('queue_entries')
-            .select('*', { count: 'exact', head: true })
-            .eq('service_id', serviceId)
-            .eq('queue_date', todayStr);
+            .select('*', { count: 'exact', head: true });
 
-          const queueNumber = (count || 0) + 1;
+          const seq = (count || 0) + 1;
+          const qNum = 'A-' + String(seq).padStart(3, '0');
           await client.from('queue_entries').insert({
             appointment_id: appointment.id,
-            patient_id: patientId,
-            doctor_id: doctorId,
-            service_id: serviceId,
-            queue_date: todayStr,
-            queue_number: queueNumber,
-            status: 'WAITING'
+            queue_number: qNum,
+            sequence_num: seq,
+            status: 'Menunggu'
           });
         }
 

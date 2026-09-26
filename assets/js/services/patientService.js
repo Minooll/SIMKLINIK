@@ -22,27 +22,27 @@
           .from('patients')
           .select(`
             id,
-            user_id,
+            profile_id,
             no_rm,
             nik,
             birth_date,
             gender,
             blood_type,
             allergies,
+            phone,
             emergency_contact,
             emergency_phone,
             created_at,
             profile:profiles!inner (
               id,
               full_name,
-              phone,
-              address,
-              avatar_url
+              username,
+              role
             )
           `);
 
         if (userId) {
-          query = query.eq('user_id', userId);
+          query = query.eq('profile_id', userId);
         }
 
         const { data, error } = await query.maybeSingle();
@@ -132,31 +132,33 @@
       try {
         // 1. Create a dummy profile record (for walk-ins without online account)
         const profileId = crypto.randomUUID();
+        const generatedUsername = 'walkin_' + (formData.nik || Date.now()).toString().slice(-6);
         const { error: profileErr } = await client.from('profiles').insert({
           id: profileId,
           full_name: formData.full_name,
-          role: 'pasien',
-          phone: formData.phone || null,
-          address: formData.address || null
+          username: generatedUsername,
+          role: 'Pasien'
         });
         if (profileErr) throw profileErr;
 
         // 2. Insert into patients table
+        const genderMapped = formData.gender === 'P' || formData.gender === 'Perempuan' ? 'Perempuan' : 'Laki-laki';
         const { data: patient, error: patientErr } = await client
           .from('patients')
           .insert({
-            user_id: profileId,
+            profile_id: profileId,
             nik: formData.nik,
             birth_date: formData.birth_date || null,
-            gender: formData.gender || 'L',
+            gender: genderMapped,
             blood_type: formData.blood_type || null,
             allergies: formData.allergies || null,
+            phone: formData.phone || null,
             emergency_contact: formData.emergency_contact || null,
             emergency_phone: formData.emergency_phone || null
           })
           .select(`
-            id, no_rm, nik, birth_date, gender, blood_type,
-            profile:profiles!inner (full_name, phone, address)
+            id, no_rm, nik, birth_date, gender, blood_type, phone,
+            profile:profiles!inner (full_name, username, role)
           `)
           .single();
 

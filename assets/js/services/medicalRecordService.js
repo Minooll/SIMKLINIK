@@ -136,28 +136,28 @@
           appointment_id: appointmentId || null,
           patient_id: patientId,
           doctor_id: doctorId,
-          subjective: subjective || '',
-          objective: objective || '',
-          vital_signs: vitalSigns || {},
-          assessment: assessment || '',
-          icd10_code: icd10Code || '',
-          plan: plan || '',
-          status: isFinal ? 'FINAL' : 'DRAFT'
+          subjective: subjective || 'Keluhan umum',
+          objective: objective || 'Pemeriksaan fisik normal',
+          vital_signs: vitalSigns || { systolic: 120, diastolic: 80, heart_rate: 78, temperature: 36.5 },
+          assessment: assessment || 'Observasi klinis',
+          diagnosis_icd10: (icd10Code ? `${icd10Code} - ` : '') + (assessment || 'Umum'),
+          treatment_plan: plan || 'Terapi simtomatik dan edukasi',
+          finalized_at: isFinal ? new Date().toISOString() : null
         };
 
         let result;
         if (id) {
-          // Check if already FINAL (cannot be edited under Permenkes 24/2022)
+          // Check if already finalized (cannot be edited under Permenkes 24/2022)
           const { data: existing } = await client
             .from('medical_records')
-            .select('status')
+            .select('finalized_at')
             .eq('id', id)
             .single();
 
-          if (existing && existing.status === 'FINAL') {
+          if (existing && existing.finalized_at) {
             return {
               success: false,
-              error: 'Rekam Medis berstatus FINAL telah dikunci dan tidak dapat diubah (Permenkes No. 24/2022).'
+              error: 'Rekam Medis telah difinalisasi dan dikunci permanen (Permenkes No. 24/2022).'
             };
           }
 

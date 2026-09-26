@@ -66,15 +66,25 @@
       if (!client) return { success: false, error: 'Database client not initialized' };
 
       try {
-        const updatePayload = { status: newStatus };
+        const STATUS_MAP = {
+          'WAITING': 'Menunggu',
+          'CALLED': 'Dipanggil',
+          'SERVING': 'Dilayani',
+          'COMPLETED': 'Selesai',
+          'CANCELLED': 'Batal',
+          'Menunggu': 'Menunggu',
+          'Dipanggil': 'Dipanggil',
+          'Dilayani': 'Dilayani',
+          'Selesai': 'Selesai',
+          'Batal': 'Batal'
+        };
+
+        const dbStatus = STATUS_MAP[newStatus] || newStatus;
+        const updatePayload = { status: dbStatus };
         const nowIso = new Date().toISOString();
 
-        if (newStatus === 'CALLED') {
+        if (dbStatus === 'Dipanggil') {
           updatePayload.called_at = nowIso;
-        } else if (newStatus === 'SERVING') {
-          updatePayload.served_at = nowIso;
-        } else if (newStatus === 'COMPLETED') {
-          updatePayload.completed_at = nowIso;
         }
 
         const { data, error } = await client

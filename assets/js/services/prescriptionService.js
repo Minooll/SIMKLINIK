@@ -27,10 +27,8 @@
           .from('prescriptions')
           .insert({
             medical_record_id: medicalRecordId,
-            patient_id: patientId,
-            doctor_id: doctorId,
             notes: notes || '',
-            status: 'ACTIVE'
+            status: 'Diterbitkan'
           })
           .select()
           .single();
