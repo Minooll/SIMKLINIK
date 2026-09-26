@@ -149,7 +149,7 @@
               <p class="eyebrow">DATA</p>
               <h2 id="lowerTitle">Ringkasan</h2>
             </div>
-            <button class="text-button" id="btnViewAllLower">Buka daftar <span>&rarr;</span></button>
+            <button class="text-button" id="btnViewAllLower">Lihat selengkapnya <span>&rarr;</span></button>
           </div>
           <div class="table-wrap">
             <table>
@@ -293,6 +293,113 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL 3: DETAIL REKAM MEDIS (RME) - PREVIEW & AUDIT
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modalMedicalDetail" role="dialog" aria-modal="true" aria-labelledby="modalMedicalDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalMedicalDetailTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          Detail Rekam Medis Elektronik (RME)
+        </h3>
+        <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalMedicalDetailBody">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" data-modal-close>Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL 4: DAFTAR LENGKAP SELURUH JADWAL DOKTER & ANTREAN KLINIK
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modalFullAgendaPetugas" role="dialog" aria-modal="true" aria-labelledby="modalFullAgendaPetugasTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalFullAgendaPetugasTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Daftar Lengkap Jadwal Dokter &amp; Antrean Klinik
+        </h3>
+        <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-filter-pills" id="modalPetugasAgendaTabs">
+          <button type="button" class="filter-pill active" id="tabPetugasJadwalDokter" data-tab="dokter">Jadwal Praktik Seluruh Dokter (10 Dokter)</button>
+          <button type="button" class="filter-pill" id="tabPetugasAntreanKlinik" data-tab="antrean">Semua Antrean Pasien Hari Ini</button>
+        </div>
+        <div class="modal-search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchFullAgendaPetugas" class="search-input" placeholder="Cari nama dokter, spesialisasi, atau nama pasien..." />
+          <span class="item-count-badge" id="badgeCountFullAgendaPetugas">0 Data</span>
+        </div>
+        <div class="modal-table-wrap" id="containerFullAgendaPetugas">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" data-modal-close>Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL 5: DAFTAR LENGKAP MASTER DATA PASIEN KLINIK
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modalFullDataPetugas" role="dialog" aria-modal="true" aria-labelledby="modalFullDataPetugasTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalFullDataPetugasTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Daftar Lengkap Master Data Pasien Klinik
+        </h3>
+        <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchFullDataPetugas" class="search-input" placeholder="Cari No. RM, NIK, nama lengkap pasien, atau no telp..." />
+          <span class="item-count-badge" id="badgeCountFullDataPetugas">0 Pasien</span>
+        </div>
+        <div class="modal-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>No. RM</th>
+                <th>Nama Lengkap</th>
+                <th>NIK</th>
+                <th>Tgl Lahir / Usia</th>
+                <th>Gender</th>
+                <th>No. Telepon</th>
+                <th>Alamat Domisili</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tableFullDataPetugasBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" data-modal-close>Tutup</button>
+        <button type="button" class="primary-button" data-modal-target="modalNewPatient">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>+ Daftarkan Pasien Baru</span>
+        </button>
+      </div>
     </div>
   </div>
 

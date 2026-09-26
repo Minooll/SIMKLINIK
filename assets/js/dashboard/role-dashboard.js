@@ -607,17 +607,170 @@
       }
     }
 
+    async function openFullAgendaPasienModal() {
+      const modal = document.getElementById('modalFullAgendaPasien');
+      const tableBody = document.getElementById('tableFullAgendaPasienBody');
+      const searchInput = document.getElementById('searchFullAgendaPasien');
+      const badgeCount = document.getElementById('badgeCountFullAgendaPasien');
+      if (!modal || !tableBody) return;
+
+      let appts = [];
+      if (patientId && window.appointmentService) {
+        const res = await window.appointmentService.getPatientAppointments(patientId);
+        if (res.success && res.data && res.data.length > 0) {
+          appts = res.data;
+        }
+      }
+
+      if (appts.length === 0) {
+        appts = [
+          { appointment_date: '26 Sep 2026', appointment_time: '09:30', doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } }, service: { name: 'Poli Umum' }, chief_complaint: 'Demam & batuk sejak 2 hari yang lalu', status: 'Terjadwal' },
+          { appointment_date: '02 Okt 2026', appointment_time: '10:00', doctor: { profile: { full_name: 'dr. Budi Santoso, Sp.PK' } }, service: { name: 'Laboratorium Klinik' }, chief_complaint: 'Tes darah lengkap & kimia darah berkala', status: 'Terjadwal' },
+          { appointment_date: '18 Sep 2026', appointment_time: '08:30', doctor: { profile: { full_name: 'dr. Dimas Putra' } }, service: { name: 'Poli Umum' }, chief_complaint: 'Pemeriksaan tensi & pusing pelipis', status: 'Selesai' },
+          { appointment_date: '07 Agu 2026', appointment_time: '14:00', doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } }, service: { name: 'Poli Umum' }, chief_complaint: 'Kontrol tekanan darah rutin bulanan', status: 'Selesai' },
+          { appointment_date: '15 Jul 2026', appointment_time: '09:00', doctor: { profile: { full_name: 'drg. Cynthia Dewi' } }, service: { name: 'Poli Gigi & Mulut' }, chief_complaint: 'Scaling karang gigi & kontrol gigi geraham', status: 'Selesai' }
+        ];
+      }
+
+      function renderRows(filteredList) {
+        if (badgeCount) badgeCount.textContent = `${filteredList.length} Janji Temu`;
+        if (filteredList.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6" class="table-empty-row">Tidak ada janji temu yang cocok dengan pencarian.</td></tr>';
+          return;
+        }
+        tableBody.innerHTML = filteredList.map(a => {
+          const docName = a.doctor?.profile?.full_name || 'Dokter Spesialis';
+          const svcName = a.service?.name || 'Poliklinik';
+          const isDone = (a.status || '').toLowerCase() === 'selesai';
+          const actionBtn = isDone
+            ? `<button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(a.appointment_date)}', '${escapeJsStr(docName)}', '${escapeJsStr(a.chief_complaint || '-')}', 'TD: 120/80 mmHg, N: 78x/m', 'Pemeriksaan ${escapeJsStr(svcName)}', 'Edukasi dan terapi terlampir', 'FINAL')">Lihat RME</button>`
+            : `<button type="button" class="action-btn-sm action-btn-danger" onclick="if(confirm('Batalkan janji temu ini?')){alert('Janji temu berhasil dibatalkan.');}">Batal</button>`;
+
+          return `
+            <tr>
+              <td class="table-primary"><strong>${a.appointment_date}</strong><br/><small class="text-muted">${a.appointment_time ? a.appointment_time.slice(0, 5) : '09:00'} WIB</small></td>
+              <td>${svcName}</td>
+              <td><strong>${docName}</strong></td>
+              <td>${a.chief_complaint || '-'}</td>
+              <td>${statusBadge(a.status || 'Terjadwal')}</td>
+              <td>${actionBtn}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderRows(appts);
+
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.oninput = (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          if (!q) {
+            renderRows(appts);
+          } else {
+            const filtered = appts.filter(a =>
+              (a.appointment_date || '').toLowerCase().includes(q) ||
+              (a.doctor?.profile?.full_name || '').toLowerCase().includes(q) ||
+              (a.service?.name || '').toLowerCase().includes(q) ||
+              (a.chief_complaint || '').toLowerCase().includes(q) ||
+              (a.status || '').toLowerCase().includes(q)
+            );
+            renderRows(filtered);
+          }
+        };
+      }
+
+      if (window.Modal) window.Modal.open('modalFullAgendaPasien');
+    }
+
+    async function openFullMedicalPasienModal() {
+      const modal = document.getElementById('modalFullMedicalPasien');
+      const tableBody = document.getElementById('tableFullMedicalPasienBody');
+      const searchInput = document.getElementById('searchFullMedicalPasien');
+      const badgeCount = document.getElementById('badgeCountFullMedicalPasien');
+      if (!modal || !tableBody) return;
+
+      let records = [];
+      if (patientId && window.medicalRecordService) {
+        const recRes = await window.medicalRecordService.getPatientHistory(patientId);
+        if (recRes.success && recRes.data && recRes.data.length > 0) {
+          records = recRes.data;
+        }
+      }
+
+      if (records.length === 0) {
+        records = [
+          { record_date: '18 Sep 2026', doctor: { profile: { full_name: 'dr. Dimas Putra' } }, service: { name: 'Poli Umum' }, subjective: 'Pusing berdenyut di bagian pelipis sejak semalam', objective: 'TD: 120/80 mmHg, N: 78x/m, S: 36.6 C', assessment: 'Tension-Type Headache (ICD-10 G44.2)', treatment_plan: 'Paracetamol 500mg 3x1 p.c., istirahat teratur', finalized_at: '2026-09-18T10:00:00Z' },
+          { record_date: '07 Agu 2026', doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } }, service: { name: 'Poli Umum' }, subjective: 'Kontrol tekanan darah rutin bulanan, leher agak kaku', objective: 'TD: 135/85 mmHg, N: 82x/m, S: 36.5 C', assessment: 'Hipertensi Primer (ICD-10 I10)', treatment_plan: 'Amlodipine 5mg 1x1 malam, diet rendah garam', finalized_at: '2026-08-07T14:30:00Z' },
+          { record_date: '15 Jul 2026', doctor: { profile: { full_name: 'drg. Cynthia Dewi' } }, service: { name: 'Poli Gigi & Mulut' }, subjective: 'Gusi berdarah saat sikat gigi dan terasa ngilu', objective: 'Plak kalkulus regio rahang bawah, gingiva hiperemis', assessment: 'Gingivitis Marginalis Akut (ICD-10 K05.0)', treatment_plan: 'Scaling rahang atas bawah, kumur antiseptik', finalized_at: '2026-07-15T09:45:00Z' },
+          { record_date: '20 Mei 2026', doctor: { profile: { full_name: 'dr. Hendra Kurniawan, Sp.A' } }, service: { name: 'Poli Spesialis Anak' }, subjective: 'Hidung tersumbat dan bersin setiap pagi hari', objective: 'Mukosa hidung pucat dan edema, sekret serosa', assessment: 'Rhinitis Alergi (ICD-10 J30.1)', treatment_plan: 'Cetirizine 1x1 tablet malam, hindari debu', finalized_at: '2026-05-20T11:15:00Z' }
+        ];
+      }
+
+      function renderRows(filteredList) {
+        if (badgeCount) badgeCount.textContent = `${filteredList.length} Rekam Medis`;
+        if (filteredList.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="7" class="table-empty-row">Tidak ada rekam medis yang cocok dengan pencarian.</td></tr>';
+          return;
+        }
+        tableBody.innerHTML = filteredList.map(r => {
+          const dateStr = r.record_date ? (r.record_date.length <= 11 ? r.record_date : new Date(r.record_date).toLocaleDateString('id-ID')) : 'Hari ini';
+          const docName = r.doctor?.profile?.full_name || 'Dokter Spesialis';
+          const svcName = r.service?.name || 'Poliklinik';
+          const diag = r.assessment || r.diagnosis_icd10 || '-';
+          const statusTxt = r.finalized_at ? 'FINAL' : 'DRAFT';
+
+          return `
+            <tr>
+              <td class="table-primary"><strong>${dateStr}</strong></td>
+              <td><strong>${docName}</strong><br/><small class="text-muted">${svcName}</small></td>
+              <td>${r.subjective || '-'}</td>
+              <td><strong>${diag}</strong></td>
+              <td><small>${r.treatment_plan || '-'}</small></td>
+              <td>${statusBadge(statusTxt)}</td>
+              <td><button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(dateStr)}', '${escapeJsStr(docName)}', '${escapeJsStr(r.subjective || '-')}', '${escapeJsStr(r.objective || '-')}', '${escapeJsStr(diag)}', '${escapeJsStr(r.treatment_plan || '-')}', '${escapeJsStr(statusTxt)}')">Lihat RME</button></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderRows(records);
+
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.oninput = (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          if (!q) {
+            renderRows(records);
+          } else {
+            const filtered = records.filter(r =>
+              (r.record_date || '').toLowerCase().includes(q) ||
+              (r.doctor?.profile?.full_name || '').toLowerCase().includes(q) ||
+              (r.assessment || r.diagnosis_icd10 || '').toLowerCase().includes(q) ||
+              (r.subjective || '').toLowerCase().includes(q) ||
+              (r.treatment_plan || '').toLowerCase().includes(q)
+            );
+            renderRows(filtered);
+          }
+        };
+      }
+
+      if (window.Modal) window.Modal.open('modalFullMedicalPasien');
+    }
+
     const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
     if (btnViewAllAgenda) {
-      btnViewAllAgenda.addEventListener('click', () => {
-        location.href = `${location.pathname}?view=janji`;
+      btnViewAllAgenda.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFullAgendaPasienModal();
       });
     }
 
     const btnViewAllLower = document.getElementById('btnViewAllLower');
     if (btnViewAllLower) {
-      btnViewAllLower.addEventListener('click', () => {
-        location.href = `${location.pathname}?view=rekam-medis`;
+      btnViewAllLower.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFullMedicalPasienModal();
       });
     }
 
@@ -1362,27 +1515,253 @@
       }
     }
 
+    function openFullAgendaPetugasModal() {
+      const modal = document.getElementById('modalFullAgendaPetugas');
+      const container = document.getElementById('containerFullAgendaPetugas');
+      const searchInput = document.getElementById('searchFullAgendaPetugas');
+      const badgeCount = document.getElementById('badgeCountFullAgendaPetugas');
+      const tabDokter = document.getElementById('tabPetugasJadwalDokter');
+      const tabAntrean = document.getElementById('tabPetugasAntreanKlinik');
+      if (!modal || !container) return;
+
+      let currentTab = (petugasActiveFilter === 'dokter') ? 'dokter' : 'antrean';
+
+      const allDoctors = window.appointmentService ? window.appointmentService.getAllDoctorsWithSchedules() : [];
+      let allQueues = [
+        { queue_number: 'A-021', time: '08:30 WIB', status: 'Dipanggil', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
+        { queue_number: 'A-022', time: '09:00 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
+        { queue_number: 'A-023', time: '09:30 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000005', profile: { full_name: 'Fajar Nugroho' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Dimas Putra' } } },
+        { queue_number: 'B-008', time: '08:45 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, service: { name: 'Laboratorium Klinik' }, doctor: { profile: { full_name: 'dr. Budi Santoso, Sp.PK' } } },
+        { queue_number: 'G-012', time: '09:15 WIB', status: 'Dipanggil', patient: { no_rm: 'RM-000016', profile: { full_name: 'Hendra Kusuma' } }, service: { name: 'Poli Gigi & Mulut' }, doctor: { profile: { full_name: 'drg. Siti Nurhaliza' } } },
+        { queue_number: 'G-013', time: '10:00 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000015', profile: { full_name: 'Ratna Dewi' } }, service: { name: 'Poli Gigi & Mulut' }, doctor: { profile: { full_name: 'drg. Cynthia Dewi' } } },
+        { queue_number: 'P-005', time: '09:00 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000021', profile: { full_name: 'Ananda Kenzo' } }, service: { name: 'Poli Spesialis Anak' }, doctor: { profile: { full_name: 'dr. Hendra Kurniawan, Sp.A' } } }
+      ];
+
+      function renderContent() {
+        const query = (searchInput?.value || '').toLowerCase().trim();
+
+        if (currentTab === 'dokter') {
+          if (tabDokter) tabDokter.classList.add('active');
+          if (tabAntrean) tabAntrean.classList.remove('active');
+
+          let filteredDocs = allDoctors;
+          if (query) {
+            filteredDocs = allDoctors.filter(d =>
+              d.full_name.toLowerCase().includes(query) ||
+              d.service_name.toLowerCase().includes(query) ||
+              d.schedule.days.toLowerCase().includes(query) ||
+              d.schedule.room.toLowerCase().includes(query)
+            );
+          }
+
+          if (badgeCount) badgeCount.textContent = `${filteredDocs.length} Dokter Terjadwal`;
+
+          if (filteredDocs.length === 0) {
+            container.innerHTML = '<div class="table-empty-row p-4">Tidak ada jadwal dokter yang cocok dengan pencarian.</div>';
+            return;
+          }
+
+          container.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Dokter</th>
+                  <th>Poliklinik Spesialis</th>
+                  <th>Hari Praktik</th>
+                  <th>Jam Sesi</th>
+                  <th>Ruangan</th>
+                  <th>Kuota / Hari</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredDocs.map(d => `
+                  <tr>
+                    <td class="table-primary"><strong>${d.full_name}</strong></td>
+                    <td><strong>${d.service_name}</strong></td>
+                    <td>${d.schedule.days}</td>
+                    <td>${d.schedule.start_time} - ${d.schedule.end_time} WIB</td>
+                    <td>${d.schedule.room}</td>
+                    <td><strong>${d.schedule.quota}</strong> Pasien</td>
+                    <td>${statusBadge(d.is_active ? 'Aktif' : 'Cuti')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        } else {
+          if (tabAntrean) tabAntrean.classList.add('active');
+          if (tabDokter) tabDokter.classList.remove('active');
+
+          let filteredQueues = allQueues;
+          if (query) {
+            filteredQueues = allQueues.filter(q =>
+              q.queue_number.toLowerCase().includes(query) ||
+              (q.patient?.profile?.full_name || '').toLowerCase().includes(query) ||
+              (q.patient?.no_rm || '').toLowerCase().includes(query) ||
+              (q.service?.name || '').toLowerCase().includes(query) ||
+              (q.doctor?.profile?.full_name || '').toLowerCase().includes(query) ||
+              q.status.toLowerCase().includes(query)
+            );
+          }
+
+          if (badgeCount) badgeCount.textContent = `${filteredQueues.length} Antrean Pasien`;
+
+          if (filteredQueues.length === 0) {
+            container.innerHTML = '<div class="table-empty-row p-4">Tidak ada antrean yang cocok dengan pencarian.</div>';
+            return;
+          }
+
+          container.innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>No. Antrean</th>
+                  <th>Waktu</th>
+                  <th>Nama Pasien</th>
+                  <th>No. RM</th>
+                  <th>Layanan Poli</th>
+                  <th>Dokter Pemeriksa</th>
+                  <th>Status</th>
+                  <th>Kontrol Petugas</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredQueues.map(q => `
+                  <tr>
+                    <td class="table-primary"><strong>${q.queue_number}</strong></td>
+                    <td>${q.time}</td>
+                    <td><strong>${q.patient?.profile?.full_name || 'Pasien'}</strong></td>
+                    <td><span class="mono-code">${q.patient?.no_rm || '-'}</span></td>
+                    <td>${q.service?.name || '-'}</td>
+                    <td>${q.doctor?.profile?.full_name || '-'}</td>
+                    <td>${statusBadge(q.status)}</td>
+                    <td>
+                      <button type="button" class="action-btn-sm action-btn-primary" onclick="alert('Memanggil nomor antrean ${q.queue_number} ke ruang ${escapeJsStr(q.service?.name || 'Pemeriksaan')}!')">Panggil</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+      }
+
+      if (tabDokter) {
+        tabDokter.onclick = () => {
+          currentTab = 'dokter';
+          renderContent();
+        };
+      }
+      if (tabAntrean) {
+        tabAntrean.onclick = () => {
+          currentTab = 'antrean';
+          renderContent();
+        };
+      }
+
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.oninput = () => renderContent();
+      }
+
+      renderContent();
+      if (window.Modal) window.Modal.open('modalFullAgendaPetugas');
+    }
+
+    async function openFullDataPetugasModal() {
+      const modal = document.getElementById('modalFullDataPetugas');
+      const tableBody = document.getElementById('tableFullDataPetugasBody');
+      const searchInput = document.getElementById('searchFullDataPetugas');
+      const badgeCount = document.getElementById('badgeCountFullDataPetugas');
+      if (!modal || !tableBody) return;
+
+      let patients = [];
+      if (window.patientService) {
+        const res = await window.patientService.searchPatients('');
+        if (res.success && res.data && res.data.length > 0) {
+          patients = res.data;
+        }
+      }
+
+      if (patients.length === 0) {
+        patients = [
+          { no_rm: 'RM-000001', nik: '3201234567890001', profile: { full_name: 'Budi Santoso', phone: '081234567890', address: 'Jl. Merdeka No. 12, Jakarta' }, birth_date: '1985-05-12', gender: 'Laki-laki', blood_type: 'O' },
+          { no_rm: 'RM-000002', nik: '3201234567890002', profile: { full_name: 'Siti Aminah', phone: '081234567891', address: 'Jl. Sudirman Kav. 45, Jakarta' }, birth_date: '1992-08-23', gender: 'Perempuan', blood_type: 'A' },
+          { no_rm: 'RM-000003', nik: '3201234567890003', profile: { full_name: 'Rizky Pratama', phone: '081234567892', address: 'Jl. Gatot Subroto No. 8, Jakarta' }, birth_date: '2000-01-15', gender: 'Laki-laki', blood_type: 'B' },
+          { no_rm: 'RM-000004', nik: '3201234567890004', profile: { full_name: 'Dewi Lestari', phone: '081234567893', address: 'Jl. Kebon Jeruk No. 3, Jakarta Barat' }, birth_date: '1988-11-04', gender: 'Perempuan', blood_type: 'AB' },
+          { no_rm: 'RM-000005', nik: '3201234567890005', profile: { full_name: 'Fajar Nugroho', phone: '081234567800', address: 'Jl. Rasuna Said No. 19, Jakarta Selatan' }, birth_date: '1979-03-30', gender: 'Laki-laki', blood_type: 'O' },
+          { no_rm: 'RM-000015', nik: '3201234567890015', profile: { full_name: 'Ratna Dewi', phone: '081298765400', address: 'Jl. Tebet Barat Dalam No. 10, Jakarta' }, birth_date: '1995-07-19', gender: 'Perempuan', blood_type: 'O' },
+          { no_rm: 'RM-000016', nik: '3201234567890016', profile: { full_name: 'Hendra Kusuma', phone: '081298765411', address: 'Jl. Menteng Raya No. 5, Jakarta Pusat' }, birth_date: '1983-12-01', gender: 'Laki-laki', blood_type: 'B' },
+          { no_rm: 'RM-000021', nik: '3201234567890021', profile: { full_name: 'Ananda Kenzo', phone: '081345678999', address: 'Jl. Cempaka Putih No. 14, Jakarta' }, birth_date: '2018-04-10', gender: 'Laki-laki', blood_type: 'A' }
+        ];
+      }
+
+      function renderRows(filteredList) {
+        if (badgeCount) badgeCount.textContent = `${filteredList.length} Pasien Terdaftar`;
+        if (filteredList.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="8" class="table-empty-row">Tidak ada data pasien yang sesuai pencarian.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = filteredList.map(pt => {
+          const ptName = pt.profile?.full_name || 'Pasien';
+          const phone = pt.profile?.phone || pt.phone || '-';
+          const addr = pt.profile?.address || pt.address || 'Jakarta';
+          const birthStr = pt.birth_date ? `${pt.birth_date}` : '-';
+
+          return `
+            <tr>
+              <td class="table-primary"><strong>${pt.no_rm}</strong></td>
+              <td><strong>${ptName}</strong></td>
+              <td><span class="mono-code">${pt.nik || '-'}</span></td>
+              <td>${birthStr}</td>
+              <td>${pt.gender || '-'} (Gol. ${pt.blood_type || '-'})</td>
+              <td>${phone}</td>
+              <td><small>${addr}</small></td>
+              <td>${statusBadge('Aktif')}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderRows(patients);
+
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.oninput = (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          if (!q) {
+            renderRows(patients);
+          } else {
+            const filtered = patients.filter(pt =>
+              pt.no_rm.toLowerCase().includes(q) ||
+              (pt.nik || '').toLowerCase().includes(q) ||
+              (pt.profile?.full_name || '').toLowerCase().includes(q) ||
+              (pt.profile?.phone || pt.phone || '').toLowerCase().includes(q) ||
+              (pt.profile?.address || pt.address || '').toLowerCase().includes(q)
+            );
+            renderRows(filtered);
+          }
+        };
+      }
+
+      if (window.Modal) window.Modal.open('modalFullDataPetugas');
+    }
+
     const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
     if (btnViewAllAgenda) {
-      btnViewAllAgenda.addEventListener('click', () => {
-        if (petugasActiveFilter === 'dokter') {
-          location.href = `${location.pathname}?view=dokter`;
-        } else if (petugasActiveFilter === 'pasien') {
-          location.href = `${location.pathname}?view=pasien`;
-        } else {
-          location.href = `${location.pathname}?view=antrean`;
-        }
+      btnViewAllAgenda.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFullAgendaPetugasModal();
       });
     }
 
     const btnViewAllLower = document.getElementById('btnViewAllLower');
     if (btnViewAllLower) {
-      btnViewAllLower.addEventListener('click', () => {
-        if (petugasActiveFilter === 'dokter') {
-          location.href = `${location.pathname}?view=dokter`;
-        } else {
-          location.href = `${location.pathname}?view=pasien`;
-        }
+      btnViewAllLower.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFullDataPetugasModal();
       });
     }
 
@@ -1863,17 +2242,185 @@
       }
     }
 
+    async function openFullAgendaDokterModal() {
+      const modal = document.getElementById('modalFullAgendaDokter');
+      const tableBody = document.getElementById('tableFullAgendaDokterBody');
+      const searchInput = document.getElementById('searchFullAgendaDokter');
+      const badgeCount = document.getElementById('badgeCountFullAgendaDokter');
+      const banner = document.getElementById('modalFullAgendaDokterBanner');
+      if (!modal || !tableBody) return;
+
+      const activeDoc = getActiveDoctor();
+      const docFullName = activeDoc ? activeDoc.full_name : 'Dokter';
+      if (banner) {
+        banner.textContent = `Menampilkan antrean pasien khusus untuk ${docFullName} (${activeDoc?.service_name || 'Poliklinik'}).`;
+      }
+
+      let appts = [];
+      if (window.appointmentService) {
+        const res = await window.appointmentService.getDoctorTodayAppointments(activeDoctorId);
+        if (res.success && res.data) {
+          appts = res.data;
+        }
+      }
+
+      function renderRows(filteredList) {
+        if (badgeCount) badgeCount.textContent = `${filteredList.length} Pasien`;
+        if (filteredList.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="7" class="table-empty-row">Tidak ada antrean pasien yang cocok dengan pencarian.</td></tr>';
+          return;
+        }
+        tableBody.innerHTML = filteredList.map((a, idx) => {
+          const ptName = a.patient?.profile?.full_name || 'Pasien';
+          const ptRm = a.patient?.no_rm || '-';
+          const queueNum = a.queue_number || `A-${String(idx + 1).padStart(3, '0')}`;
+          const timeStr = a.appointment_time ? a.appointment_time.slice(0, 5) : '08:30';
+          const complaint = a.chief_complaint || '-';
+          const status = a.status || 'Menunggu';
+
+          return `
+            <tr>
+              <td class="table-primary"><strong>${queueNum}</strong></td>
+              <td>${timeStr} WIB</td>
+              <td><strong>${ptName}</strong></td>
+              <td><span class="mono-code">${ptRm}</span></td>
+              <td>${complaint}</td>
+              <td>${statusBadge(status)}</td>
+              <td><button type="button" class="action-btn-sm action-btn-primary" onclick="window.openDoctorSoapModal('${escapeJsStr(ptRm)}', '${escapeJsStr(ptName)}', '${escapeJsStr(complaint)}', '${escapeJsStr(a.patient_id || '')}', '${escapeJsStr(a.id || '')}')">Periksa SOAP</button></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderRows(appts);
+
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.oninput = (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          if (!q) {
+            renderRows(appts);
+          } else {
+            const filtered = appts.filter(a =>
+              (a.queue_number || '').toLowerCase().includes(q) ||
+              (a.patient?.profile?.full_name || '').toLowerCase().includes(q) ||
+              (a.patient?.no_rm || '').toLowerCase().includes(q) ||
+              (a.chief_complaint || '').toLowerCase().includes(q) ||
+              (a.status || '').toLowerCase().includes(q)
+            );
+            renderRows(filtered);
+          }
+        };
+      }
+
+      if (window.Modal) window.Modal.open('modalFullAgendaDokter');
+    }
+
+    async function openFullMedicalDokterModal() {
+      const modal = document.getElementById('modalFullMedicalDokter');
+      const tableBody = document.getElementById('tableFullMedicalDokterBody');
+      const searchInput = document.getElementById('searchFullMedicalDokter');
+      const badgeCount = document.getElementById('badgeCountFullMedicalDokter');
+      if (!modal || !tableBody) return;
+
+      const activeDoc = getActiveDoctor();
+      const docFullName = activeDoc ? activeDoc.full_name : 'Dokter';
+
+      let records = [];
+      if (window.medicalRecordService) {
+        const rmeRes = await window.medicalRecordService.getDoctorRecords(activeDoctorId);
+        if (rmeRes.success && rmeRes.data && rmeRes.data.length > 0) {
+          records = rmeRes.data;
+        }
+      }
+
+      if (records.length === 0) {
+        const apptRes = await window.appointmentService.getDoctorTodayAppointments(activeDoctorId);
+        const sampleAppts = (apptRes.success && apptRes.data) ? apptRes.data : [];
+        if (sampleAppts.length > 0) {
+          records = sampleAppts.map(a => ({
+            record_date: a.appointment_date || '26 Sep 2026',
+            patient: a.patient,
+            subjective: a.chief_complaint || 'Pemeriksaan klinis keluhan umum',
+            objective: 'TD: 120/80 mmHg, N: 78x/m, S: 36.6 C',
+            assessment: `Pemeriksaan Klinis ${activeDoc?.service_name || 'Poli'}`,
+            treatment_plan: 'Edukasi dan anjuran istirahat teratur',
+            finalized_at: a.status === 'Selesai' ? '2026-09-26T10:00:00Z' : null
+          }));
+        } else {
+          records = [
+            { record_date: '26 Sep 2026', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, subjective: 'Demam tinggi menggigil sejak 2 hari yang lalu', objective: 'TD: 120/80 mmHg, N: 88x/m, S: 38.5 C', assessment: 'Febris Akut ec Suspek ISPA (R50.9)', treatment_plan: 'Paracetamol 500mg 3x1, Amoxicillin 500mg 3x1', finalized_at: '2026-09-26T09:15:00Z' },
+            { record_date: '25 Sep 2026', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, subjective: 'Batuk kering dan rasa gatal di tenggorokan', objective: 'Faring hiperemis ringan, tonsil T1-T1', assessment: 'Faringitis Akut (ICD-10 J02.9)', treatment_plan: 'Dextromethorphan syrup 3x1 cth', finalized_at: '2026-09-25T11:00:00Z' },
+            { record_date: '24 Sep 2026', patient: { no_rm: 'RM-000005', profile: { full_name: 'Fajar Nugroho' } }, subjective: 'Nyeri perut sebelah kiri atas setelah makan pedas', objective: 'Nyeri tekan epigastrium (+), bising usus normal', assessment: 'Dispepsia Fungsional (ICD-10 K30)', treatment_plan: 'Omeprazole 20mg 2x1 a.c., Antasida sirup', finalized_at: '2026-09-24T14:20:00Z' }
+          ];
+        }
+      }
+
+      function renderRows(filteredList) {
+        if (badgeCount) badgeCount.textContent = `${filteredList.length} Pemeriksaan`;
+        if (filteredList.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="8" class="table-empty-row">Tidak ada berkas medis yang cocok dengan pencarian.</td></tr>';
+          return;
+        }
+        tableBody.innerHTML = filteredList.map(r => {
+          const dateStr = r.record_date ? (r.record_date.length <= 11 ? r.record_date : new Date(r.record_date).toLocaleDateString('id-ID')) : 'Hari ini';
+          const ptName = r.patient?.profile?.full_name || 'Pasien';
+          const ptRm = r.patient?.no_rm || '-';
+          const diag = r.diagnosis_icd10 || r.assessment || '-';
+          const statusTxt = r.finalized_at ? 'FINAL' : 'DRAFT';
+
+          return `
+            <tr>
+              <td class="table-primary"><strong>${dateStr}</strong></td>
+              <td><span class="mono-code">${ptRm}</span></td>
+              <td><strong>${ptName}</strong></td>
+              <td>${r.subjective || '-'}</td>
+              <td><strong>${diag}</strong></td>
+              <td><small>${r.treatment_plan || '-'}</small></td>
+              <td>${statusBadge(statusTxt)}</td>
+              <td><button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(dateStr)}', '${escapeJsStr(docFullName)}', '${escapeJsStr(r.subjective || '-')}', '${escapeJsStr(r.objective || '-')}', '${escapeJsStr(diag)}', '${escapeJsStr(r.treatment_plan || '-')}', '${escapeJsStr(statusTxt)}')">Lihat RME</button></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderRows(records);
+
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.oninput = (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          if (!q) {
+            renderRows(records);
+          } else {
+            const filtered = records.filter(r =>
+              (r.patient?.profile?.full_name || '').toLowerCase().includes(q) ||
+              (r.patient?.no_rm || '').toLowerCase().includes(q) ||
+              (r.diagnosis_icd10 || r.assessment || '').toLowerCase().includes(q) ||
+              (r.subjective || '').toLowerCase().includes(q) ||
+              (r.treatment_plan || '').toLowerCase().includes(q)
+            );
+            renderRows(filtered);
+          }
+        };
+      }
+
+      if (window.Modal) window.Modal.open('modalFullMedicalDokter');
+    }
+
     const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
     if (btnViewAllAgenda) {
-      btnViewAllAgenda.addEventListener('click', () => {
-        location.href = `${location.pathname}?view=jadwal`;
+      btnViewAllAgenda.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFullAgendaDokterModal();
       });
     }
 
     const btnViewAllLower = document.getElementById('btnViewAllLower');
     if (btnViewAllLower) {
-      btnViewAllLower.addEventListener('click', () => {
-        location.href = `${location.pathname}?view=rekam-medis`;
+      btnViewAllLower.addEventListener('click', (e) => {
+        e.preventDefault();
+        openFullMedicalDokterModal();
       });
     }
 
