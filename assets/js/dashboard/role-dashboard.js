@@ -233,20 +233,23 @@
         if (!serviceId) {
           bookingDoctorSelect.disabled = true;
           bookingDoctorSelect.innerHTML = '<option value="">-- Pilih Poli Terlebih Dahulu --</option>';
+          updateBookingQuotaNotice();
           return;
         }
 
         bookingDoctorSelect.disabled = true;
-        bookingDoctorSelect.innerHTML = '<option value="">Memuat dokter...</option>';
+        bookingDoctorSelect.innerHTML = '<option value="">Memuat daftar dokter poli...</option>';
 
         const docRes = await window.appointmentService.getDoctorsByService(serviceId);
-        if (docRes.success && docRes.data.length > 0) {
+        if (docRes.success && docRes.data && docRes.data.length > 0) {
           bookingDoctorSelect.innerHTML = '<option value="">-- Pilih Dokter --</option>' +
             docRes.data.map(d => `<option value="${d.id}">${d.profile?.full_name || 'Dokter'} - ${d.specialization || 'Spesialis'}</option>`).join('');
           bookingDoctorSelect.disabled = false;
         } else {
           bookingDoctorSelect.innerHTML = '<option value="">Belum ada dokter di poli ini</option>';
+          bookingDoctorSelect.disabled = true;
         }
+        updateBookingQuotaNotice();
       });
     }
 
@@ -314,6 +317,11 @@
         if (result.success) {
           window.Toast.success('Janji temu berhasil dibuat! Nomor antrean Anda telah diterbitkan.');
           formBooking.reset();
+          if (bookingDoctorSelect) {
+            bookingDoctorSelect.disabled = true;
+            bookingDoctorSelect.innerHTML = '<option value="">-- Pilih Poli Terlebih Dahulu --</option>';
+          }
+          updateBookingQuotaNotice();
           window.Modal.close('modalBooking');
           refreshPasienDashboard();
         } else {

@@ -39,20 +39,112 @@
   ];
 
   const FALLBACK_DOCTORS = [
+    // ── 1. Poli Umum (b9154d6a-e41d-43d6-a25a-1f8cfcbdd816) ──
     {
       id: '11111111-1111-4111-8111-111111111111',
+      service_id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816',
+      service_code: 'POLI_UMUM',
+      sip_number: 'SIP-503/001/DU/2024',
       specialization: 'Dokter Umum / Penyakit Dalam',
-      profile: { full_name: 'dr. Ayu Rahma, Sp.PD', phone: '08123456789' }
+      is_active: true,
+      service: { id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816', code: 'POLI_UMUM', name: 'Poli Umum' },
+      profile: { id: '11111111-1111-4111-8111-111111111111', full_name: 'dr. Ayu Rahma, Sp.PD', phone: '081234567891' }
+    },
+    {
+      id: '11111111-1111-4111-8111-222222222222',
+      service_id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816',
+      service_code: 'POLI_UMUM',
+      sip_number: 'SIP-503/002/DU/2024',
+      specialization: 'Dokter Pelayanan Umum',
+      is_active: true,
+      service: { id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816', code: 'POLI_UMUM', name: 'Poli Umum' },
+      profile: { id: '11111111-1111-4111-8111-222222222222', full_name: 'dr. Dimas Putra', phone: '081234567892' }
+    },
+    {
+      id: '11111111-1111-4111-8111-333333333333',
+      service_id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816',
+      service_code: 'POLI_UMUM',
+      sip_number: 'SIP-503/003/DU/2024',
+      specialization: 'Dokter Umum Senior',
+      is_active: true,
+      service: { id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816', code: 'POLI_UMUM', name: 'Poli Umum' },
+      profile: { id: '11111111-1111-4111-8111-333333333333', full_name: 'dr. Hendra Wijaya', phone: '081234567893' }
+    },
+
+    // ── 2. Poli Gigi & Mulut (335f3cba-0e0c-4b29-83ec-b7b66316a430) ──
+    {
+      id: '22222222-2222-4222-8222-111111111111',
+      service_id: '335f3cba-0e0c-4b29-83ec-b7b66316a430',
+      service_code: 'POLI_GIGI',
+      sip_number: 'SIP-503/010/DG/2024',
+      specialization: 'Dokter Gigi & Mulut',
+      is_active: true,
+      service: { id: '335f3cba-0e0c-4b29-83ec-b7b66316a430', code: 'POLI_GIGI', name: 'Poli Gigi & Mulut' },
+      profile: { id: '22222222-2222-4222-8222-111111111111', full_name: 'drg. Siti Nurhaliza', phone: '081298765431' }
     },
     {
       id: '22222222-2222-4222-8222-222222222222',
-      specialization: 'Dokter Gigi & Mulut',
-      profile: { full_name: 'drg. Siti Nurhaliza', phone: '08129876543' }
+      service_id: '335f3cba-0e0c-4b29-83ec-b7b66316a430',
+      service_code: 'POLI_GIGI',
+      sip_number: 'SIP-503/011/DG/2024',
+      specialization: 'Dokter Gigi & Periodonsia',
+      is_active: true,
+      service: { id: '335f3cba-0e0c-4b29-83ec-b7b66316a430', code: 'POLI_GIGI', name: 'Poli Gigi & Mulut' },
+      profile: { id: '22222222-2222-4222-8222-222222222222', full_name: 'drg. Rani Sari', phone: '081298765432' }
     },
     {
-      id: '33333333-3333-4333-8333-333333333333',
-      specialization: 'Dokter Spesialis Anak',
-      profile: { full_name: 'dr. Dimas Putra, Sp.A', phone: '08134567890' }
+      id: '22222222-2222-4222-8222-333333333333',
+      service_id: '335f3cba-0e0c-4b29-83ec-b7b66316a430',
+      service_code: 'POLI_GIGI',
+      sip_number: 'SIP-503/012/DG/2024',
+      specialization: 'Spesialis Konservasi Gigi (Sp.KG)',
+      is_active: true,
+      service: { id: '335f3cba-0e0c-4b29-83ec-b7b66316a430', code: 'POLI_GIGI', name: 'Poli Gigi & Mulut' },
+      profile: { id: '22222222-2222-4222-8222-333333333333', full_name: 'drg. Farhan Ramadhan, Sp.KG', phone: '081298765433' }
+    },
+
+    // ── 3. Poli Spesialis Anak (aaa6eaa6-9133-4420-a2e6-591ab9aaf35c) ──
+    {
+      id: '33333333-3333-4333-8333-111111111111',
+      service_id: 'aaa6eaa6-9133-4420-a2e6-591ab9aaf35c',
+      service_code: 'POLI_ANAK',
+      sip_number: 'SIP-503/020/SPA/2024',
+      specialization: 'Spesialis Anak & Pediatri Umum (Sp.A)',
+      is_active: true,
+      service: { id: 'aaa6eaa6-9133-4420-a2e6-591ab9aaf35c', code: 'POLI_ANAK', name: 'Poli Spesialis Anak' },
+      profile: { id: '33333333-3333-4333-8333-111111111111', full_name: 'dr. Anisa Triastuti, Sp.A, M.Kes', phone: '081345678901' }
+    },
+    {
+      id: '33333333-3333-4333-8333-222222222222',
+      service_id: 'aaa6eaa6-9133-4420-a2e6-591ab9aaf35c',
+      service_code: 'POLI_ANAK',
+      sip_number: 'SIP-503/021/SPA/2024',
+      specialization: 'Spesialis Tumbuh Kembang Anak (Sp.A)',
+      is_active: true,
+      service: { id: 'aaa6eaa6-9133-4420-a2e6-591ab9aaf35c', code: 'POLI_ANAK', name: 'Poli Spesialis Anak' },
+      profile: { id: '33333333-3333-4333-8333-222222222222', full_name: 'dr. Bagus Prasetyo, Sp.A', phone: '081345678902' }
+    },
+
+    // ── 4. Laboratorium Klinik (7cbdca21-101d-4191-86b4-3317dc4401d7) ──
+    {
+      id: '44444444-4444-4444-8444-111111111111',
+      service_id: '7cbdca21-101d-4191-86b4-3317dc4401d7',
+      service_code: 'LABORATORIUM',
+      sip_number: 'SIP-503/030/SPPK/2024',
+      specialization: 'Spesialis Patologi Klinik & Diagnostik (Sp.PK)',
+      is_active: true,
+      service: { id: '7cbdca21-101d-4191-86b4-3317dc4401d7', code: 'LABORATORIUM', name: 'Laboratorium Klinik' },
+      profile: { id: '44444444-4444-4444-8444-111111111111', full_name: 'dr. Budi Santoso, Sp.PK', phone: '081399887766' }
+    },
+    {
+      id: '44444444-4444-4444-8444-222222222222',
+      service_id: '7cbdca21-101d-4191-86b4-3317dc4401d7',
+      service_code: 'LABORATORIUM',
+      sip_number: 'SIP-503/031/SPPK/2024',
+      specialization: 'Spesialis Hematologi & Analis Lab (Sp.PK)',
+      is_active: true,
+      service: { id: '7cbdca21-101d-4191-86b4-3317dc4401d7', code: 'LABORATORIUM', name: 'Laboratorium Klinik' },
+      profile: { id: '44444444-4444-4444-8444-222222222222', full_name: 'dr. Maya Indah, Sp.PK', phone: '081399887755' }
     }
   ];
 
@@ -84,32 +176,67 @@
      */
     async getDoctorsByService(serviceId) {
       const client = getClient();
-      if (!client) return { success: true, data: FALLBACK_DOCTORS };
+
+      // Filter fallback dummy doctors by specific service ID or code
+      const filterFallback = (sId) => {
+        if (!sId) return FALLBACK_DOCTORS;
+        return FALLBACK_DOCTORS.filter(d => 
+          d.service_id === sId || 
+          d.service_code === sId ||
+          (d.service && (d.service.id === sId || d.service.code === sId))
+        );
+      };
+
+      if (!client) return { success: true, data: filterFallback(serviceId) };
 
       try {
-        let query = client
-          .from('doctors')
-          .select(`
-            id,
-            sip_number,
-            specialization,
-            is_active,
-            service:services (id, code, name),
-            profile:profiles!inner (id, full_name, phone, avatar_url)
-          `)
-          .eq('is_active', true);
+        let doctorsData = [];
 
+        // 1. If serviceId provided, check doctor_schedules first (linking doctors to service)
         if (serviceId && isUuid(serviceId)) {
-          query = query.eq('service_id', serviceId);
+          const { data: scheduleDocs, error: sErr } = await client
+            .from('doctor_schedules')
+            .select(`
+              doctor:doctors (
+                id, sip_number, specialization, is_active,
+                profile:profiles!inner (id, full_name, phone, avatar_url)
+              )
+            `)
+            .eq('service_id', serviceId)
+            .eq('is_active', true);
+
+          if (!sErr && scheduleDocs && scheduleDocs.length > 0) {
+            doctorsData = scheduleDocs
+              .map(sd => sd.doctor)
+              .filter(d => d && d.is_active);
+          }
         }
 
-        const { data, error } = await query;
-        if (error) throw error;
-        // Always provide fallback doctors if database is empty
-        return { success: true, data: (data && data.length > 0) ? data : FALLBACK_DOCTORS };
+        // 2. If no schedule records found and no serviceId specified, query all doctors
+        if (doctorsData.length === 0 && !serviceId) {
+          const { data: directDocs, error: dErr } = await client
+            .from('doctors')
+            .select(`
+              id, sip_number, specialization, is_active,
+              profile:profiles!inner (id, full_name, phone, avatar_url)
+            `)
+            .eq('is_active', true);
+
+          if (!dErr && directDocs && directDocs.length > 0) {
+            doctorsData = directDocs;
+          }
+        }
+
+        // If database records found, return them
+        if (doctorsData.length > 0) {
+          return { success: true, data: doctorsData };
+        }
+
+        // Otherwise return filtered fallback dummy doctors for the requested poli
+        return { success: true, data: filterFallback(serviceId) };
       } catch (err) {
         console.warn('[appointmentService.getDoctorsByService]', err.message);
-        return { success: true, data: FALLBACK_DOCTORS };
+        return { success: true, data: filterFallback(serviceId) };
       }
     },
 
