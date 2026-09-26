@@ -14,6 +14,7 @@
     />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     <link rel="stylesheet" href="assets/css/role-pages.css" />
+    <link rel="stylesheet" href="assets/css/modal.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config/supabase.js"></script>
   </head>
@@ -71,9 +72,12 @@
               <h1 id="welcomeTitle"></h1>
               <p class="welcome-copy" id="welcomeCopy"></p>
             </div>
-            <button class="primary-button" id="primaryAction">
-              <span id="primaryActionText"></span>
-            </button>
+            <div class="welcome-actions">
+              <button class="primary-button" id="primaryAction" onclick="window.openDoctorSoapModal('RM-000002', 'Siti Aminah', 'Demam tinggi dan batuk')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <span id="primaryActionText">Periksa Pasien (SOAP)</span>
+              </button>
+            </div>
           </section>
           <section class="stats-grid" id="statsGrid"></section>
           <section class="dashboard-grid">
@@ -83,7 +87,7 @@
                   <p class="eyebrow">AGENDA</p>
                   <h2 id="agendaTitle"></h2>
                 </div>
-                <button class="text-button">Lihat semua <span>&rarr;</span></button>
+                <button class="text-button" id="btnViewAllAgenda">Lihat semua <span>&rarr;</span></button>
               </div>
               <div class="schedule-list" id="scheduleList"></div>
             </div>
@@ -104,7 +108,7 @@
                 <p class="eyebrow">DATA</p>
                 <h2 id="lowerTitle">Ringkasan</h2>
               </div>
-              <button class="text-button">Buka daftar <span>&rarr;</span></button>
+              <button class="text-button" id="btnViewAllLower">Buka daftar <span>&rarr;</span></button>
             </div>
             <div class="table-wrap">
               <table>
@@ -118,6 +122,136 @@
         </div>
       </main>
     </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         MODAL: PEMERIKSAAN KLINIS RME (SOAP) & E-RESEP
+         Sesuai Permenkes No. 24 Tahun 2022
+         ══════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="modalSoapRecord" role="dialog" aria-modal="true" aria-labelledby="modalSoapTitle" aria-hidden="true" data-backdrop="static">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalSoapTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Rekam Medis Elektronik (RME SOAP)
+          </h3>
+          <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="formSoap" novalidate>
+          <input type="hidden" id="soapPatientId" value="demo-patient-id" />
+          <div class="modal-body">
+            <!-- Patient Banner -->
+            <div class="modal-info-box" id="soapPatientBanner">
+              Pasien: Siti Aminah (RM-000002) · Usia: 28 Tahun · Poli Umum
+            </div>
+
+            <!-- Subjective -->
+            <div class="modal-form-group">
+              <label for="soapSubjective">S — Subjective (Anamnesis / Riwayat Penyakit)</label>
+              <textarea id="soapSubjective" rows="2" placeholder="Keluhan utama, riwayat penyakit sekarang, riwayat alergi obat..." required></textarea>
+            </div>
+
+            <!-- Objective & Vital Signs -->
+            <div class="modal-form-group">
+              <label>O — Objective (Tanda-Tanda Vital Pasien)</label>
+              <div class="modal-grid-3">
+                <div class="modal-form-group">
+                  <label for="vitalSystolic">Tekanan Darah (mmHg)</label>
+                  <div class="split-input-group">
+                    <input type="number" id="vitalSystolic" placeholder="Sistole (120)" />
+                    <span>/</span>
+                    <input type="number" id="vitalDiastolic" placeholder="Diastole (80)" />
+                  </div>
+                </div>
+                <div class="modal-form-group">
+                  <label for="vitalPulse">Denyut Nadi (bpm)</label>
+                  <input type="number" id="vitalPulse" placeholder="78 bpm" />
+                </div>
+                <div class="modal-form-group">
+                  <label for="vitalTemp">Suhu Tubuh (&deg;C)</label>
+                  <input type="number" id="vitalTemp" step="0.1" placeholder="36.5" />
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-form-group">
+              <label for="soapObjective">Pemeriksaan Fisik Klinis</label>
+              <textarea id="soapObjective" rows="2" placeholder="Kepala, mata, THT, toraks, abdomen, ekstremitas..."></textarea>
+            </div>
+
+            <!-- Assessment -->
+            <div class="modal-grid-2">
+              <div class="modal-form-group">
+                <label for="soapAssessment">A — Assessment (Diagnosa Medis)</label>
+                <input type="text" id="soapAssessment" placeholder="Contoh: Faringitis Akut" required />
+              </div>
+              <div class="modal-form-group">
+                <label for="soapIcd10">Kode ICD-10 Standar WHO</label>
+                <input type="text" id="soapIcd10" placeholder="Contoh: J02.9" />
+              </div>
+            </div>
+
+            <!-- Plan -->
+            <div class="modal-form-group">
+              <label for="soapPlan">P — Plan (Rencana Penatalaksanaan &amp; Edukasi)</label>
+              <textarea id="soapPlan" rows="2" placeholder="Edukasi istirahat, diet lunak, rencana kontrol ulang..."></textarea>
+            </div>
+
+            <!-- Electronic Prescriptions Table -->
+            <div class="modal-form-group">
+              <label>Resep Obat Elektronik (e-Prescription)</label>
+              <table class="modal-table" id="tableSoapMedicines">
+                <thead>
+                  <tr>
+                    <th>Nama Obat</th>
+                    <th class="th-w-md">Dosis</th>
+                    <th>Aturan Minum</th>
+                    <th class="th-w-sm">Jumlah</th>
+                    <th class="th-w-xs"></th>
+                  </tr>
+                </thead>
+                <tbody id="soapMedicineRows">
+                  <tr>
+                    <td><input type="text" class="med-name" placeholder="Amoxicillin" value="Paracetamol" /></td>
+                    <td><input type="text" class="med-dosage" placeholder="500 mg" value="500 mg" /></td>
+                    <td><input type="text" class="med-freq" placeholder="3x1 sesudah makan" value="3x1 sesudah makan" /></td>
+                    <td><input type="number" class="med-qty" value="10" min="1" /></td>
+                    <td><button type="button" class="action-btn-sm" onclick="this.closest('tr').remove()">&times;</button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <button type="button" class="btn-add-item" id="btnAddMedicineRow">
+                + Tambah Obat Lain
+              </button>
+            </div>
+
+            <!-- Legal & Permenkes notice -->
+            <div class="modal-alert-box">
+              PERMENKES NO. 24/2022: Finalisasi akan mengunci catatan rekam medis secara permanen dengan stempel audit digital.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-modal-close>Tutup</button>
+            <button type="button" class="btn-modal-cancel" id="btnSaveSoapDraft">Simpan Draft</button>
+            <button type="button" class="btn-modal-submit" id="btnFinalizeSoap">
+              <span class="btn-spinner"></span>
+              <span>Finalisasi RME (Kunci Permanen)</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- UI Components & Supabase Data Services -->
+    <script src="assets/js/components/modal.js"></script>
+    <script src="assets/js/components/toast.js"></script>
+    <script src="assets/js/services/patientService.js"></script>
+    <script src="assets/js/services/appointmentService.js"></script>
+    <script src="assets/js/services/queueService.js"></script>
+    <script src="assets/js/services/medicalRecordService.js"></script>
+    <script src="assets/js/services/prescriptionService.js"></script>
+    <script src="assets/js/services/billingService.js"></script>
     <script src="assets/js/dashboard/role-dashboard.js"></script>
   </body>
 </html>

@@ -279,6 +279,16 @@ body.modal-open {
   border-bottom: 1px solid #e2e8f0;
 }
 
+.split-input-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.th-w-xs { width: 44px; text-align: center; }
+.th-w-sm { width: 75px; }
+.th-w-md { width: 110px; }
+
 .btn-add-item {
   align-self: flex-start;
   padding: 0.4rem 0.8rem;
