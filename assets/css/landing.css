@@ -891,6 +891,20 @@ button {
   .nav-links {
     display: none;
   }
+  .nav-links.is-open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+    border-bottom: 1px solid var(--color-border);
+    gap: 1.25rem;
+    z-index: 99;
+  }
   .mobile-menu-toggle {
     display: block;
   }

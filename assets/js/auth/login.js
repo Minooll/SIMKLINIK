@@ -108,8 +108,7 @@
         passwordInput.type = show ? 'text' : 'password';
         togglePwBtn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
         togglePwBtn.setAttribute('aria-pressed', String(show));
-        iconEye.style.display    = show ? 'none' : '';
-        iconEyeOff.style.display = show ? '' : 'none';
+        togglePwBtn.classList.toggle('is-visible', show);
         passwordInput.focus();
       });
 

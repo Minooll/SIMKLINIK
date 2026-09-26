@@ -521,6 +521,52 @@ body {
   display: flex;
 }
 
+/* Password toggle button */
+.btn-toggle-pw {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  color: var(--clr-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition), background-color var(--transition);
+  z-index: 2;
+}
+
+.btn-toggle-pw:hover {
+  color: var(--clr-text);
+  background-color: rgba(14, 165, 233, 0.08);
+}
+
+.btn-toggle-pw .icon-eye,
+.btn-toggle-pw .icon-eye-off {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-toggle-pw .icon-eye {
+  display: block;
+}
+
+.btn-toggle-pw .icon-eye-off {
+  display: none;
+}
+
+.btn-toggle-pw.is-visible .icon-eye {
+  display: none;
+}
+
+.btn-toggle-pw.is-visible .icon-eye-off {
+  display: block;
+}
+
 /* ============================================================
        OPTIONS ROW
     ============================================================ */

@@ -52,8 +52,11 @@ button {
   border-radius: 9px;
   display: grid;
   place-items: center;
-  font: bold 27px/1 "Space Grotesk";
   color: #123b43;
+}
+.brand-mark svg {
+  width: 20px;
+  height: 20px;
 }
 .brand strong {
   display: block;
@@ -87,20 +90,28 @@ button {
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 8px;
   color: #a8c6c2;
   text-decoration: none;
   font-size: 13px;
+  font-weight: 500;
+  transition: all 0.18s ease;
 }
-.nav-item span:first-child {
-  width: 20px;
-  text-align: center;
-  font-size: 16px;
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+.nav-item svg,
+.nav-item .nav-svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 .nav-item.active {
   background: #215a5d;
   color: #fff;
+  font-weight: 600;
   box-shadow: inset 3px 0 #63cfbd;
 }
 .sidebar-footer {
@@ -115,13 +126,17 @@ button {
 }
 .help-icon {
   border: 1px solid #61958f;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   color: #9bcac3;
-  font-weight: 700;
+  flex-shrink: 0;
+}
+.help-icon svg {
+  width: 15px;
+  height: 15px;
 }
 .help-box strong,
 .help-box small {
@@ -141,11 +156,22 @@ button {
   background: transparent;
   text-align: left;
   color: #a8c6c2;
-  padding: 12px;
+  padding: 10px 12px;
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  transition: all 0.18s ease;
 }
-.logout-button span {
-  margin-right: 11px;
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.logout-button svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 .main-content {
   min-width: 0;
@@ -394,6 +420,42 @@ button {
 .status.wait {
   background: #fff5e4;
   color: #ae762b;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.status-active {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.status-waiting {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.status-done {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.status-info {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.status-default {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
 }
 .live-badge {
   font-size: 11px;

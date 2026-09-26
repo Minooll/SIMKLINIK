@@ -1,35 +1,31 @@
 /**
  * SIMKLINIK — Landing Page Interactivity (landing.js)
- * Clean vanilla JS for mobile menu toggle and smooth navigation.
+ * Clean vanilla JS with CSS class-based state management (zero inline styles).
  */
 (() => {
   'use strict';
 
-  // Mobile menu toggle
   const mobileToggle = document.getElementById('mobileMenuToggle');
   const navLinks = document.getElementById('navLinks');
 
   if (mobileToggle && navLinks) {
-    mobileToggle.addEventListener('click', () => {
-      const isVisible = navLinks.style.display === 'flex';
-      navLinks.style.display = isVisible ? 'none' : 'flex';
-      if (!isVisible) {
-        navLinks.style.flexDirection = 'column';
-        navLinks.style.position = 'absolute';
-        navLinks.style.top = '100%';
-        navLinks.style.left = '0';
-        navLinks.style.right = '0';
-        navLinks.style.background = '#ffffff';
-        navLinks.style.padding = '1.5rem';
-        navLinks.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
-        navLinks.style.borderBottom = '1px solid #e2e8f0';
-      } else {
-        navLinks.removeAttribute('style');
-      }
+    mobileToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navLinks.classList.toggle('is-open');
+      const isOpen = navLinks.classList.contains('is-open');
+      mobileToggle.setAttribute('aria-expanded', String(isOpen));
     });
   }
 
-  // Smooth scroll for in-page anchors
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (navLinks && navLinks.classList.contains('is-open') && !navLinks.contains(e.target) && e.target !== mobileToggle) {
+      navLinks.classList.remove('is-open');
+      if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Smooth scroll for anchor links
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', function (e) {
       const targetId = this.getAttribute('href');
@@ -38,8 +34,9 @@
         if (targetEl) {
           e.preventDefault();
           targetEl.scrollIntoView({ behavior: 'smooth' });
-          if (window.innerWidth <= 768 && navLinks) {
-            navLinks.removeAttribute('style');
+          if (navLinks) {
+            navLinks.classList.remove('is-open');
+            if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
           }
         }
       }
