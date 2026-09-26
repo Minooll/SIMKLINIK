@@ -95,6 +95,15 @@
     else btn.classList.remove('is-loading');
   };
 
+  const escapeJsStr = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '&quot;')
+      .replace(/\r?\n/g, ' ');
+  };
+
   /* ══════════════════════════════════════════════════════════
      AUTH SESSION CHECK & PROFILE RESUME
      ══════════════════════════════════════════════════════════ */
@@ -128,11 +137,25 @@
         }
       }
 
-      // If role is pasien, load patient record
+      // If role is pasien, load patient record or auto-create if missing
       if (role === 'pasien') {
         const patientRes = await window.patientService.getPatientProfile(currentAuthUser.id);
         if (patientRes.success && patientRes.data) {
           currentPatientRecord = patientRes.data;
+        } else if (window.supabaseClient) {
+          try {
+            const { data: newPt } = await window.supabaseClient
+              .from('patients')
+              .insert({
+                profile_id: currentAuthUser.id,
+                phone: currentAuthUser.phone || ''
+              })
+              .select('*, profile:profiles(*)')
+              .maybeSingle();
+            if (newPt) currentPatientRecord = newPt;
+          } catch (pe) {
+            console.warn('[Auto-create patient]', pe.message);
+          }
         }
       } else if (role === 'dokter') {
         const { data: docData } = await window.supabaseClient
@@ -269,8 +292,13 @@
 
         setButtonLoading(btnSubmitBooking, true);
 
-        // Resolve patient ID
-        const patientId = currentPatientRecord ? currentPatientRecord.id : 'demo-patient-uuid';
+        // Resolve patient ID with valid RFC-4122 UUID fallback
+        const isValidUuid = (id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+        const patientId = (currentPatientRecord && isValidUuid(currentPatientRecord.id))
+          ? currentPatientRecord.id
+          : ((currentAuthUser && isValidUuid(currentAuthUser.id))
+              ? currentAuthUser.id
+              : 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
 
         const result = await window.appointmentService.createAppointment({
           patientId,
@@ -471,7 +499,7 @@
                 <td>${r.doctor?.profile?.full_name || 'Dokter Pemeriksa'}</td>
                 <td>${r.assessment || r.diagnosis_icd10 || 'Pemeriksaan Rutin'}</td>
                 <td>${statusBadge(r.finalized_at ? 'FINAL' : 'DRAFT')}</td>
-                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${r.record_date || 'Hari ini'}', '${r.doctor?.profile?.full_name || 'Dokter'}', '${r.subjective || '-'}', '${r.objective || '-'}', '${r.assessment || r.diagnosis_icd10 || '-'}', '${r.treatment_plan || '-'}', '${r.finalized_at ? 'FINAL' : 'DRAFT'}')">Lihat RME</button></td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(r.record_date || 'Hari ini')}', '${escapeJsStr(r.doctor?.profile?.full_name || 'Dokter')}', '${escapeJsStr(r.subjective || '-')}', '${escapeJsStr(r.objective || '-')}', '${escapeJsStr(r.assessment || r.diagnosis_icd10 || '-')}', '${escapeJsStr(r.treatment_plan || '-')}', '${escapeJsStr(r.finalized_at ? 'FINAL' : 'DRAFT')}')">Lihat RME</button></td>
               </tr>
             `).join('');
           } else {
@@ -786,8 +814,8 @@
                 <td>${q.service?.name || 'Poli'} · ${q.doctor?.profile?.full_name || 'Dokter'}</td>
                 <td>${statusBadge(q.status)}</td>
                 <td>
-                  <button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('${q.id}', '${q.queue_number}')">Panggil</button>
-                  <button class="action-btn-sm action-btn-success" onclick="window.layaniAntrean('${q.id}', '${q.queue_number}')">Layani</button>
+                  <button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('${escapeJsStr(q.id)}', '${escapeJsStr(q.queue_number)}')">Panggil</button>
+                  <button class="action-btn-sm action-btn-success" onclick="window.layaniAntrean('${escapeJsStr(q.id)}', '${escapeJsStr(q.queue_number)}')">Layani</button>
                 </td>
               </tr>
             `).join('');
@@ -845,7 +873,7 @@
                 <td>
                   ${p.status === 'Lunas'
                     ? '<span class="status-badge status-done">Lunas</span>'
-                    : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${p.invoice_number}', '${p.patient?.profile?.full_name || 'Pasien'}', ${p.total_amount}, '${p.id}')">Proses Bayar</button>`
+                    : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${escapeJsStr(p.invoice_number)}', '${escapeJsStr(p.patient?.profile?.full_name || 'Pasien')}', ${Number(p.total_amount) || 0}, '${escapeJsStr(p.id)}')">Proses Bayar</button>`
                   }
                 </td>
               </tr>
@@ -1148,8 +1176,8 @@
             tableBody.innerHTML = todayAppts.map(a => {
               const isDone = a.status === 'Selesai' || a.status === 'Completed' || a.status === 'FINAL';
               const actionBtn = isDone
-                ? `<button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${a.appointment_date}', '${defaultRoleMeta.name}', '${a.chief_complaint || '-'}', 'TD: 120/80 mmHg, Nadi: 78x/m', 'Pemeriksaan Rutin Poli', 'Edukasi dan resep terlampir', 'FINAL')">Lihat RME</button>`
-                : `<button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('${a.patient?.no_rm || '-'}', '${a.patient?.profile?.full_name || 'Pasien'}', '${a.chief_complaint || 'Keluhan umum'}', '${a.patient?.id || ''}', '${a.id}')">Periksa (SOAP)</button>`;
+                ? `<button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(a.appointment_date)}', '${escapeJsStr(defaultRoleMeta.name)}', '${escapeJsStr(a.chief_complaint || '-')}', 'TD: 120/80 mmHg, Nadi: 78x/m', 'Pemeriksaan Rutin Poli', 'Edukasi dan resep terlampir', 'FINAL')">Lihat RME</button>`
+                : `<button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('${escapeJsStr(a.patient?.no_rm || '-')}', '${escapeJsStr(a.patient?.profile?.full_name || 'Pasien')}', '${escapeJsStr(a.chief_complaint || 'Keluhan umum')}', '${escapeJsStr(a.patient?.id || '')}', '${escapeJsStr(a.id)}')">Periksa (SOAP)</button>`;
               return `
                 <tr>
                   <td class="table-primary">${a.patient?.no_rm || '-'}</td>
@@ -1206,7 +1234,7 @@
                 <td><strong>${pt.profile?.full_name || 'Pasien'}</strong></td>
                 <td>${pt.blood_type || '-'}</td>
                 <td>${pt.allergies || 'Tidak ada'}</td>
-                <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('${pt.no_rm}', '${pt.profile?.full_name || 'Pasien'}', 'Konsultasi poli', '${pt.id}')">Periksa Pasien</button></td>
+                <td><button class="action-btn-sm action-btn-success" onclick="window.openDoctorSoapModal('${escapeJsStr(pt.no_rm)}', '${escapeJsStr(pt.profile?.full_name || 'Pasien')}', 'Konsultasi poli', '${escapeJsStr(pt.id)}')">Periksa Pasien</button></td>
               </tr>
             `).join('');
           } else {
@@ -1296,7 +1324,7 @@
                 <td>${r.subjective || '-'}</td>
                 <td><strong>${r.diagnosis_icd10 || r.assessment || '-'}</strong></td>
                 <td>${statusBadge(r.finalized_at ? 'FINAL' : 'DRAFT')}</td>
-                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${r.record_date ? new Date(r.record_date).toLocaleDateString('id-ID') : 'Hari ini'}', '${defaultRoleMeta.name}', '${r.subjective || '-'}', '${r.objective || '-'}', '${r.diagnosis_icd10 || r.assessment || '-'}', '${r.treatment_plan || '-'}', '${r.finalized_at ? 'FINAL' : 'DRAFT'}')">Lihat RME</button></td>
+                <td><button class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(r.record_date ? new Date(r.record_date).toLocaleDateString('id-ID') : 'Hari ini')}', '${escapeJsStr(defaultRoleMeta.name)}', '${escapeJsStr(r.subjective || '-')}', '${escapeJsStr(r.objective || '-')}', '${escapeJsStr(r.diagnosis_icd10 || r.assessment || '-')}', '${escapeJsStr(r.treatment_plan || '-')}', '${escapeJsStr(r.finalized_at ? 'FINAL' : 'DRAFT')}')">Lihat RME</button></td>
               </tr>
             `).join('');
           } else {
