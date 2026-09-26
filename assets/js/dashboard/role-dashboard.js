@@ -774,12 +774,25 @@
     }
 
     if (petugasFilterPills) {
+      if (currentView === 'dokter') {
+        petugasActiveFilter = 'dokter';
+      } else if (currentView === 'pasien') {
+        petugasActiveFilter = 'pasien';
+      }
+
+      petugasFilterPills.querySelectorAll('.filter-pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.filter === petugasActiveFilter);
+      });
+
       petugasFilterPills.addEventListener('click', (e) => {
         const pill = e.target.closest('.filter-pill');
         if (!pill) return;
         petugasFilterPills.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         petugasActiveFilter = pill.dataset.filter || 'all';
+
+        const label = pill.textContent.trim();
+        window.Toast.info(`Filter aktif: ${label}`);
 
         if (petugasSearchQuery.length >= 2) {
           renderQuickSearchDropdown(petugasSearchQuery);
@@ -873,7 +886,353 @@
     }
 
     async function renderPetugasDashboard() {
-      if (currentView === 'dashboard') {
+      // Determine display mode from active filter pill or currentView
+      let mode = petugasActiveFilter;
+      if (mode === 'all') {
+        if (currentView === 'dokter') mode = 'dokter';
+        else if (currentView === 'pasien') mode = 'pasien';
+        else if (currentView === 'antrean') mode = 'antrean';
+        else if (currentView === 'pembayaran') mode = 'pembayaran';
+      }
+
+      if (mode === 'dokter') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Jadwal Praktik Seluruh Dokter';
+        if (welcomeCopy) welcomeCopy.textContent = 'Master jadwal praktik dokter seluruh poliklinik, jam konsultasi, ruangan, dan kuota pasien.';
+        if (statsGrid) {
+          statsGrid.innerHTML = `
+            <article class="stat-card">
+              <div class="stat-top"><span>Total Dokter</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">10 Dokter</strong>
+              <small class="stat-note">4 Poliklinik klinik</small>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Dokter Aktif</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">08 Praktik</strong>
+              <small class="stat-note">2 Dokter cuti/off</small>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Ruang Layanan</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">4 Ruangan</strong>
+              <small class="stat-note">Umum, Gigi, Anak, Lab</small>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Kapasitas Pasien</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">185 Kuota</strong>
+              <small class="stat-note">Maksimal per hari</small>
+            </article>
+          `;
+        }
+
+        let allDocs = await window.appointmentService.getAllDoctorsWithSchedules();
+        if (petugasSearchQuery) {
+          const q = petugasSearchQuery.toLowerCase();
+          allDocs = allDocs.filter(d =>
+            (d.profile?.full_name || '').toLowerCase().includes(q) ||
+            (d.specialization || '').toLowerCase().includes(q) ||
+            (d.service?.name || '').toLowerCase().includes(q) ||
+            (d.sip_number || '').toLowerCase().includes(q)
+          );
+        }
+
+        if (agendaTitle) {
+          agendaTitle.textContent = petugasSearchQuery
+            ? `Hasil Pencarian Dokter Bertugas ("${petugasSearchQuery}")`
+            : 'Dokter Poliklinik Bertugas Hari Ini';
+        }
+
+        if (scheduleList) {
+          if (allDocs.length > 0) {
+            scheduleList.innerHTML = allDocs.map(d => `
+              <div class="schedule-item">
+                <time class="schedule-time">${d.schedule?.start_time || '08:00'}</time>
+                <div>
+                  <strong>${d.profile?.full_name}</strong>
+                  <small>${d.service?.name} · ${d.specialization} (${d.schedule?.room || 'Ruang Poli'})</small>
+                </div>
+                ${statusBadge(d.is_active ? 'Aktif Praktik' : 'Cuti')}
+              </div>
+            `).join('');
+          } else {
+            scheduleList.innerHTML = `<div class="empty-state-card"><p>Tidak ada dokter yang cocok dengan pencarian.</p></div>`;
+          }
+        }
+
+        if (insightTitle) insightTitle.textContent = 'Aksi Cepat & Ketersediaan Dokter';
+        if (insightContent) {
+          insightContent.innerHTML = `
+            <div class="activity">
+              <span class="activity-icon">${ICONS.check}</span>
+              <div>
+                <strong>10 Dokter Terdaftar di SIMKLINIK</strong>
+                <small>Meliputi Poli Umum, Poli Gigi, Poli Spesialis Anak, dan Laboratorium.</small>
+              </div>
+            </div>
+            <div class="activity">
+              <span class="activity-icon">${ICONS.sparkle}</span>
+              <div>
+                <strong>Informasi Ruangan &amp; Kuota</strong>
+                <small>Pasien diarahkan ke ruangan dokter yang sedang bertugas.</small>
+              </div>
+            </div>
+          `;
+        }
+
+        if (lowerTitle) {
+          lowerTitle.textContent = petugasSearchQuery
+            ? `Master Dokter Seluruh Poliklinik ("${petugasSearchQuery}")`
+            : 'Master Data & Jadwal Seluruh Dokter Klinik';
+        }
+
+        if (tableHead) {
+          tableHead.innerHTML = '<th>Nama Dokter &amp; SIP</th><th>Poliklinik</th><th>Spesialisasi</th><th>Jadwal &amp; Ruangan</th><th>Sisa Kuota</th><th>Status</th>';
+        }
+
+        if (tableBody) {
+          if (allDocs.length > 0) {
+            tableBody.innerHTML = allDocs.map(d => `
+              <tr>
+                <td class="table-primary"><strong>${d.profile?.full_name}</strong><br/><small>${d.sip_number}</small></td>
+                <td>${d.service?.name}</td>
+                <td>${d.specialization}</td>
+                <td>${d.schedule?.days || 'Senin - Sabtu'}<br/><small>${d.schedule?.start_time} - ${d.schedule?.end_time} WIB (${d.schedule?.room || 'Poli'})</small></td>
+                <td><strong>${d.schedule?.quota ? d.schedule.quota - 4 : 16}</strong> / ${d.schedule?.quota || 20}</td>
+                <td>${statusBadge(d.is_active ? 'Aktif' : 'Cuti')}</td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = '<tr><td colspan="6" class="table-empty-row">Tidak ditemukan data dokter yang sesuai dengan kriteria pencarian.</td></tr>';
+          }
+        }
+      } else if (mode === 'pasien') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Data Induk Pasien Seluruh Poliklinik';
+        if (welcomeCopy) welcomeCopy.textContent = 'Pencarian data rekam medis dan master data pasien klinik terlengkap.';
+        if (statsGrid) {
+          statsGrid.innerHTML = `
+            <article class="stat-card">
+              <div class="stat-top"><span>Total Pasien</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">36 Pasien</strong>
+              <small class="stat-note">Terdaftar di SIMKLINIK</small>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Kunjungan Hari Ini</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">12 Kunjungan</strong>
+              <small class="stat-note">Terjadwal di semua poli</small>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Verifikasi NIK</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">100%</strong>
+              <small class="stat-note">Sesuai KTP / BPJS</small>
+            </article>
+            <article class="stat-card">
+              <div class="stat-top"><span>Standar RME</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+              <strong class="stat-value">Valid</strong>
+              <small class="stat-note">Permenkes 24/2022</small>
+            </article>
+          `;
+        }
+
+        if (agendaTitle) {
+          agendaTitle.textContent = petugasSearchQuery
+            ? `Hasil Pencarian Pasien ("${petugasSearchQuery}")`
+            : 'Antrean Pasien Terdaftar Hari Ini';
+        }
+
+        let patients = [];
+        const ptRes = await window.patientService.searchPatients(petugasSearchQuery);
+        if (ptRes.success && ptRes.data && ptRes.data.length > 0) {
+          patients = ptRes.data;
+        }
+
+        const samplePts = [
+          { no_rm: 'RM-000001', nik: '3201234567890001', profile: { full_name: 'Budi Santoso', phone: '081234567890' }, blood_type: 'O', status_layanan: 'Dipanggil' },
+          { no_rm: 'RM-000002', nik: '3201234567890002', profile: { full_name: 'Siti Aminah', phone: '081234567891' }, blood_type: 'A', status_layanan: 'Menunggu' },
+          { no_rm: 'RM-000003', nik: '3201234567890003', profile: { full_name: 'Rizky Pratama', phone: '081345678900' }, blood_type: 'B', status_layanan: 'Sedang berjalan' },
+          { no_rm: 'RM-000005', nik: '3201234567890005', profile: { full_name: 'Fajar Nugroho', phone: '081234567800' }, blood_type: 'AB', status_layanan: 'Menunggu' },
+          { no_rm: 'RM-000015', nik: '3201234567890015', profile: { full_name: 'Ratna Dewi', phone: '081298765400' }, blood_type: 'O', status_layanan: 'Menunggu' },
+          { no_rm: 'RM-000016', nik: '3201234567890016', profile: { full_name: 'Hendra Kusuma', phone: '081298765411' }, blood_type: 'B', status_layanan: 'Menunggu' },
+          { no_rm: 'RM-000021', nik: '3201234567890021', profile: { full_name: 'Ananda Kenzo', phone: '081345678999' }, blood_type: 'A', status_layanan: 'Menunggu' }
+        ];
+
+        if (patients.length === 0) {
+          if (petugasSearchQuery) {
+            const q = petugasSearchQuery.toLowerCase();
+            patients = samplePts.filter(p =>
+              p.no_rm.toLowerCase().includes(q) ||
+              p.nik.toLowerCase().includes(q) ||
+              (p.profile?.full_name || '').toLowerCase().includes(q)
+            );
+          } else {
+            patients = samplePts;
+          }
+        }
+
+        if (scheduleList) {
+          if (patients.length > 0) {
+            scheduleList.innerHTML = patients.map((pt) => `
+              <div class="schedule-item">
+                <time class="schedule-time">${pt.no_rm}</time>
+                <div>
+                  <strong>${pt.profile?.full_name || 'Pasien'}</strong>
+                  <small>NIK: ${pt.nik || '-'} · Telp: ${pt.profile?.phone || pt.phone || '-'} (Gol. ${pt.blood_type || '-'})</small>
+                </div>
+                ${statusBadge(pt.status_layanan || 'Aktif')}
+              </div>
+            `).join('');
+          } else {
+            scheduleList.innerHTML = `<div class="empty-state-card"><p>Tidak ada data pasien yang cocok dengan pencarian.</p></div>`;
+          }
+        }
+
+        if (insightTitle) insightTitle.textContent = 'Aksi Data Pasien & Rekam Medis';
+        if (insightContent) {
+          insightContent.innerHTML = `
+            <div class="activity">
+              <span class="activity-icon">${ICONS.check}</span>
+              <div>
+                <strong>Validasi Identitas Pasien</strong>
+                <small>Pastikan NIK dan nomor rekam medis sesuai identitas resmi.</small>
+              </div>
+            </div>
+            <div class="activity">
+              <span class="activity-icon">${ICONS.sparkle}</span>
+              <div>
+                <strong>Privasi Data Medis (UU PDP 27/2022)</strong>
+                <small>Seluruh data pasien terlindungi dengan protokol audit log klinik.</small>
+              </div>
+            </div>
+          `;
+        }
+
+        if (lowerTitle) {
+          lowerTitle.textContent = petugasSearchQuery
+            ? `Daftar Pasien Terdaftar ("${petugasSearchQuery}")`
+            : 'Daftar Seluruh Pasien Klinik';
+        }
+
+        if (tableHead) {
+          tableHead.innerHTML = '<th>No. RM</th><th>NIK</th><th>Nama Lengkap</th><th>Gol. Darah</th><th>No. HP</th><th>Status</th><th>Aksi</th>';
+        }
+
+        if (tableBody) {
+          if (patients.length > 0) {
+            tableBody.innerHTML = patients.map(pt => `
+              <tr>
+                <td class="table-primary"><strong>${pt.no_rm}</strong></td>
+                <td>${pt.nik || '-'}</td>
+                <td><strong>${pt.profile?.full_name || 'Pasien'}</strong></td>
+                <td>${pt.blood_type || '-'}</td>
+                <td>${pt.profile?.phone || pt.phone || '-'}</td>
+                <td>${statusBadge('Aktif')}</td>
+                <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = '<tr><td colspan="7" class="table-empty-row">Tidak ada pasien yang sesuai dengan kata kunci pencarian.</td></tr>';
+          }
+        }
+      } else if (mode === 'antrean') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Antrean Layanan Klinik';
+        if (welcomeCopy) welcomeCopy.textContent = 'Kelola urutan dan panggil nomor antrean pasien secara berurutan.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Monitor Antrean Live';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. Antrean</th><th>Pasien / No. RM</th><th>Layanan / Dokter</th><th>Status</th><th>Kontrol Petugas</th>';
+
+        let queues = [];
+        const queueRes = await window.queueService.getTodayQueue();
+        if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
+          queues = queueRes.data;
+        }
+
+        if (queues.length === 0) {
+          queues = [
+            { id: 'demo-1', queue_number: 'A-021', status: 'Dipanggil', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
+            { id: 'demo-2', queue_number: 'A-022', status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
+            { id: 'demo-3', queue_number: 'B-008', status: 'Menunggu', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, service: { name: 'Laboratorium' }, doctor: { profile: { full_name: 'dr. Budi Santoso, Sp.PK' } } },
+            { id: 'demo-4', queue_number: 'G-012', status: 'Menunggu', patient: { no_rm: 'RM-000016', profile: { full_name: 'Hendra Kusuma' } }, service: { name: 'Poli Gigi' }, doctor: { profile: { full_name: 'drg. Siti Nurhaliza' } } }
+          ];
+        }
+
+        if (petugasSearchQuery) {
+          const q = petugasSearchQuery.toLowerCase();
+          queues = queues.filter(qn =>
+            qn.queue_number.toLowerCase().includes(q) ||
+            (qn.patient?.profile?.full_name || '').toLowerCase().includes(q) ||
+            (qn.patient?.no_rm || '').toLowerCase().includes(q) ||
+            (qn.doctor?.profile?.full_name || '').toLowerCase().includes(q)
+          );
+        }
+
+        if (tableBody) {
+          if (queues.length > 0) {
+            tableBody.innerHTML = queues.map(q => `
+              <tr>
+                <td class="table-primary"><strong>${q.queue_number}</strong></td>
+                <td>${q.patient?.profile?.full_name || 'Pasien'} (${q.patient?.no_rm || '-'})</td>
+                <td>${q.service?.name || 'Poli'} · ${q.doctor?.profile?.full_name || 'Dokter'}</td>
+                <td>${statusBadge(q.status)}</td>
+                <td>
+                  <button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('${escapeJsStr(q.id)}', '${escapeJsStr(q.queue_number)}')">Panggil</button>
+                  <button class="action-btn-sm action-btn-success" onclick="window.layaniAntrean('${escapeJsStr(q.id)}', '${escapeJsStr(q.queue_number)}')">Layani</button>
+                </td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Tidak ada nomor antrean yang sesuai pencarian.</td></tr>';
+          }
+        }
+      } else if (mode === 'pembayaran') {
+        if (welcomeTitle) welcomeTitle.textContent = 'Kasir & Pembayaran';
+        if (welcomeCopy) welcomeCopy.textContent = 'Penerbitan invoice dan penyelesaian transaksi konsultasi & farmasi obat.';
+        if (statsGrid) statsGrid.innerHTML = '';
+        if (agendaTitle) agendaTitle.textContent = 'Daftar Tagihan Hari Ini';
+
+        if (tableHead) tableHead.innerHTML = '<th>No. Invoice</th><th>Pasien</th><th>Total Tagihan</th><th>Status</th><th>Aksi Kasir</th>';
+
+        let payments = [];
+        const payRes = await window.billingService.getTodayPayments();
+        if (payRes.success && payRes.data && payRes.data.length > 0) {
+          payments = payRes.data;
+        }
+
+        if (payments.length === 0) {
+          payments = [
+            { id: 'demo-p-1', invoice_number: 'INV-2026-0041', total_amount: 85000, status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } } },
+            { id: 'demo-p-2', invoice_number: 'INV-2026-0040', total_amount: 75000, status: 'Lunas', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } } },
+            { id: 'demo-p-3', invoice_number: 'INV-2026-0039', total_amount: 140000, status: 'Lunas', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } } }
+          ];
+        }
+
+        if (petugasSearchQuery) {
+          const q = petugasSearchQuery.toLowerCase();
+          payments = payments.filter(p =>
+            p.invoice_number.toLowerCase().includes(q) ||
+            (p.patient?.profile?.full_name || '').toLowerCase().includes(q)
+          );
+        }
+
+        if (tableBody) {
+          if (payments.length > 0) {
+            tableBody.innerHTML = payments.map(p => `
+              <tr>
+                <td class="table-primary">${p.invoice_number}</td>
+                <td>${p.patient?.profile?.full_name || 'Pasien'} (${p.patient?.no_rm || '-'})</td>
+                <td><strong>Rp ${Number(p.total_amount).toLocaleString('id-ID')}</strong></td>
+                <td>${statusBadge(p.status)}</td>
+                <td>
+                  ${p.status === 'Lunas'
+                    ? '<span class="status-badge status-done">Lunas</span>'
+                    : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${escapeJsStr(p.invoice_number)}', '${escapeJsStr(p.patient?.profile?.full_name || 'Pasien')}', ${Number(p.total_amount) || 0}, '${escapeJsStr(p.id)}')">Proses Bayar</button>`
+                  }
+                </td>
+              </tr>
+            `).join('');
+          } else {
+            tableBody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Tidak ada invoice pembayaran yang sesuai pencarian.</td></tr>';
+          }
+        }
+      } else {
+        // mode === 'all' (Semua Data Antrean & Kunjungan)
         if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
         if (statsGrid) {
@@ -893,7 +1252,7 @@
           clinicAppts = apptRes.data;
         }
 
-        // Apply real-time search and filter
+        // Apply real-time search
         if (petugasSearchQuery) {
           const q = petugasSearchQuery.toLowerCase();
           clinicAppts = clinicAppts.filter(a => {
@@ -902,12 +1261,6 @@
             const docName = (a.doctor?.profile?.full_name || '').toLowerCase();
             const srvName = (a.service?.name || '').toLowerCase();
             const complaint = (a.chief_complaint || '').toLowerCase();
-
-            if (petugasActiveFilter === 'pasien') {
-              return ptName.includes(q) || ptRm.includes(q) || complaint.includes(q);
-            } else if (petugasActiveFilter === 'dokter') {
-              return docName.includes(q) || srvName.includes(q);
-            }
             return ptName.includes(q) || ptRm.includes(q) || docName.includes(q) || srvName.includes(q) || complaint.includes(q);
           });
         }
@@ -952,8 +1305,8 @@
             <div class="activity">
               <span class="activity-icon">${ICONS.sparkle}</span>
               <div>
-                <strong>Pencarian Cepat Aktif</strong>
-                <small>Ketik nama pasien atau dokter di kolom atas untuk filter data instan.</small>
+                <strong>Pencarian &amp; Filter Cepat Aktif</strong>
+                <small>Gunakan filter pil di atas untuk melihat data pasien atau jadwal dokter secara instan.</small>
               </div>
             </div>
           `;
@@ -1006,241 +1359,30 @@
             `;
           }
         }
-      } else if (currentView === 'dokter') {
-        if (welcomeTitle) welcomeTitle.textContent = 'Jadwal Praktik Seluruh Dokter';
-        if (welcomeCopy) welcomeCopy.textContent = 'Master jadwal praktik dokter seluruh poliklinik, jam konsultasi, ruangan, dan kuota pasien.';
-        if (statsGrid) statsGrid.innerHTML = '';
-        if (agendaTitle) agendaTitle.textContent = 'Dokter Poliklinik Bertugas Hari Ini';
-        if (lowerTitle) {
-          lowerTitle.textContent = petugasSearchQuery
-            ? `Master Dokter Seluruh Poliklinik ("${petugasSearchQuery}")`
-            : 'Master Data & Jadwal Seluruh Dokter Klinik';
-        }
-
-        let allDocs = await window.appointmentService.getAllDoctorsWithSchedules();
-        if (petugasSearchQuery) {
-          const q = petugasSearchQuery.toLowerCase();
-          allDocs = allDocs.filter(d =>
-            (d.profile?.full_name || '').toLowerCase().includes(q) ||
-            (d.specialization || '').toLowerCase().includes(q) ||
-            (d.service?.name || '').toLowerCase().includes(q) ||
-            (d.sip_number || '').toLowerCase().includes(q)
-          );
-        }
-
-        if (scheduleList) {
-          if (allDocs.length > 0) {
-            scheduleList.innerHTML = allDocs.map(d => `
-              <div class="schedule-item">
-                <time class="schedule-time">${d.schedule?.start_time || '08:00'}</time>
-                <div>
-                  <strong>${d.profile?.full_name}</strong>
-                  <small>${d.service?.name} · ${d.specialization} (${d.schedule?.room || 'Ruang Poli'})</small>
-                </div>
-                ${statusBadge(d.is_active ? 'Aktif Praktik' : 'Cuti')}
-              </div>
-            `).join('');
-          } else {
-            scheduleList.innerHTML = `<div class="empty-state-card"><p>Tidak ada dokter yang cocok dengan pencarian.</p></div>`;
-          }
-        }
-
-        if (tableHead) {
-          tableHead.innerHTML = '<th>Nama Dokter &amp; SIP</th><th>Poliklinik</th><th>Spesialisasi</th><th>Jadwal &amp; Ruangan</th><th>Sisa Kuota</th><th>Status</th>';
-        }
-
-        if (tableBody) {
-          if (allDocs.length > 0) {
-            tableBody.innerHTML = allDocs.map(d => `
-              <tr>
-                <td class="table-primary"><strong>${d.profile?.full_name}</strong><br/><small>${d.sip_number}</small></td>
-                <td>${d.service?.name}</td>
-                <td>${d.specialization}</td>
-                <td>${d.schedule?.days || 'Senin - Sabtu'}<br/><small>${d.schedule?.start_time} - ${d.schedule?.end_time} WIB (${d.schedule?.room || 'Poli'})</small></td>
-                <td><strong>${d.schedule?.quota ? d.schedule.quota - 4 : 16}</strong> / ${d.schedule?.quota || 20}</td>
-                <td>${statusBadge(d.is_active ? 'Aktif' : 'Cuti')}</td>
-              </tr>
-            `).join('');
-          } else {
-            tableBody.innerHTML = '<tr><td colspan="6" class="table-empty-row">Tidak ditemukan data dokter yang sesuai dengan kriteria pencarian.</td></tr>';
-          }
-        }
-      } else if (currentView === 'pasien') {
-        if (welcomeTitle) welcomeTitle.textContent = 'Data Induk Pasien Seluruh Poliklinik';
-        if (welcomeCopy) welcomeCopy.textContent = 'Pencarian data rekam medis dan master data pasien klinik terlengkap.';
-        if (statsGrid) statsGrid.innerHTML = '';
-        if (agendaTitle) agendaTitle.textContent = 'Ringkasan Pasien Terdaftar';
-        if (lowerTitle) {
-          lowerTitle.textContent = petugasSearchQuery
-            ? `Daftar Pasien Terdaftar ("${petugasSearchQuery}")`
-            : 'Daftar Seluruh Pasien Klinik';
-        }
-
-        if (tableHead) {
-          tableHead.innerHTML = '<th>No. RM</th><th>NIK</th><th>Nama Lengkap</th><th>Gol. Darah</th><th>No. HP</th><th>Status</th><th>Aksi</th>';
-        }
-
-        let patients = [];
-        const ptRes = await window.patientService.searchPatients(petugasSearchQuery);
-        if (ptRes.success && ptRes.data && ptRes.data.length > 0) {
-          patients = ptRes.data;
-        }
-
-        if (patients.length === 0) {
-          const samplePts = [
-            { no_rm: 'RM-000001', nik: '3201234567890001', profile: { full_name: 'Budi Santoso', phone: '081234567890' }, blood_type: 'O' },
-            { no_rm: 'RM-000002', nik: '3201234567890002', profile: { full_name: 'Siti Aminah', phone: '081234567891' }, blood_type: 'A' },
-            { no_rm: 'RM-000003', nik: '3201234567890003', profile: { full_name: 'Rizky Pratama', phone: '081345678900' }, blood_type: 'B' },
-            { no_rm: 'RM-000005', nik: '3201234567890005', profile: { full_name: 'Fajar Nugroho', phone: '081234567800' }, blood_type: 'AB' },
-            { no_rm: 'RM-000015', nik: '3201234567890015', profile: { full_name: 'Ratna Dewi', phone: '081298765400' }, blood_type: 'O' },
-            { no_rm: 'RM-000016', nik: '3201234567890016', profile: { full_name: 'Hendra Kusuma', phone: '081298765411' }, blood_type: 'B' },
-            { no_rm: 'RM-000021', nik: '3201234567890021', profile: { full_name: 'Ananda Kenzo', phone: '081345678999' }, blood_type: 'A' }
-          ];
-
-          if (petugasSearchQuery) {
-            const q = petugasSearchQuery.toLowerCase();
-            patients = samplePts.filter(p =>
-              p.no_rm.toLowerCase().includes(q) ||
-              p.nik.toLowerCase().includes(q) ||
-              (p.profile?.full_name || '').toLowerCase().includes(q)
-            );
-          } else {
-            patients = samplePts;
-          }
-        }
-
-        if (tableBody) {
-          if (patients.length > 0) {
-            tableBody.innerHTML = patients.map(pt => `
-              <tr>
-                <td class="table-primary"><strong>${pt.no_rm}</strong></td>
-                <td>${pt.nik || '-'}</td>
-                <td><strong>${pt.profile?.full_name || 'Pasien'}</strong></td>
-                <td>${pt.blood_type || '-'}</td>
-                <td>${pt.profile?.phone || pt.phone || '-'}</td>
-                <td>${statusBadge('Aktif')}</td>
-                <td><button class="action-btn-sm action-btn-primary" data-modal-target="modalNewPatient">Edit</button></td>
-              </tr>
-            `).join('');
-          } else {
-            tableBody.innerHTML = '<tr><td colspan="7" class="table-empty-row">Tidak ada pasien yang sesuai dengan kata kunci pencarian.</td></tr>';
-          }
-        }
-      } else if (currentView === 'antrean') {
-        if (welcomeTitle) welcomeTitle.textContent = 'Antrean Layanan Klinik';
-        if (welcomeCopy) welcomeCopy.textContent = 'Kelola urutan dan panggil nomor antrean pasien secara berurutan.';
-        if (statsGrid) statsGrid.innerHTML = '';
-        if (agendaTitle) agendaTitle.textContent = 'Monitor Antrean Live';
-
-        if (tableHead) tableHead.innerHTML = '<th>No. Antrean</th><th>Pasien / No. RM</th><th>Layanan / Dokter</th><th>Status</th><th>Kontrol Petugas</th>';
-
-        let queues = [];
-        const queueRes = await window.queueService.getTodayQueue();
-        if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
-          queues = queueRes.data;
-        }
-
-        if (queues.length === 0) {
-          queues = [
-            { id: 'demo-1', queue_number: 'A-021', status: 'Dipanggil', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
-            { id: 'demo-2', queue_number: 'A-022', status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
-            { id: 'demo-3', queue_number: 'B-008', status: 'Menunggu', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, service: { name: 'Laboratorium' }, doctor: { profile: { full_name: 'dr. Budi Santoso, Sp.PK' } } },
-            { id: 'demo-4', queue_number: 'G-012', status: 'Menunggu', patient: { no_rm: 'RM-000016', profile: { full_name: 'Hendra Kusuma' } }, service: { name: 'Poli Gigi' }, doctor: { profile: { full_name: 'drg. Siti Nurhaliza' } } }
-          ];
-        }
-
-        if (petugasSearchQuery) {
-          const q = petugasSearchQuery.toLowerCase();
-          queues = queues.filter(qn =>
-            qn.queue_number.toLowerCase().includes(q) ||
-            (qn.patient?.profile?.full_name || '').toLowerCase().includes(q) ||
-            (qn.patient?.no_rm || '').toLowerCase().includes(q) ||
-            (qn.doctor?.profile?.full_name || '').toLowerCase().includes(q)
-          );
-        }
-
-        if (tableBody) {
-          if (queues.length > 0) {
-            tableBody.innerHTML = queues.map(q => `
-              <tr>
-                <td class="table-primary"><strong>${q.queue_number}</strong></td>
-                <td>${q.patient?.profile?.full_name || 'Pasien'} (${q.patient?.no_rm || '-'})</td>
-                <td>${q.service?.name || 'Poli'} · ${q.doctor?.profile?.full_name || 'Dokter'}</td>
-                <td>${statusBadge(q.status)}</td>
-                <td>
-                  <button class="action-btn-sm action-btn-primary" onclick="window.panggilAntrean('${escapeJsStr(q.id)}', '${escapeJsStr(q.queue_number)}')">Panggil</button>
-                  <button class="action-btn-sm action-btn-success" onclick="window.layaniAntrean('${escapeJsStr(q.id)}', '${escapeJsStr(q.queue_number)}')">Layani</button>
-                </td>
-              </tr>
-            `).join('');
-          } else {
-            tableBody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Tidak ada nomor antrean yang sesuai pencarian.</td></tr>';
-          }
-        }
-      } else if (currentView === 'pembayaran') {
-        if (welcomeTitle) welcomeTitle.textContent = 'Kasir & Pembayaran';
-        if (welcomeCopy) welcomeCopy.textContent = 'Penerbitan invoice dan penyelesaian transaksi konsultasi & farmasi obat.';
-        if (statsGrid) statsGrid.innerHTML = '';
-        if (agendaTitle) agendaTitle.textContent = 'Daftar Tagihan Hari Ini';
-
-        if (tableHead) tableHead.innerHTML = '<th>No. Invoice</th><th>Pasien</th><th>Total Tagihan</th><th>Status</th><th>Aksi Kasir</th>';
-
-        let payments = [];
-        const payRes = await window.billingService.getTodayPayments();
-        if (payRes.success && payRes.data && payRes.data.length > 0) {
-          payments = payRes.data;
-        }
-
-        if (payments.length === 0) {
-          payments = [
-            { id: 'demo-p-1', invoice_number: 'INV-2026-0041', total_amount: 85000, status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } } },
-            { id: 'demo-p-2', invoice_number: 'INV-2026-0040', total_amount: 75000, status: 'Lunas', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } } },
-            { id: 'demo-p-3', invoice_number: 'INV-2026-0039', total_amount: 140000, status: 'Lunas', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } } }
-          ];
-        }
-
-        if (petugasSearchQuery) {
-          const q = petugasSearchQuery.toLowerCase();
-          payments = payments.filter(p =>
-            p.invoice_number.toLowerCase().includes(q) ||
-            (p.patient?.profile?.full_name || '').toLowerCase().includes(q)
-          );
-        }
-
-        if (tableBody) {
-          if (payments.length > 0) {
-            tableBody.innerHTML = payments.map(p => `
-              <tr>
-                <td class="table-primary">${p.invoice_number}</td>
-                <td>${p.patient?.profile?.full_name || 'Pasien'} (${p.patient?.no_rm || '-'})</td>
-                <td><strong>Rp ${Number(p.total_amount).toLocaleString('id-ID')}</strong></td>
-                <td>${statusBadge(p.status)}</td>
-                <td>
-                  ${p.status === 'Lunas'
-                    ? '<span class="status-badge status-done">Lunas</span>'
-                    : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${escapeJsStr(p.invoice_number)}', '${escapeJsStr(p.patient?.profile?.full_name || 'Pasien')}', ${Number(p.total_amount) || 0}, '${escapeJsStr(p.id)}')">Proses Bayar</button>`
-                  }
-                </td>
-              </tr>
-            `).join('');
-          } else {
-            tableBody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Tidak ada invoice pembayaran yang sesuai pencarian.</td></tr>';
-          }
-        }
       }
     }
 
     const btnViewAllAgenda = document.getElementById('btnViewAllAgenda');
     if (btnViewAllAgenda) {
       btnViewAllAgenda.addEventListener('click', () => {
-        location.href = `${location.pathname}?view=antrean`;
+        if (petugasActiveFilter === 'dokter') {
+          location.href = `${location.pathname}?view=dokter`;
+        } else if (petugasActiveFilter === 'pasien') {
+          location.href = `${location.pathname}?view=pasien`;
+        } else {
+          location.href = `${location.pathname}?view=antrean`;
+        }
       });
     }
 
     const btnViewAllLower = document.getElementById('btnViewAllLower');
     if (btnViewAllLower) {
       btnViewAllLower.addEventListener('click', () => {
-        location.href = `${location.pathname}?view=pasien`;
+        if (petugasActiveFilter === 'dokter') {
+          location.href = `${location.pathname}?view=dokter`;
+        } else {
+          location.href = `${location.pathname}?view=pasien`;
+        }
       });
     }
 
