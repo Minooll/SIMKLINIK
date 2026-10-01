@@ -17,7 +17,7 @@
     root.id = 'aiChatWidgetRoot';
     root.innerHTML = `
       <div class="ai-fab-container" id="aiFabContainer">
-        <span class="ai-fab-label">Tanya Sasa (AI)</span>
+        <span class="ai-fab-label">Tanya Sasa 😊✨</span>
         <button class="ai-fab-btn" id="aiFabBtn" aria-label="Buka Asisten Medis Virtual">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.708-1.175L2 22l1.175-5.292A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"></path>
@@ -34,7 +34,7 @@
             <div class="ai-chat-avatar">S</div>
             <div class="ai-chat-title">
               <strong>Sasa — Asisten Cerdas SIMKLINIK</strong>
-              <small>Sistem Asisten Skrining &amp; Anamnesis</small>
+              <small>😊 Ceria, Ramah &amp; Siap Membantu ✨</small>
             </div>
           </div>
           <button class="ai-chat-close-btn" id="aiChatCloseBtn" aria-label="Tutup obrolan">
@@ -48,7 +48,7 @@
 
         <div class="ai-chat-messages" id="aiChatMessages">
           <div class="ai-message bot">
-            Halo! Saya <strong>Sasa</strong> (<em>Sistem Asisten Skrining &amp; Anamnesis</em>), asisten cerdas dari <strong>SIMKLINIK</strong>. Ada keluhan gejala yang sedang Anda rasakan, atau ada yang ingin ditanyakan seputar layanan klinik kami?
+            Halo Sahabat Sehat SIMKLINIK! Senang sekali bisa menyapa kamu hari ini! 😊✨ Saya <strong>Sasa</strong> (<em>Sistem Asisten Skrining &amp; Anamnesis</em>), asisten cerdas yang selalu ceria dan siap nemenin kamu dengan penuh semangat! 🌟<br><br>Ada keluhan kesehatan yang sedang dirasakan, atau ada yang ingin ditanyakan seputar SIMKLINIK? Yuk, ceritakan ke Sasa dengan santai ya! 🩺💖
           </div>
         </div>
 
@@ -59,7 +59,7 @@
         </div>
 
         <form class="ai-chat-input-bar" id="aiChatForm">
-          <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Ceritakan keluhan atau ajukan pertanyaan..." autocomplete="off" />
+          <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Ceritakan keluhanmu di sini dengan santai ya... 😊" autocomplete="off" />
           <button type="submit" class="ai-chat-send-btn" id="aiChatSendBtn" aria-label="Kirim pesan">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
