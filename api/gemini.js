@@ -22,6 +22,12 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    if (req.body && req.body.listModels) {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const listData = await listRes.json();
+      return res.status(listRes.status).json(listData);
+    }
+
     const { prompt, systemInstruction, model, temperature = 0.4, maxOutputTokens = 2048 } = req.body || {};
     if (!prompt) {
       return res.status(400).json({ error: 'Field "prompt" is required.' });
@@ -42,8 +48,8 @@ module.exports = async function handler(req, res) {
     }
 
     // Try user-specified model or cascade through common Gemini models
-    const candidateModels = [model, 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.0-flash'].filter(Boolean);
-    let lastError = null;
+    const candidateModels = [model, 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp', 'gemini-2.0-flash'].filter(Boolean);
+    const attempts = [];
 
     for (const m of candidateModels) {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
@@ -59,10 +65,11 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ text: candidateText, modelUsed: m, raw: data });
       }
 
-      lastError = await response.text();
+      const errText = await response.text();
+      attempts.push({ model: m, status: response.status, error: errText });
     }
 
-    return res.status(502).json({ error: `Gemini API error: ${lastError}` });
+    return res.status(502).json({ error: 'All models failed', attempts });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Internal proxy error' });
   }
