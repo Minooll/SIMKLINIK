@@ -47,8 +47,8 @@ module.exports = async function handler(req, res) {
       };
     }
 
-    // Try user-specified model or cascade through common Gemini models
-    const candidateModels = [model, 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp', 'gemini-2.0-flash'].filter(Boolean);
+    // Try user-specified model or cascade through verified 2026 Gemini models
+    const candidateModels = [model, 'gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
     const attempts = [];
 
     for (const m of candidateModels) {
