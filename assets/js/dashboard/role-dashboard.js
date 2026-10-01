@@ -533,7 +533,7 @@
         if (welcomeTitle) welcomeTitle.textContent = 'Resep Obat Elektronik';
         if (welcomeCopy) welcomeCopy.textContent = 'Daftar resep obat aktif yang diresepkan oleh dokter dan siap ditebus di farmasi.';
         if (statsGrid) statsGrid.innerHTML = '';
-        if (agendaTitle) agendaTitle.textContent = 'Resep &amp; Aturan Minum';
+        if (agendaTitle) agendaTitle.textContent = 'Resep & Aturan Minum';
 
         if (tableHead) tableHead.innerHTML = '<th>No. Resep</th><th>Tanggal</th><th>Dokter</th><th>Obat &amp; Aturan Pakai</th><th>Status</th>';
         
@@ -1859,7 +1859,7 @@
           if (headerName) headerName.textContent = selDoc.profile?.full_name || 'Dokter';
           const inits = (selDoc.profile?.full_name || 'D').replace(/^(drg?\.|Sp\.[A-Z]+|\s)+/g, '').slice(0, 2).toUpperCase() || 'DR';
           if (headerAvatar) headerAvatar.textContent = inits;
-          window.Toast.info(`Beralih ke jadwal &amp; data pasien ${selDoc.profile?.full_name}`);
+          window.Toast.info(`Beralih ke jadwal & data pasien ${selDoc.profile?.full_name}`);
         }
         renderDokterDashboard();
       });
@@ -2041,7 +2041,7 @@
           `;
         }
 
-        if (lowerTitle) lowerTitle.textContent = `Riwayat &amp; Jadwal Kunjungan Pasien ${docFullName}`;
+        if (lowerTitle) lowerTitle.textContent = `Riwayat & Jadwal Kunjungan Pasien ${docFullName}`;
         if (tableHead) tableHead.innerHTML = '<th>No. RM</th><th>Nama Pasien</th><th>Keluhan Utama</th><th>Waktu</th><th>Status</th><th>Tindakan Klinis</th>';
         if (tableBody) {
           if (todayAppts.length > 0) {
