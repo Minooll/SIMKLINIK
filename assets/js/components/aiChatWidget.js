@@ -1,5 +1,5 @@
 /**
- * SIMKLINIK - AI Patient Chat Widget Component (Nayla)
+ * SIMKLINIK - AI Patient Chat Widget Component (Sasa)
  * Handles Smart Triage, FAQ queries, and [BOOK_POLI] action shortcuts.
  */
 (() => {
@@ -17,7 +17,7 @@
     root.id = 'aiChatWidgetRoot';
     root.innerHTML = `
       <div class="ai-fab-container" id="aiFabContainer">
-        <span class="ai-fab-label">Tanya Asisten Nayla</span>
+        <span class="ai-fab-label">Tanya Sasa (AI)</span>
         <button class="ai-fab-btn" id="aiFabBtn" aria-label="Buka Asisten Medis Virtual">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a9.96 9.96 0 0 1-4.708-1.175L2 22l1.175-5.292A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2z"></path>
@@ -31,10 +31,10 @@
       <div class="ai-chat-window" id="aiChatWindow" aria-hidden="true">
         <header class="ai-chat-header">
           <div class="ai-chat-profile">
-            <div class="ai-chat-avatar">N</div>
+            <div class="ai-chat-avatar">S</div>
             <div class="ai-chat-title">
-              <strong>Nayla — Asisten Virtual</strong>
-              <small>Aktif · Siap Membantu</small>
+              <strong>Sasa — Asisten Cerdas SIMKLINIK</strong>
+              <small>Sistem Asisten Skrining &amp; Anamnesis</small>
             </div>
           </div>
           <button class="ai-chat-close-btn" id="aiChatCloseBtn" aria-label="Tutup obrolan">
@@ -48,7 +48,7 @@
 
         <div class="ai-chat-messages" id="aiChatMessages">
           <div class="ai-message bot">
-            Halo! Saya <strong>Nayla</strong>, asisten medis virtual SIMKLINIK. Ada keluhan gejala yang sedang Anda rasakan, atau ada yang ingin ditanyakan seputar layanan klinik kami?
+            Halo! Saya <strong>Sasa</strong> (<em>Sistem Asisten Skrining &amp; Anamnesis</em>), asisten cerdas dari <strong>SIMKLINIK</strong>. Ada keluhan gejala yang sedang Anda rasakan, atau ada yang ingin ditanyakan seputar layanan klinik kami?
           </div>
         </div>
 
@@ -207,7 +207,7 @@
         appendBotMessage(formatBotMarkdown(triage.rawText), triage.isEmergency, triage.triageLevel);
       } else {
         const faqReply = await window.aiService.answerClinicFaq(query, {
-          clinicName: 'SIMKLINIK Sehat Pratama',
+          clinicName: 'SIMKLINIK',
           hours: 'Senin - Sabtu: 08:00 - 21:00 WIB',
           bpjs: 'Melayani BPJS Kesehatan faskes primer'
         });
@@ -216,7 +216,8 @@
       }
     } catch (err) {
       hideTypingIndicator();
-      appendBotMessage(`Maaf, terjadi kendala: ${err.message}. Pastikan koneksi atau kunci API Gemini telah terpasang.`, false, '');
+      const errDisplay = window.translateError ? window.translateError(err.message) : err.message;
+      appendBotMessage(`Maaf, terjadi kendala: ${errDisplay}. Silakan coba beberapa saat lagi.`, false, '');
     }
   };
 

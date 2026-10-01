@@ -1,7 +1,6 @@
-/**
- * Vercel Serverless Function: Gemini API Reverse Proxy
- * Keeps GEMINI_API_KEY secure on the server side.
- */
+// Cache the fastest responsive model across serverless invocations
+let lastWorkingModel = 'gemini-3.5-flash';
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,7 +27,7 @@ module.exports = async function handler(req, res) {
       return res.status(listRes.status).json(listData);
     }
 
-    const { prompt, systemInstruction, model, temperature = 0.4, maxOutputTokens = 2048 } = req.body || {};
+    const { prompt, systemInstruction, model, temperature = 0.4, maxOutputTokens = 1500 } = req.body || {};
     if (!prompt) {
       return res.status(400).json({ error: 'Field "prompt" is required.' });
     }
@@ -47,33 +46,40 @@ module.exports = async function handler(req, res) {
       };
     }
 
-    // Try user-specified model or cascade through verified active 2026 Gemini models
-    const candidateModels = [
+    // Prioritize cached last working model, then gemini-3.5-flash and gemini-3.5-flash-lite for ultra-fast chat responses
+    const candidateModels = Array.from(new Set([
       model,
-      'gemini-3.8-flash',
+      lastWorkingModel,
       'gemini-3.5-flash',
       'gemini-3.5-flash-lite',
+      'gemini-3.8-flash',
       'gemini-3.7-flash',
       'gemini-3.1-flash-lite'
-    ].filter(Boolean);
+    ])).filter(Boolean);
     const attempts = [];
 
     for (const m of candidateModels) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(8000)
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        return res.status(200).json({ text: candidateText, modelUsed: m, raw: data });
+        if (response.ok) {
+          lastWorkingModel = m; // Remember the fast working model for subsequent requests
+          const data = await response.json();
+          const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          return res.status(200).json({ text: candidateText, modelUsed: m, raw: data });
+        }
+
+        const errText = await response.text();
+        attempts.push({ model: m, status: response.status, error: errText });
+      } catch (reqErr) {
+        attempts.push({ model: m, status: 0, error: reqErr.message });
       }
-
-      const errText = await response.text();
-      attempts.push({ model: m, status: response.status, error: errText });
     }
 
     return res.status(502).json({ error: 'All models failed', attempts });

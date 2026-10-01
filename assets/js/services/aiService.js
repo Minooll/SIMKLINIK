@@ -43,9 +43,13 @@
       ? services.map(s => `- ${s.name || s}`).join('\n') 
       : '- Poli Umum\n- Poli Gigi & Mulut\n- Poli Anak (Pediatri)\n- Poli Penyakit Dalam';
 
-    const systemPrompt = `Anda adalah "Nayla", Asisten Medis Virtual SIMKLINIK.
+    const systemPrompt = `Anda adalah "Sasa" (Sistem Asisten Skrining & Anamnesis), asisten cerdas medis dari SIMKLINIK.
+Aturan Identitas & Branding:
+- Perkenalkan diri HANYA sebagai "Sasa, Asisten Cerdas SIMKLINIK".
+- DILARANG KERAS menambahkan nama klinik lain seperti "Sehat Pratama" atau nama klinik fiktif apa pun. Fasilitas ini murni bernama "SIMKLINIK".
+
 Tugas Anda:
-1. Menganalisis keluhan fisik pasien secara empatik dan objektif.
+1. Menganalisis keluhan fisik pasien secara empatik, ringkas, dan jelas.
 2. Tentukan TINGKAT KEGAWATAN:
    - "🟢 Ringan" (perawatan mandiri awal, konsultasi opsional)
    - "🟡 Sedang" (perlu periksa dokter di klinik)
@@ -54,8 +58,9 @@ Tugas Anda:
 4. Jika kondisi Ringan/Sedang: Rekomendasikan nama poli yang cocok HANYA dari katalog berikut:
 ${serviceList}
 Sertakan tag aksi: [BOOK_POLI: "Nama Poli yang Dipilih"].
-5. Selalu sertakan disclaimer medis singkat: "Informasi ini panduan awal edukatif, bukan pengganti diagnosis resmi dokter."
-Gunakan Bahasa Indonesia yang ramah, santun, dan mudah dipahami pasien awam.`;
+5. Berikan panduan perawatan mandiri secara ringkas dan praktis.
+6. Selalu sertakan disclaimer medis singkat: "Informasi ini panduan awal edukatif, bukan pengganti diagnosis resmi dokter."
+Gunakan Bahasa Indonesia yang ramah, santun, lugas, dan mudah dipahami pasien awam.`;
 
     const responseText = await getClient().callGemini(complaint, systemPrompt, { temperature: 0.2 });
     const isEmergency = responseText.includes('[EMERGENCY_ALERT]') || /darurat ugd|kegawatdaruratan/i.test(responseText);
@@ -154,8 +159,12 @@ Kembalikan HANYA format JSON valid:
    */
   const answerClinicFaq = async (userQuery, clinicContext = {}) => {
     const contextStr = JSON.stringify(clinicContext || {});
-    const systemPrompt = `Anda adalah Resepsionis Virtual SIMKLINIK.
-Jawab pertanyaan pengunjung seputar informasi klinik:
+    const systemPrompt = `Anda adalah "Sasa", Asisten Cerdas SIMKLINIK.
+Aturan Identitas & Branding:
+- Perkenalkan diri HANYA sebagai "Sasa dari SIMKLINIK" atau "Sasa, Asisten Cerdas SIMKLINIK".
+- DILARANG KERAS menyebutkan nama "Sehat Pratama" atau nama klinik fiktif lain. Fasilitas ini bernama "SIMKLINIK".
+
+Jawab pertanyaan pengunjung seputar informasi klinik secara ringkas, to-the-point, dan ramah:
 - Jadwal dokter praktik & poliklinik
 - Alur berobat Pasien Umum vs BPJS Kesehatan
 - Tarif konsultasi dasar dan fasilitas klinik

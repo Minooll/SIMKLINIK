@@ -7,7 +7,7 @@ const { buildGeminiPayload } = require('../config/gemini.js');
 test('E2E Verification: Triage, Explainer, SOAP, Safety, FAQ, and Analytics', async () => {
   const mockClient = {
     async callGemini(prompt, systemInstruction) {
-      if (systemInstruction.includes('Nayla')) {
+      if (systemInstruction.includes('Skrining') || systemInstruction.includes('Nayla')) {
         return 'Triage: Ringan. Keluhan batuk biasa. [BOOK_POLI: "Poli Umum"]';
       }
       if (systemInstruction.includes('Apoteker')) {
@@ -30,7 +30,7 @@ test('E2E Verification: Triage, Explainer, SOAP, Safety, FAQ, and Analytics', as
           recommendation: 'Ganti antibiotik dengan makrolida (Azitromisin).'
         });
       }
-      if (systemInstruction.includes('Resepsionis')) {
+      if (systemInstruction.includes('informasi klinik') || systemInstruction.includes('Resepsionis')) {
         return 'Jam operasional Senin - Sabtu pukul 08:00 - 21:00 WIB. Melayani BPJS Kesehatan.';
       }
       if (systemInstruction.includes('Analis Data')) {
