@@ -334,7 +334,8 @@
           } else if (err.code === 'PROFILE_UNAVAILABLE') {
             showError('Profil Belum Siap', err.message);
           } else {
-            showError('Login Gagal', err.message || 'Tidak dapat masuk. Periksa konfigurasi Supabase dan coba lagi.');
+            const friendlyErr = (window.translateError ? window.translateError(err.message) : err.message) || 'Tidak dapat masuk. Periksa konfigurasi Supabase dan coba lagi.';
+            showError('Login Gagal', friendlyErr);
           }
         }
       });
@@ -383,7 +384,8 @@
           setRegisterLoading(false);
         } catch (err) {
           setRegisterLoading(false);
-          showError('Registrasi Gagal', err.message || 'Tidak dapat membuat akun baru.');
+          const friendlyErr = (window.translateError ? window.translateError(err.message) : err.message) || 'Tidak dapat membuat akun baru.';
+          showError('Registrasi Gagal', friendlyErr);
         }
       });
 
@@ -407,7 +409,8 @@
             if (error) throw error;
           } catch (err) {
             btnGoogleSignIn.disabled = false;
-            showError('Login Google Gagal', err.message || 'Provider Google belum aktif di Supabase.');
+            const friendlyErr = (window.translateError ? window.translateError(err.message) : err.message) || 'Provider Google belum aktif di Supabase.';
+            showError('Login Google Gagal', friendlyErr);
           }
         });
       }

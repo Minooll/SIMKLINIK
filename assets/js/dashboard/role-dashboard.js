@@ -470,8 +470,9 @@
             window.Modal.open('modalHealthProfile');
           }, 450);
         } else {
-          if (onboardingNotice) onboardingNotice.textContent = res.error || 'Gagal menyimpan data kependudukan. Coba lagi.';
-          window.Toast.error(res.error || 'Gagal menyimpan data kependudukan.');
+          const friendlyErr = (window.translateError ? window.translateError(res.error) : res.error) || 'Gagal menyimpan data kependudukan. Coba lagi.';
+          if (onboardingNotice) onboardingNotice.textContent = friendlyErr;
+          window.Toast.error(friendlyErr);
         }
       });
     }
@@ -986,7 +987,8 @@
         .replace(/\n/g, '<br>');
       container.innerHTML = `<div class="ai-explainer-body">${formatted}</div>`;
     } catch (err) {
-      container.innerHTML = `<div class="error-state">Gagal memuat penjelasan obat: ${err.message}</div>`;
+      const friendlyErr = window.translateError ? window.translateError(err.message) : err.message;
+      container.innerHTML = `<div class="error-state">Gagal memuat penjelasan obat: ${friendlyErr}</div>`;
     }
   };
 
@@ -1052,7 +1054,8 @@
 
           resultBox.innerHTML = formatted;
         } catch (err) {
-          resultBox.innerHTML = `<span class="error-text">Gagal memproses analitik: ${err.message}</span>`;
+          const friendlyErr = window.translateError ? window.translateError(err.message) : err.message;
+          resultBox.innerHTML = `<span class="error-text">Gagal memproses analitik: ${friendlyErr}</span>`;
         } finally {
           setButtonLoading(submitBtn, false);
         }
@@ -2281,7 +2284,8 @@
           }
         } catch (err) {
           if (window.Toast) {
-            window.Toast.error(`Gagal memformat SOAP: ${err.message}`);
+            const friendlyErr = window.translateError ? window.translateError(err.message) : err.message;
+            window.Toast.error(`Gagal memformat SOAP: ${friendlyErr}`);
           }
         } finally {
           setButtonLoading(btnAiGenerateSoap, false);

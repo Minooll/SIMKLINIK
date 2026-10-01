@@ -367,6 +367,12 @@ body.modal-open {
   border-left: 4px solid #ef4444;
 }
 
+.toast-item.toast-warning {
+  background: #ffffff;
+  color: #92400e;
+  border-left: 4px solid #f59e0b;
+}
+
 .toast-item.toast-info {
   background: #ffffff;
   color: #0369a1;

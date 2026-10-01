@@ -52,10 +52,22 @@ create table if not exists public.patients (
   blood_type text check (blood_type in ('A', 'B', 'AB', 'O', '-')),
   allergies text default 'Tidak ada alergi yang tercatat',
   phone text,
+  address text,
   emergency_contact text,
   emergency_phone text,
   created_at timestamptz not null default now()
 );
+
+-- Migration: Pastikan kolom address tersedia pada database yang sudah berjalan
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns 
+    where table_schema = 'public' and table_name = 'patients' and column_name = 'address'
+  ) then
+    alter table public.patients add column address text;
+  end if;
+end $$;
 
 -- 3. DOCTORS
 create table if not exists public.doctors (
