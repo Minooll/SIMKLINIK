@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     <link rel="stylesheet" href="assets/css/role-pages.css" />
     <link rel="stylesheet" href="assets/css/modal.css" />
+    <link rel="stylesheet" href="assets/css/ai-chat.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config/supabase.js"></script>
   </head>
@@ -441,6 +442,35 @@
     <script src="assets/js/services/medicalRecordService.js"></script>
     <script src="assets/js/services/prescriptionService.js"></script>
     <script src="assets/js/services/billingService.js"></script>
+    <script src="config/gemini.js"></script>
+    <script src="assets/js/services/aiService.js"></script>
+    <script src="assets/js/components/aiChatWidget.js"></script>
     <script src="assets/js/dashboard/role-dashboard.js"></script>
+    <script>
+      window.openBookingModalWithService = (serviceName) => {
+        if (window.Modal) {
+          window.Modal.open('modalBooking');
+        }
+        const serviceSelect = document.getElementById('bookingServiceSelect');
+        if (serviceSelect && serviceName) {
+          for (let i = 0; i < serviceSelect.options.length; i++) {
+            if (serviceSelect.options[i].text.toLowerCase().includes(serviceName.toLowerCase()) ||
+                serviceName.toLowerCase().includes(serviceSelect.options[i].text.toLowerCase())) {
+              serviceSelect.selectedIndex = i;
+              serviceSelect.dispatchEvent(new Event('change'));
+              break;
+            }
+          }
+        }
+      };
+
+      // Handle query param ?poli= from landing page redirect
+      document.addEventListener('DOMContentLoaded', () => {
+        const urlPoli = new URLSearchParams(window.location.search).get('poli');
+        if (urlPoli) {
+          setTimeout(() => window.openBookingModalWithService(urlPoli), 600);
+        }
+      });
+    </script>
   </body>
 </html>
