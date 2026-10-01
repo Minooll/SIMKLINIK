@@ -214,7 +214,77 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════════
+         MODAL: ONBOARDING DATA DIRI WAJIB PASIEN
+         (Wajib dilengkapi saat pertama kali login / Google OAuth, tidak dapat ditutup)
+         ══════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="modalPatientOnboarding" role="dialog" aria-modal="true" aria-labelledby="modalOnboardingTitle" data-backdrop="static" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalOnboardingTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Lengkapi Data Diri Pasien (Wajib)
+          </h3>
+          <!-- Tidak ada tombol close: Wajib dilengkapi sebelum mengakses portal -->
+        </div>
+        <form id="formPatientOnboarding" novalidate>
+          <div class="modal-body">
+            <div class="modal-info-box">
+              <strong>Verifikasi Identitas Resmi Permenkes No. 24/2022:</strong>
+              Mohon isi data diri sesuai <strong>Kartu Keluarga (KK)</strong> atau <strong>KTP</strong> Anda untuk penerbitan Rekam Medis Elektronik (RME) resmi klinik. Formulir ini wajib dilengkapi sebelum Anda dapat mengakses layanan reservasi dan konsultasi dokter.
+            </div>
+
+            <div class="modal-grid-2">
+              <div class="modal-form-group">
+                <label for="onboardingFullName">Nama Lengkap (Sesuai Kartu Keluarga / KTP) *</label>
+                <input type="text" id="onboardingFullName" placeholder="Nama lengkap tanpa singkatan" required />
+              </div>
+              <div class="modal-form-group">
+                <label for="onboardingNik">Nomor Induk Kependudukan (NIK 16 Digit) *</label>
+                <input type="text" id="onboardingNik" placeholder="Contoh: 3271xxxxxxxxxxxx" maxlength="16" pattern="\d{16}" required />
+              </div>
+            </div>
+
+            <div class="modal-grid-2">
+              <div class="modal-form-group">
+                <label for="onboardingBirthDate">Tanggal Lahir *</label>
+                <input type="date" id="onboardingBirthDate" required />
+              </div>
+              <div class="modal-form-group">
+                <label for="onboardingGender">Jenis Kelamin *</label>
+                <select id="onboardingGender" required>
+                  <option value="">-- Pilih Jenis Kelamin --</option>
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="modal-grid-2">
+              <div class="modal-form-group">
+                <label for="onboardingPhone">Nomor WhatsApp / HP Aktif *</label>
+                <input type="tel" id="onboardingPhone" placeholder="08xxxxxxxxxx" required />
+              </div>
+              <div class="modal-form-group">
+                <label for="onboardingAddress">Alamat Lengkap Domisili *</label>
+                <input type="text" id="onboardingAddress" placeholder="Nama jalan, RT/RW, kelurahan, kecamatan, kota" required />
+              </div>
+            </div>
+
+            <p class="form-notice" id="onboardingNotice"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn-modal-submit" id="btnSubmitOnboarding">
+              <span class="btn-spinner"></span>
+              <span>Simpan Data Diri &amp; Lanjutkan</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
          MODAL 3: PROFIL KESEHATAN MANDIRI
+         (Bisa dilewati atau ditutup oleh pasien)
          ══════════════════════════════════════════════════════════ -->
     <div class="modal-backdrop" id="modalHealthProfile" role="dialog" aria-modal="true" aria-labelledby="modalHealthProfileTitle" aria-hidden="true">
       <div class="modal-dialog">
@@ -229,6 +299,9 @@
         </div>
         <form id="formHealthProfile" novalidate>
           <div class="modal-body">
+            <div class="modal-info-box">
+              Informasi riwayat alergi dan kontak darurat bersifat opsional namun sangat membantu dokter dalam memberikan resep dan penanganan medis yang aman.
+            </div>
             <div class="modal-grid-2">
               <div class="modal-form-group">
                 <label for="healthBloodType">Golongan Darah</label>
@@ -238,6 +311,7 @@
                   <option value="B">B</option>
                   <option value="AB">AB</option>
                   <option value="O">O</option>
+                  <option value="-">- (Belum Tahu)</option>
                 </select>
               </div>
               <div class="modal-form-group">
@@ -247,18 +321,18 @@
             </div>
             <div class="modal-form-group">
               <label for="healthEmergencyContact">Nama Kontak Darurat</label>
-              <input type="text" id="healthEmergencyContact" placeholder="Nama kerabat / keluarga" required />
+              <input type="text" id="healthEmergencyContact" placeholder="Nama kerabat / keluarga" />
             </div>
             <div class="modal-form-group">
               <label for="healthEmergencyPhone">Nomor Telepon Kontak Darurat</label>
-              <input type="tel" id="healthEmergencyPhone" placeholder="08xxxxxxxxxx" required />
+              <input type="tel" id="healthEmergencyPhone" placeholder="08xxxxxxxxxx" />
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn-modal-cancel" data-modal-close>Batal</button>
+            <button type="button" class="btn-modal-cancel" data-modal-close>Lewati untuk Sekarang</button>
             <button type="submit" class="btn-modal-submit" id="btnSubmitHealthProfile">
               <span class="btn-spinner"></span>
-              <span>Simpan Pembaruan</span>
+              <span>Simpan Profil Kesehatan</span>
             </button>
           </div>
         </form>

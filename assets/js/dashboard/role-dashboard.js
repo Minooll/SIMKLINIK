@@ -207,6 +207,18 @@
     const healthEmergencyPhone = document.getElementById('healthEmergencyPhone');
     const btnSubmitHealthProfile = document.getElementById('btnSubmitHealthProfile');
 
+    // Setup Onboarding References (Mandatory & Static Backdrop)
+    const modalPatientOnboarding = document.getElementById('modalPatientOnboarding');
+    const formPatientOnboarding = document.getElementById('formPatientOnboarding');
+    const onboardingFullName = document.getElementById('onboardingFullName');
+    const onboardingNik = document.getElementById('onboardingNik');
+    const onboardingBirthDate = document.getElementById('onboardingBirthDate');
+    const onboardingGender = document.getElementById('onboardingGender');
+    const onboardingPhone = document.getElementById('onboardingPhone');
+    const onboardingAddress = document.getElementById('onboardingAddress');
+    const onboardingNotice = document.getElementById('onboardingNotice');
+    const btnSubmitOnboarding = document.getElementById('btnSubmitOnboarding');
+
     // 1. Populate Booking Form Options
     async function loadBookingFormData() {
       if (!bookingServiceSelect) return;
@@ -330,7 +342,17 @@
       });
     }
 
-    // 5. Health Profile Submit
+    // Pre-fill health profile form if patient data exists
+    function populateHealthProfileForm() {
+      if (!currentPatientRecord) return;
+      if (healthBloodType && currentPatientRecord.blood_type) healthBloodType.value = currentPatientRecord.blood_type;
+      if (healthAllergies && currentPatientRecord.allergies) healthAllergies.value = currentPatientRecord.allergies;
+      if (healthEmergencyContact && currentPatientRecord.emergency_contact) healthEmergencyContact.value = currentPatientRecord.emergency_contact;
+      if (healthEmergencyPhone && currentPatientRecord.emergency_phone) healthEmergencyPhone.value = currentPatientRecord.emergency_phone;
+    }
+    populateHealthProfileForm();
+
+    // 5. Health Profile Submit (Optional / Dismissable)
     if (formHealthProfile) {
       formHealthProfile.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -338,11 +360,6 @@
         const allergies = healthAllergies.value.trim();
         const emergency_contact = healthEmergencyContact.value.trim();
         const emergency_phone = healthEmergencyPhone.value.trim();
-
-        if (!emergency_contact || !emergency_phone) {
-          window.Toast.error('Kontak darurat dan nomor telepon wajib diisi.');
-          return;
-        }
 
         setButtonLoading(btnSubmitHealthProfile, true);
         const patientId = currentPatientRecord ? currentPatientRecord.id : 'demo-patient-uuid';
@@ -357,13 +374,148 @@
         setButtonLoading(btnSubmitHealthProfile, false);
 
         if (res.success) {
+          if (currentPatientRecord) {
+            currentPatientRecord.blood_type = blood_type;
+            currentPatientRecord.allergies = allergies;
+            currentPatientRecord.emergency_contact = emergency_contact;
+            currentPatientRecord.emergency_phone = emergency_phone;
+          }
           window.Toast.success('Profil kesehatan mandiri berhasil disimpan.');
           window.Modal.close('modalHealthProfile');
         } else {
-          window.Toast.info('Pembaruan profil tersimpan lokal.');
+          window.Toast.info('Pembaruan profil tersimpan.');
           window.Modal.close('modalHealthProfile');
         }
       });
+    }
+
+    // 5b. Patient Onboarding Submit (Mandatory & Non-closable)
+    if (formPatientOnboarding) {
+      formPatientOnboarding.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (onboardingNotice) onboardingNotice.textContent = '';
+
+        const fullName = (onboardingFullName.value || '').trim();
+        const nik = (onboardingNik.value || '').trim();
+        const birthDate = (onboardingBirthDate.value || '').trim();
+        const gender = onboardingGender.value;
+        const phone = (onboardingPhone.value || '').trim();
+        const address = (onboardingAddress.value || '').trim();
+
+        if (!fullName || fullName.length < 3) {
+          if (onboardingNotice) onboardingNotice.textContent = 'Nama lengkap sesuai Kartu Keluarga (KK) wajib diisi minimal 3 karakter.';
+          onboardingFullName.focus();
+          return;
+        }
+
+        if (!nik || !/^\d{16}$/.test(nik)) {
+          if (onboardingNotice) onboardingNotice.textContent = 'Nomor Induk Kependudukan (NIK) wajib 16 digit angka.';
+          onboardingNik.focus();
+          return;
+        }
+
+        if (!birthDate) {
+          if (onboardingNotice) onboardingNotice.textContent = 'Tanggal lahir wajib diisi.';
+          onboardingBirthDate.focus();
+          return;
+        }
+
+        if (!gender) {
+          if (onboardingNotice) onboardingNotice.textContent = 'Silakan pilih jenis kelamin.';
+          onboardingGender.focus();
+          return;
+        }
+
+        if (!phone || phone.length < 9) {
+          if (onboardingNotice) onboardingNotice.textContent = 'Nomor WhatsApp / HP aktif wajib diisi minimal 9 digit.';
+          onboardingPhone.focus();
+          return;
+        }
+
+        if (!address) {
+          if (onboardingNotice) onboardingNotice.textContent = 'Alamat domisili lengkap wajib diisi.';
+          onboardingAddress.focus();
+          return;
+        }
+
+        setButtonLoading(btnSubmitOnboarding, true);
+        const userId = currentAuthUser ? currentAuthUser.id : (currentPatientRecord?.profile_id || 'demo-patient-user');
+
+        const res = await window.patientService.completePatientOnboarding(userId, {
+          full_name: fullName,
+          nik,
+          birth_date: birthDate,
+          gender,
+          phone,
+          address
+        });
+
+        setButtonLoading(btnSubmitOnboarding, false);
+
+        if (res.success && res.data) {
+          currentPatientRecord = { ...(currentPatientRecord || {}), ...res.data };
+          if (headerName) headerName.textContent = fullName;
+          const inits = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'P';
+          if (headerAvatar) headerAvatar.textContent = inits;
+
+          window.Toast.success('Data identitas sesuai Kartu Keluarga berhasil diverifikasi dan disimpan.');
+          window.Modal.close('modalPatientOnboarding');
+
+          // Pre-populate health profile form
+          populateHealthProfileForm();
+
+          // Auto open Modal 2: Health Profile (Optional / Dismissable)
+          setTimeout(() => {
+            window.Toast.info('Silakan lengkapi riwayat alergi dan golongan darah Anda (dapat dilewati).');
+            window.Modal.open('modalHealthProfile');
+          }, 450);
+        } else {
+          if (onboardingNotice) onboardingNotice.textContent = res.error || 'Gagal menyimpan data kependudukan. Coba lagi.';
+          window.Toast.error(res.error || 'Gagal menyimpan data kependudukan.');
+        }
+      });
+    }
+
+    // 5c. Check if onboarding is needed
+    function checkPatientOnboardingRequirement() {
+      if (!modalPatientOnboarding) return;
+
+      const hasNik = currentPatientRecord && currentPatientRecord.nik && currentPatientRecord.nik.trim().length === 16;
+      const hasBirthDate = currentPatientRecord && currentPatientRecord.birth_date;
+      const hasGender = currentPatientRecord && currentPatientRecord.gender;
+      const hasPhone = currentPatientRecord && currentPatientRecord.phone && currentPatientRecord.phone.trim().length >= 9;
+      const profileName = (currentPatientRecord && currentPatientRecord.profile && currentPatientRecord.profile.full_name) ||
+        (currentAuthUser && currentAuthUser.user_metadata && (currentAuthUser.user_metadata.full_name || currentAuthUser.user_metadata.name)) || '';
+      const hasValidFullName = profileName && !profileName.includes('@') && profileName.trim().length >= 3;
+
+      const isComplete = hasNik && hasBirthDate && hasGender && hasPhone && hasValidFullName;
+
+      if (!isComplete) {
+        // Pre-fill existing data from Google / Auth user
+        if (onboardingFullName && !onboardingFullName.value) {
+          onboardingFullName.value = profileName && !profileName.includes('@') ? profileName : '';
+        }
+        if (onboardingPhone && !onboardingPhone.value && currentPatientRecord?.phone) {
+          onboardingPhone.value = currentPatientRecord.phone;
+        }
+        if (onboardingNik && !onboardingNik.value && currentPatientRecord?.nik) {
+          onboardingNik.value = currentPatientRecord.nik;
+        }
+        if (onboardingBirthDate && !onboardingBirthDate.value && currentPatientRecord?.birth_date) {
+          onboardingBirthDate.value = currentPatientRecord.birth_date;
+        }
+        if (onboardingGender && !onboardingGender.value && currentPatientRecord?.gender) {
+          onboardingGender.value = currentPatientRecord.gender;
+        }
+        if (onboardingAddress && !onboardingAddress.value && currentPatientRecord?.address) {
+          onboardingAddress.value = currentPatientRecord.address;
+        }
+
+        // Open mandatory modal (backdrop static, non-closable)
+        setTimeout(() => {
+          window.Modal.open('modalPatientOnboarding');
+        }, 350);
+      }
     }
 
     // 6. View Dispatcher for Pasien
@@ -777,6 +929,7 @@
     }
 
     refreshPasienDashboard();
+    checkPatientOnboardingRequirement();
   }
 
   // Global helper to view Medical Record Detail in Modal
