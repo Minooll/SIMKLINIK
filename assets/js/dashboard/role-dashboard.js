@@ -2134,6 +2134,60 @@
     if (btnSaveSoapDraft) btnSaveSoapDraft.addEventListener('click', () => handleSoapSubmit(false));
     if (btnFinalizeSoap) btnFinalizeSoap.addEventListener('click', () => handleSoapSubmit(true));
 
+    // AI Ambient SOAP Assistant Generator
+    const btnAiGenerateSoap = document.getElementById('btnAiGenerateSoap');
+    if (btnAiGenerateSoap) {
+      btnAiGenerateSoap.addEventListener('click', async () => {
+        const rawInput = document.getElementById('aiSoapRawInput');
+        const rawNotes = rawInput ? rawInput.value.trim() : '';
+        if (!rawNotes) {
+          if (window.Toast) window.Toast.warning('Ketikkan catatan mentah pemeriksaan terlebih dahulu.');
+          return;
+        }
+
+        setButtonLoading(btnAiGenerateSoap, true);
+        try {
+          if (!window.aiService) throw new Error('Layanan AI belum siap.');
+
+          const vitals = {
+            systolic: document.getElementById('vitalSystolic')?.value,
+            diastolic: document.getElementById('vitalDiastolic')?.value,
+            pulse: document.getElementById('vitalPulse')?.value,
+            temp: document.getElementById('vitalTemp')?.value,
+            rr: document.getElementById('vitalRR')?.value
+          };
+
+          const soap = await window.aiService.generateSoapFromNotes(rawNotes, vitals);
+
+          if (soap.subjective && document.getElementById('soapSubjective')) {
+            document.getElementById('soapSubjective').value = soap.subjective;
+          }
+          if (soap.objective && document.getElementById('soapObjective')) {
+            document.getElementById('soapObjective').value = soap.objective;
+          }
+          if (soap.assessment && document.getElementById('soapAssessment')) {
+            document.getElementById('soapAssessment').value = soap.assessment;
+          }
+          if (soap.icd10 && document.getElementById('soapIcd10')) {
+            document.getElementById('soapIcd10').value = soap.icd10;
+          }
+          if (soap.plan && document.getElementById('soapPlan')) {
+            document.getElementById('soapPlan').value = soap.plan;
+          }
+
+          if (window.Toast) {
+            window.Toast.success('Format SOAP dan Kode ICD-10 WHO berhasil dibuat otomatis oleh AI!');
+          }
+        } catch (err) {
+          if (window.Toast) {
+            window.Toast.error(`Gagal memformat SOAP: ${err.message}`);
+          }
+        } finally {
+          setButtonLoading(btnAiGenerateSoap, false);
+        }
+      });
+    }
+
     async function renderDokterDashboard() {
       const activeDoc = allDoctors.find(d => d.id === activeDoctorId) || initialDoc;
       const docFullName = activeDoc?.profile?.full_name || 'Dokter';

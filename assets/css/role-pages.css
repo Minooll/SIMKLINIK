@@ -573,3 +573,236 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
   overflow-x: auto;
   padding-bottom: 2px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AI COPILOT, SAFETY CHECKER & ANALYTICS EXTENSIONS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Doctor AI Ambient SOAP Copilot */
+.ai-soap-copilot-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.ai-soap-copilot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ai-copilot-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #166534;
+  font-size: 0.9rem;
+}
+
+.ai-copilot-tag {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.ai-copilot-hint {
+  font-size: 0.8rem;
+  color: #374151;
+  margin: 0 0 6px 0;
+}
+
+.ai-soap-raw-textarea {
+  width: 100%;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.ai-soap-raw-textarea:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+.btn-ai-generate {
+  margin-top: 8px;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-ai-generate:hover {
+  background: #15803d;
+}
+
+/* Doctor e-Resep Safety Alert Banner */
+.ai-safety-alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+}
+
+.ai-safety-alert-banner[hidden] {
+  display: none !important;
+}
+
+.ai-safety-alert-banner.sedang {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+}
+
+.ai-safety-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.ai-safety-text strong {
+  display: block;
+  color: #991b1b;
+  margin-bottom: 2px;
+}
+
+.ai-safety-alert-banner.sedang .ai-safety-text strong {
+  color: #92400e;
+}
+
+.ai-safety-text p {
+  margin: 0 0 4px 0;
+  color: #374151;
+}
+
+.ai-safety-text small {
+  color: #047857;
+  font-weight: 600;
+}
+
+/* Petugas Natural Language Analytics Console */
+.petugas-ai-analytics-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.ai-analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ai-analytics-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.ai-badge-live {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.ai-analytics-input-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ai-analytics-input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.ai-analytics-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.ai-analytics-submit-btn {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-analytics-submit-btn:hover {
+  background: #0369a1;
+}
+
+.ai-analytics-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-stat-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.ai-stat-chip:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.ai-analytics-result-box {
+  margin-top: 14px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
