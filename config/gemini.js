@@ -37,9 +37,20 @@
   const hasKey = () => Boolean(getApiKey());
 
   const callGemini = async (prompt, systemInstruction = '', options = {}) => {
-    // 1. Try serverless proxy first
+    // 1. Determine serverless endpoint:
+    // If running on localhost or file:, automatically connect to production Vercel serverless proxy!
+    let endpoint = '/api/gemini';
+    if (typeof window !== 'undefined') {
+      const isLocalHost = window.location.hostname === 'localhost' ||
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.protocol === 'file:';
+      if (isLocalHost) {
+        endpoint = 'https://simklinik-one.vercel.app/api/gemini';
+      }
+    }
+
     try {
-      const res = await fetch('/api/gemini', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, systemInstruction, ...options })
@@ -48,14 +59,21 @@
         const data = await res.json();
         return data.text;
       }
-    } catch {
-      // Serverless not reachable (e.g. static preview or local file), fallback to direct client call
+      const errData = await res.json().catch(() => ({}));
+      if (errData && errData.error) {
+        throw new Error(errData.error);
+      }
+    } catch (netErr) {
+      if (netErr.message && !netErr.message.includes('fetch') && !netErr.message.includes('Failed to')) {
+        throw netErr;
+      }
+      // Serverless not reachable (e.g. offline), fallback to direct client call
     }
 
     // 2. Direct client fallback via Google Generative Language REST
     const localKey = getApiKey();
     if (!localKey) {
-      throw new Error('NO_API_KEY: Kunci Gemini API belum diatur. Silakan atur di menu pengaturan.');
+      throw new Error('NO_API_KEY: Kunci Gemini API belum diatur. Silakan atur di Vercel atau penyimpanan lokal.');
     }
 
     const candidateModels = [
