@@ -2,32 +2,32 @@
        DESIGN TOKENS
     ============================================================ */
 :root {
-  --clr-primary: #0ea5e9;
-  --clr-primary-dark: #0284c7;
-  --clr-primary-light: #e0f2fe;
+  --clr-primary: #0d9488;
+  --clr-primary-dark: #0f766e;
+  --clr-primary-light: #ccfbf1;
   --clr-teal: #14b8a6;
-  --clr-teal-dark: #0d9488;
-  --clr-success: #16a34a;
-  --clr-success-bg: #f0fdf4;
-  --clr-success-border: #bbf7d0;
-  --clr-error: #dc2626;
+  --clr-teal-dark: #0f766e;
+  --clr-success: #10b981;
+  --clr-success-bg: #ecfdf5;
+  --clr-success-border: #a7f3d0;
+  --clr-error: #ef4444;
   --clr-error-bg: #fef2f2;
   --clr-error-border: #fecaca;
   --clr-warning-bg: #fffbeb;
   --clr-warning-border: #fde68a;
-  --clr-text: #1e293b;
+  --clr-text: #0f172a;
   --clr-text-muted: #64748b;
-  --clr-border: #cbd5e1;
-  --clr-bg: #f0f9ff;
+  --clr-border: #e2e8f0;
+  --clr-bg: #f8fafc;
   --clr-white: #ffffff;
-  --clr-card-shadow: rgba(14, 165, 233, 0.12);
+  --clr-card-shadow: rgba(15, 23, 42, 0.08);
 
-  --radius-sm: 6px;
+  --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-xl: 28px;
-  --transition: 0.2s ease;
-  --font: "Inter", system-ui, -apple-system, sans-serif;
+  --transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 }
 
 /* ============================================================

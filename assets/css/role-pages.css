@@ -1,117 +1,163 @@
+/* ============================================================
+   SIMKLINIK — ROLE PAGES STYLESHEET (role-pages.css)
+   Clean Clinical Tech: Pasien, Dokter, Petugas Custom Views
+   ============================================================ */
+
 .feature-copy {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.6;
   padding: 0 0 18px;
 }
+
 .schedule-list .table-wrap {
   border-top: 1px solid var(--line);
   padding-top: 16px;
 }
+
 .table-primary {
   font-weight: 700;
   color: var(--ink);
 }
+
+/* ── Feature Forms (Inline & Modal) ── */
 .feature-form {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
+
 .feature-form label {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #718394;
+  color: var(--muted);
   text-transform: uppercase;
 }
-.feature-form input {
+
+.feature-form input,
+.feature-form select,
+.feature-form textarea {
   display: block;
   width: 100%;
-  margin-top: 7px;
+  margin-top: 6px;
   border: 1px solid var(--line);
-  border-radius: 7px;
-  padding: 11px 12px;
-  font: 13px "DM Sans";
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font: 13.5px var(--font-sans);
   color: var(--ink);
+  background: var(--paper);
   outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.feature-form input:focus {
+
+.feature-form input:focus,
+.feature-form select:focus,
+.feature-form textarea:focus {
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(22, 143, 136, 0.12);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
 }
+
 .feature-form .primary-button {
   justify-self: start;
 }
+
 .form-notice {
-  min-height: 16px;
+  min-height: 18px;
   color: var(--teal);
-  font-size: 12px;
+  font-size: 12.5px;
   margin: 0;
+  font-weight: 500;
 }
+
 #statsGrid:empty {
   display: none;
 }
+
 .welcome-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
+/* ── Button Hierarchy ── */
 .secondary-button {
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 7px;
-  padding: 12px 17px;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 13.5px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  gap: 8px;
+  transition: all var(--transition-bounce);
+  box-shadow: var(--shadow-xs);
 }
 
 .secondary-button:hover {
-  background: #f1f5f9;
+  background: #f8fafc;
   border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-.primary-button {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+.secondary-button:active {
+  transform: scale(0.98);
 }
 
 .action-btn-sm {
-  padding: 5px 10px;
+  padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   cursor: pointer;
   border: 1px solid transparent;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.15s ease;
+  gap: 5px;
+  transition: all var(--transition-fast);
+}
+
+.action-btn-sm:active {
+  transform: scale(0.96);
 }
 
 .action-btn-primary {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #f0f9ff;
+  color: #0284c7;
   border-color: #bae6fd;
 }
+
 .action-btn-primary:hover {
-  background: #bae6fd;
+  background: #e0f2fe;
+  color: #0369a1;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
 }
 
 .action-btn-success {
-  background: #dcfce7;
-  color: #15803d;
-  border-color: #bbf7d0;
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
 }
+
 .action-btn-success:hover {
-  background: #bbf7d0;
+  background: #d1fae5;
+  color: #047857;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+}
+
+.action-btn-danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.action-btn-danger:hover {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 /* ── Petugas Search Bar & Filter Pills ── */
@@ -119,13 +165,19 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 16px;
-  margin-bottom: 22px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-md);
+  padding: 10px 18px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.petugas-search-bar-wrap:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
 }
 
 .search-input-box {
@@ -133,28 +185,30 @@
   align-items: center;
   flex: 1;
   min-width: 260px;
-  gap: 10px;
+  gap: 12px;
   position: relative;
 }
 
 .search-svg-icon {
-  color: #718394;
+  color: var(--muted-light);
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .petugas-search-field {
   width: 100%;
   border: none;
   background: transparent;
-  font: 14px "DM Sans", -apple-system, sans-serif;
+  font: 14px var(--font-sans);
   color: var(--ink);
   outline: none;
   padding: 6px 0;
 }
 
 .petugas-search-field::placeholder {
-  color: #94a3b8;
-  font-size: 13px;
+  color: var(--muted-light);
+  font-size: 13.5px;
 }
 
 .search-clear-btn {
@@ -163,14 +217,14 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
-  color: #64748b;
+  color: var(--muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .search-clear-btn:hover {
@@ -181,41 +235,50 @@
 .search-filter-pills {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .filter-pill {
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--line);
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .filter-pill:hover {
   background: #f1f5f9;
   color: var(--ink);
+  border-color: #cbd5e1;
 }
 
 .filter-pill.active {
   background: var(--teal);
   color: #ffffff;
   border-color: var(--teal);
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
 }
 
 /* Quick Search Dropdown / Live Preview */
 .search-dropdown-container {
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  margin-top: -14px;
-  margin-bottom: 22px;
+  border-radius: var(--radius-md);
+  margin-top: -16px;
+  margin-bottom: 24px;
   padding: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInDown 0.2s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .search-results-section-title {
@@ -223,8 +286,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #718394;
-  margin: 10px 0 6px;
+  color: var(--muted);
+  margin: 12px 0 8px;
 }
 
 .search-results-section-title:first-child {
@@ -235,9 +298,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
-  border-radius: 6px;
-  transition: background 0.15s ease;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
 }
 
 .search-result-row:hover {
@@ -251,12 +314,12 @@
 }
 
 .search-result-info strong {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--ink);
 }
 
 .search-result-info small {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--muted);
 }
 
@@ -264,18 +327,19 @@
   font-size: 13px;
   color: var(--muted);
   text-align: center;
-  padding: 14px 0;
+  padding: 16px 0;
 }
 
 /* ── Doctor Switcher in Doctor Dashboard ── */
 .doctor-selector-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  box-shadow: var(--shadow-xs);
 }
 
 .doctor-select-label {
@@ -287,37 +351,37 @@
 
 .doctor-select-dropdown {
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font: 13px "DM Sans", -apple-system, sans-serif;
+  border-radius: var(--radius-xs);
+  padding: 6px 12px;
+  font: 13px var(--font-sans);
   color: var(--ink);
   background: #f8fafc;
   outline: none;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-fast);
 }
 
 .doctor-select-dropdown:focus {
   border-color: var(--teal);
 }
 
-/* Empty State Cards & Table Rows (Zero Inline Styles) */
+/* Empty State Cards & Table Rows */
 .empty-state-card {
-  padding: 24px;
+  padding: 28px 20px;
   text-align: center;
   background: #f8fafc;
   border: 1px dashed var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--muted);
-  font-size: 13px;
-  margin: 10px 0;
+  font-size: 13.5px;
+  margin: 12px 0;
 }
 
 .table-empty-row {
   text-align: center;
-  padding: 28px 16px;
+  padding: 32px 16px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 13.5px;
   font-style: italic;
 }
 
@@ -328,9 +392,9 @@
 /* ── Petugas Dashboard: Scrollable Queue & Schedule List ── */
 body[data-role="petugas"] .schedule-list,
 .schedule-panel .schedule-list {
-  max-height: 340px;
+  max-height: 360px;
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 6px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
@@ -359,7 +423,7 @@ body[data-role="petugas"] .schedule-list::-webkit-scrollbar-thumb:hover,
 
 /* Petugas Dashboard: Scrollable Lower Table with Sticky Header */
 body[data-role="petugas"] .lower-panel .table-wrap {
-  max-height: 400px;
+  max-height: 420px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
@@ -386,33 +450,33 @@ body[data-role="petugas"] .lower-panel .table-wrap::-webkit-scrollbar-thumb:hove
 body[data-role="petugas"] .lower-panel .table-wrap table thead th {
   position: sticky;
   top: 0;
-  background: var(--paper, #ffffff);
+  background: #f8fafc;
   z-index: 2;
   box-shadow: 0 1px 0 var(--line);
 }
 
 /* ══════════════════════════════════════════════════════════
    VIEW ALL POPUP MODALS (Daftar Lengkap Popup)
-   Zero inline styles, responsive, sticky header, scrollable
+   Clean Clinical Tech: Responsive, Sticky Header, Scrollable
    ══════════════════════════════════════════════════════════ */
 .modal-search-bar {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
   position: relative;
 }
 
 .modal-search-bar .search-input {
   flex: 1;
-  padding: 0.65rem 1rem 0.65rem 2.4rem;
+  padding: 0.7rem 1rem 0.7rem 2.5rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
   color: var(--ink);
-  background: var(--paper, #ffffff);
+  background: var(--paper);
   outline: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .modal-search-bar .search-input:focus {
@@ -422,32 +486,32 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
 
 .modal-search-bar .search-icon {
   position: absolute;
-  left: 0.8rem;
+  left: 0.85rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  color: var(--muted);
+  width: 17px;
+  height: 17px;
+  color: var(--muted-light);
   pointer-events: none;
 }
 
 .modal-search-bar .item-count-badge {
-  font-size: 0.8rem;
-  padding: 0.35rem 0.75rem;
-  background: var(--surface);
+  font-size: 0.82rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--canvas);
   color: var(--muted);
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-weight: 600;
   white-space: nowrap;
   border: 1px solid var(--line);
 }
 
 .modal-table-wrap {
-  max-height: 440px;
+  max-height: 460px;
   overflow-y: auto;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--paper, #ffffff);
+  border-radius: var(--radius-md);
+  background: var(--paper);
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
@@ -469,7 +533,7 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
 .modal-table-wrap table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.88rem;
 }
 
 .modal-table-wrap table thead th {
@@ -477,19 +541,19 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
   top: 0;
   background: #f8fafc;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.75rem 1rem;
+  letter-spacing: 0.05em;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--line);
   text-align: left;
   z-index: 2;
 }
 
 .modal-table-wrap table tbody td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--line);
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line-subtle);
   color: var(--ink);
   vertical-align: middle;
 }
@@ -505,11 +569,7 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
 .modal-filter-pills {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.9rem;
   overflow-x: auto;
   padding-bottom: 2px;
 }
-
-
-
-
