@@ -230,6 +230,15 @@
             <!-- Electronic Prescriptions Table -->
             <div class="modal-form-group">
               <label>Resep Obat Elektronik (e-Prescription)</label>
+              <!-- AI Safety Warning Banner -->
+              <div class="ai-safety-alert-banner" id="soapSafetyWarningBanner" hidden>
+                <div class="ai-safety-icon">⚠️</div>
+                <div class="ai-safety-text">
+                  <strong id="safetyWarningTitle">Peringatan Keamanan Obat</strong>
+                  <p id="safetyWarningDesc"></p>
+                  <small id="safetyWarningRec"></small>
+                </div>
+              </div>
               <table class="modal-table" id="tableSoapMedicines">
                 <thead>
                   <tr>

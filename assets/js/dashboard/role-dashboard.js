@@ -1999,6 +1999,49 @@
     const btnAddMedicine = document.getElementById('btnAddMedicineRow');
     const medicineTableBody = document.getElementById('soapMedicineRows');
 
+    // Reactive Safety Checker for e-Prescription (Allergy & Drug Interactions)
+    let safetyCheckTimeout = null;
+    const triggerMedicineSafetyCheck = () => {
+      clearTimeout(safetyCheckTimeout);
+      safetyCheckTimeout = setTimeout(async () => {
+        const banner = document.getElementById('soapSafetyWarningBanner');
+        if (!banner || !window.aiService) return;
+
+        const medRows = medicineTableBody ? medicineTableBody.querySelectorAll('tr') : [];
+        const meds = [];
+        medRows.forEach(tr => {
+          const name = tr.querySelector('.med-name')?.value?.trim();
+          const dosage = tr.querySelector('.med-dosage')?.value?.trim();
+          if (name) meds.push(`${name} ${dosage || ''}`);
+        });
+
+        if (meds.length === 0) {
+          banner.hidden = true;
+          return;
+        }
+
+        const patientAllergy = window.activeSoapPatientAllergies || 'Alergi Penisilin (Amoxicillin, Ampicillin)';
+
+        try {
+          const result = await window.aiService.checkPrescriptionSafety(patientAllergy, meds);
+          if (result && result.hasRisk) {
+            banner.hidden = false;
+            banner.className = `ai-safety-alert-banner ${result.severity === 'TINGGI' ? 'tinggi' : 'sedang'}`;
+            const titleEl = document.getElementById('safetyWarningTitle');
+            const descEl = document.getElementById('safetyWarningDesc');
+            const recEl = document.getElementById('safetyWarningRec');
+            if (titleEl) titleEl.textContent = `⚠️ Peringatan Keamanan Obat (${result.severity})`;
+            if (descEl) descEl.textContent = result.warning;
+            if (recEl) recEl.textContent = result.recommendation ? `Rekomendasi Alternatif: ${result.recommendation}` : '';
+          } else {
+            banner.hidden = true;
+          }
+        } catch {
+          banner.hidden = true;
+        }
+      }, 500);
+    };
+
     if (btnAddMedicine && medicineTableBody) {
       btnAddMedicine.addEventListener('click', () => {
         const tr = document.createElement('tr');
@@ -2007,11 +2050,14 @@
           <td><input type="text" class="table-input med-dosage" placeholder="500 mg" /></td>
           <td><input type="text" class="table-input med-freq" placeholder="3x1 sesudah makan" /></td>
           <td><input type="number" class="table-input med-qty" value="10" min="1" /></td>
-          <td><button type="button" class="action-btn-sm" onclick="this.closest('tr').remove()">&times;</button></td>
+          <td><button type="button" class="action-btn-sm" onclick="this.closest('tr').remove(); window.triggerMedicineSafetyCheck && window.triggerMedicineSafetyCheck();">&times;</button></td>
         `;
         medicineTableBody.appendChild(tr);
+        triggerMedicineSafetyCheck();
       });
+      medicineTableBody.addEventListener('input', triggerMedicineSafetyCheck);
     }
+    window.triggerMedicineSafetyCheck = triggerMedicineSafetyCheck;
 
     // Load all doctors across all poliklinik
     const allDoctors = await window.appointmentService.getAllDoctorsWithSchedules();
