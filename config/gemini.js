@@ -58,21 +58,27 @@
       throw new Error('NO_API_KEY: Kunci Gemini API belum diatur. Silakan atur di menu pengaturan.');
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${localKey}`;
-    const payload = buildGeminiPayload(prompt, systemInstruction, options);
-    const directRes = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    const candidateModels = [options.model, 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.0-flash'].filter(Boolean);
+    let lastError = null;
 
-    if (!directRes.ok) {
-      const errBody = await directRes.text();
-      throw new Error(`Gemini Error (${directRes.status}): ${errBody}`);
+    for (const m of candidateModels) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${localKey}`;
+      const payload = buildGeminiPayload(prompt, systemInstruction, options);
+      const directRes = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (directRes.ok) {
+        const result = await directRes.json();
+        return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      }
+
+      lastError = await directRes.text();
     }
 
-    const result = await directRes.json();
-    return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    throw new Error(`Gemini Error: ${lastError}`);
   };
 
   const api = {

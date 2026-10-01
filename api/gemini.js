@@ -22,12 +22,11 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { prompt, systemInstruction, temperature = 0.4, maxOutputTokens = 2048 } = req.body || {};
+    const { prompt, systemInstruction, model, temperature = 0.4, maxOutputTokens = 2048 } = req.body || {};
     if (!prompt) {
       return res.status(400).json({ error: 'Field "prompt" is required.' });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
     const payload = {
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
@@ -42,20 +41,28 @@ module.exports = async function handler(req, res) {
       };
     }
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    // Try user-specified model or cascade through common Gemini models
+    const candidateModels = [model, 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.0-flash'].filter(Boolean);
+    let lastError = null;
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ error: `Gemini API error: ${errText}` });
+    for (const m of candidateModels) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        return res.status(200).json({ text: candidateText, modelUsed: m, raw: data });
+      }
+
+      lastError = await response.text();
     }
 
-    const data = await response.json();
-    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    return res.status(200).json({ text: candidateText, raw: data });
+    return res.status(502).json({ error: `Gemini API error: ${lastError}` });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Internal proxy error' });
   }
