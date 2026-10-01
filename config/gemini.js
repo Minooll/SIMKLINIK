@@ -58,7 +58,14 @@
       throw new Error('NO_API_KEY: Kunci Gemini API belum diatur. Silakan atur di menu pengaturan.');
     }
 
-    const candidateModels = [options.model, 'gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
+    const candidateModels = [
+      options.model,
+      'gemini-3.8-flash',
+      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-3.7-flash',
+      'gemini-3.1-flash-lite'
+    ].filter(Boolean);
     let lastError = null;
 
     for (const m of candidateModels) {
