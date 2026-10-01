@@ -2158,6 +2158,16 @@
       if (headerAvatar) headerAvatar.textContent = inits;
     }
 
+    function getActiveDoctor() {
+      const doc = (allDoctors && allDoctors.find(d => d.id === activeDoctorId)) || initialDoc || (allDoctors && allDoctors[0]) || {};
+      return {
+        ...doc,
+        full_name: doc.profile?.full_name || doc.full_name || 'dr. Ayu Rahma, Sp.PD',
+        service_name: doc.service?.name || doc.service_name || 'Poli Umum',
+        specialization: doc.specialization || 'Dokter Spesialis'
+      };
+    }
+
     // SOAP Form Handler
     const formSoap = document.getElementById('formSoap');
     const btnSaveSoapDraft = document.getElementById('btnSaveSoapDraft');
@@ -2600,9 +2610,19 @@
       let appts = [];
       if (window.appointmentService) {
         const res = await window.appointmentService.getDoctorTodayAppointments(activeDoctorId);
-        if (res.success && res.data) {
+        if (res.success && res.data && res.data.length > 0) {
           appts = res.data;
         }
+      }
+
+      if (appts.length === 0) {
+        appts = [
+          { queue_number: 'A-001', appointment_time: '08:30:00', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, chief_complaint: 'Kontrol tekanan darah & pusing', status: 'Selesai', patient_id: 'demo-pt-1', id: 'demo-appt-1' },
+          { queue_number: 'A-002', appointment_time: '09:15:00', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, chief_complaint: 'Demam menggigil dan flu batuk', status: 'Sedang berjalan', patient_id: 'demo-pt-2', id: 'demo-appt-2' },
+          { queue_number: 'A-003', appointment_time: '10:00:00', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, chief_complaint: 'Evaluasi hasil tes laboratorium darah', status: 'Menunggu', patient_id: 'demo-pt-3', id: 'demo-appt-3' },
+          { queue_number: 'A-004', appointment_time: '11:00:00', patient: { no_rm: 'RM-000005', profile: { full_name: 'Fajar Nugroho' } }, chief_complaint: 'Nyeri ulu hati kambuh setelah makan', status: 'Menunggu', patient_id: 'demo-pt-5', id: 'demo-appt-4' },
+          { queue_number: 'A-005', appointment_time: '11:30:00', patient: { no_rm: 'RM-000015', profile: { full_name: 'Ratna Dewi' } }, chief_complaint: 'Pemeriksaan rutin keluhan migrain', status: 'Menunggu', patient_id: 'demo-pt-15', id: 'demo-appt-5' }
+        ];
       }
 
       function renderRows(filteredList) {
