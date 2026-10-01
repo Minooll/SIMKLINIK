@@ -955,12 +955,39 @@
       <div class="modal-form-group">
         <label>P — Plan (Rencana Terapi &amp; Resep)</label>
         <p class="feature-copy">${plan}</p>
+        <button type="button" class="btn-ai-explain-med" onclick="window.openMedicationExplainer('${escapeJsStr(plan)}', '${escapeJsStr(assess)}')">
+          ✨ Jelaskan Aturan Obat &amp; Gaya Hidup dengan AI
+        </button>
       </div>
       <div class="modal-alert-box">
         Catatan rekam medis elektronik ini telah ditandatangani secara digital dan dikunci sesuai Permenkes No. 24/2022.
       </div>
     `;
     window.Modal.open('modalMedicalDetail');
+  };
+
+  // Global helper for AI Medication Explainer
+  window.openMedicationExplainer = async (planText, diagnosis) => {
+    const modal = document.getElementById('modalMedicationExplainer');
+    const container = document.getElementById('medExplainerContent');
+    if (!modal || !container) return;
+
+    container.innerHTML = '<div class="loading-state"><span class="btn-spinner"></span> Menyiapkan penjelasan aturan obat...</div>';
+    if (window.Modal) window.Modal.open('modalMedicationExplainer');
+
+    try {
+      if (!window.aiService) throw new Error('Layanan AI belum siap.');
+      const explanation = await window.aiService.explainMedications(planText, diagnosis);
+      const formatted = explanation
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n- /g, '<br>• ')
+        .replace(/\n/g, '<br>');
+      container.innerHTML = `<div class="ai-explainer-body">${formatted}</div>`;
+    } catch (err) {
+      container.innerHTML = `<div class="error-state">Gagal memuat penjelasan obat: ${err.message}</div>`;
+    }
   };
 
   /* ══════════════════════════════════════════════════════════

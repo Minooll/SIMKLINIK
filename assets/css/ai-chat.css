@@ -344,3 +344,30 @@
   0%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-4px); }
 }
+
+/* AI Medication Explainer */
+.btn-ai-explain-med {
+  margin-top: 8px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.btn-ai-explain-med:hover {
+  background: #0369a1;
+}
+.ai-explainer-body {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #1e293b;
+  padding: 8px 0;
+}
+
