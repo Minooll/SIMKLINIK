@@ -38,13 +38,13 @@
             .from('appointments')
             .select(`
               id,
-              service:services (name, consultation_fee)
+              service:services (name, base_price)
             `)
             .eq('id', appointmentId)
             .maybeSingle();
 
           if (appt && appt.service) {
-            consultationFee = Number(appt.service.consultation_fee) || 50000;
+            consultationFee = Number(appt.service.base_price) || 50000;
             serviceName = appt.service.name;
           }
         }
@@ -58,12 +58,13 @@
             .from('prescriptions')
             .select(`
               id,
+              medical_record:medical_records!inner (patient_id),
               prescription_items (
                 medicine_name,
                 quantity
               )
             `)
-            .eq('patient_id', patientId)
+            .eq('medical_records.patient_id', patientId)
             .order('created_at', { ascending: false })
             .limit(1);
 
@@ -191,15 +192,16 @@
           .select(`
             id,
             invoice_number,
-            amount,
+            total_amount,
             payment_method,
-            payment_type,
             status,
             paid_at,
             created_at,
-            patient:patients!inner (
-              no_rm,
-              profile:profiles!inner (full_name)
+            appointment:appointments!inner (
+              patient:patients!inner (
+                no_rm,
+                profile:profiles!inner (full_name)
+              )
             )
           `)
           .gte('created_at', `${todayStr}T00:00:00`)
@@ -207,7 +209,12 @@
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return { success: true, data: data || [] };
+        const formatted = (data || []).map(p => ({
+          ...p,
+          amount: p.total_amount,
+          patient: p.appointment?.patient || null
+        }));
+        return { success: true, data: formatted };
       } catch (err) {
         console.warn('[billingService.getTodayPayments]', err.message);
         return { success: false, error: err.message, data: [] };

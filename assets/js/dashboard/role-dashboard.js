@@ -615,6 +615,7 @@
       if (!modal || !tableBody) return;
 
       let appts = [];
+      const patientId = currentPatientRecord ? currentPatientRecord.id : null;
       if (patientId && window.appointmentService) {
         const res = await window.appointmentService.getPatientAppointments(patientId);
         if (res.success && res.data && res.data.length > 0) {
@@ -691,6 +692,7 @@
       if (!modal || !tableBody) return;
 
       let records = [];
+      const patientId = currentPatientRecord ? currentPatientRecord.id : null;
       if (patientId && window.medicalRecordService) {
         const recRes = await window.medicalRecordService.getPatientHistory(patientId);
         if (recRes.success && recRes.data && recRes.data.length > 0) {

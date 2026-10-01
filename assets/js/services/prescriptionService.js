@@ -92,9 +92,12 @@
             status,
             notes,
             created_at,
-            doctor:doctors (
-              specialization,
-              profile:profiles (full_name)
+            medical_record:medical_records!inner (
+              patient_id,
+              doctor:doctors (
+                specialization,
+                profile:profiles (full_name)
+              )
             ),
             prescription_items (
               id,
@@ -105,7 +108,7 @@
               instructions
             )
           `)
-          .eq('patient_id', patientId)
+          .eq('medical_records.patient_id', patientId)
           .order('created_at', { ascending: false });
 
         if (error) throw error;

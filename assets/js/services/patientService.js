@@ -99,8 +99,8 @@
           const { data, error } = await client
             .from('patients')
             .select(`
-              id, no_rm, nik, birth_date, gender, blood_type, allergies,
-              profile:profiles!inner (full_name, phone, address)
+              id, no_rm, nik, birth_date, gender, blood_type, allergies, phone, emergency_contact, emergency_phone,
+              profile:profiles!inner (full_name, username)
             `)
             .order('created_at', { ascending: false })
             .limit(20);
@@ -112,8 +112,8 @@
         const { data, error } = await client
           .from('patients')
           .select(`
-            id, no_rm, nik, birth_date, gender, blood_type, allergies,
-            profile:profiles!inner (full_name, phone, address)
+            id, no_rm, nik, birth_date, gender, blood_type, allergies, phone, emergency_contact, emergency_phone,
+            profile:profiles!inner (full_name, username)
           `)
           .or(`no_rm.ilike.%${trimmed}%,nik.ilike.%${trimmed}%`)
           .limit(20);

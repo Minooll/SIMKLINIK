@@ -299,11 +299,11 @@
           result = data;
         }
 
-        // If finalized and attached to appointment, update appointment status to COMPLETED
+        // If finalized and attached to appointment, update appointment status to Selesai
         if (isFinal && appointmentId) {
           await client
             .from('appointments')
-            .update({ status: 'COMPLETED' })
+            .update({ status: 'Selesai' })
             .eq('id', appointmentId);
         }
 

@@ -25,33 +25,42 @@
             id,
             queue_number,
             status,
-            queue_date,
             created_at,
             called_at,
-            served_at,
-            completed_at,
-            service:services (id, code, name),
-            patient:patients!inner (
+            appointment:appointments!inner (
               id,
-              no_rm,
-              profile:profiles!inner (full_name, phone)
-            ),
-            doctor:doctors (
-              id,
-              specialization,
-              profile:profiles (full_name)
+              appointment_date,
+              appointment_time,
+              service:services (id, code, name),
+              patient:patients!inner (
+                id,
+                no_rm,
+                phone,
+                profile:profiles!inner (full_name)
+              ),
+              doctor:doctors (
+                id,
+                specialization,
+                profile:profiles (full_name)
+              )
             )
           `)
-          .eq('queue_date', todayStr)
+          .eq('appointment.appointment_date', todayStr)
           .order('queue_number', { ascending: true });
 
         if (serviceId) {
-          query = query.eq('service_id', serviceId);
+          query = query.eq('appointment.service_id', serviceId);
         }
 
         const { data, error } = await query;
         if (error) throw error;
-        return { success: true, data: data || [] };
+        const formatted = (data || []).map(q => ({
+          ...q,
+          service: q.appointment?.service || null,
+          patient: q.appointment?.patient || null,
+          doctor: q.appointment?.doctor || null
+        }));
+        return { success: true, data: formatted };
       } catch (err) {
         console.warn('[queueService.getTodayQueue]', err.message);
         return { success: false, error: err.message, data: [] };
@@ -117,19 +126,28 @@
             id,
             queue_number,
             status,
-            service:services (name),
-            doctor:doctors (
-              profile:profiles (full_name)
+            appointment:appointments!inner (
+              patient_id,
+              appointment_date,
+              service:services (name),
+              doctor:doctors (
+                profile:profiles (full_name)
+              )
             )
           `)
-          .eq('patient_id', patientId)
-          .eq('queue_date', todayStr)
-          .in('status', ['WAITING', 'CALLED', 'SERVING'])
+          .eq('appointment.patient_id', patientId)
+          .eq('appointment.appointment_date', todayStr)
+          .in('status', ['Menunggu', 'Dipanggil', 'Dilayani', 'WAITING', 'CALLED', 'SERVING'])
           .order('queue_number', { ascending: true })
           .maybeSingle();
 
         if (error) throw error;
-        return { success: true, data };
+        const formatted = data ? {
+          ...data,
+          service: data.appointment?.service || null,
+          doctor: data.appointment?.doctor || null
+        } : null;
+        return { success: true, data: formatted };
       } catch (err) {
         console.warn('[queueService.getPatientActiveQueue]', err.message);
         return { success: false, error: err.message, data: null };

@@ -64,7 +64,12 @@
         petugas: { label: 'Petugas', username: 'petugas', authEmail: 'petugas@simklinik.id' },
         pasien: { label: 'Pasien', username: '', authEmail: '' }
       };
-      let selectedRole = 'dokter';
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialRoleParam = urlParams.get('role');
+      let selectedRole = (initialRoleParam && demoAccounts[initialRoleParam.toLowerCase()])
+        ? initialRoleParam.toLowerCase()
+        : 'dokter';
 
       function updateRole(role) {
         selectedRole = role;
@@ -78,12 +83,12 @@
         usernameLabel.textContent = isPatient ? 'Email pasien' : 'Username';
         usernameInput.type = isPatient ? 'email' : 'text';
         usernameInput.name = isPatient ? 'email' : 'username';
-        usernameInput.placeholder = isPatient ? 'nama@gmail.com' : `Masukkan username ${role}`;
+        usernameInput.placeholder = isPatient ? 'nama@email.com' : `Masukkan username ${role}`;
         usernameInput.autocomplete = isPatient ? 'email' : 'username';
         demoHint.innerHTML = isPatient
-          ? '<span>i</span> Gunakan email Gmail yang sudah terdaftar di Supabase.'
+          ? '<span>i</span> Gunakan alamat email terdaftar akun Pasien.'
           : `<span>i</span> Username akan dicocokkan dengan akun Supabase ${account.authEmail}.`;
-        authSubtitle.textContent = isPatient ? 'Pasien wajib masuk menggunakan alamat email Gmail.' : `Akses khusus ${account.label.toLowerCase()} menggunakan username.`;
+        authSubtitle.textContent = isPatient ? 'Akses portal pasien menggunakan email terdaftar.' : `Akses khusus ${account.label.toLowerCase()} menggunakan username.`;
         googleSignInSection.classList.toggle('auth-form-hidden', !isPatient);
         authDivider.classList.remove('auth-form-hidden');
         usernameInput.value = '';
@@ -285,8 +290,8 @@
         const identifier = usernameInput.value.trim().toLowerCase();
         const password = passwordInput.value;
 
-        if (selectedRole === 'pasien' && !/^[^\s@]+@gmail\.com$/i.test(identifier)) {
-          showError('Email pasien tidak valid', 'Pasien harus masuk menggunakan email dengan format @gmail.com.');
+        if (selectedRole === 'pasien' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(identifier)) {
+          showError('Email pasien tidak valid', 'Masukkan format alamat email yang valid (contoh: nama@email.com).');
           usernameInput.focus();
           return;
         }
@@ -305,11 +310,25 @@
           showSuccess(user);
         } catch (err) {
           setLoading(false);
+          shake(form);
+
+          // Track failed attempts for Brute-force protection
+          const bf = getBF();
+          bf.attempts = (bf.attempts || 0) + 1;
+          if (bf.attempts >= MAX_ATTEMPTS) {
+            bf.until = Date.now() + (LOCKOUT_SECS * 1000);
+            saveBF(bf);
+            startLockoutUI(LOCKOUT_SECS);
+            showError('Terlalu Banyak Percobaan', `Terdeteksi 5x percobaan gagal. Form dikunci sementara selama ${LOCKOUT_SECS} detik untuk keamanan.`);
+            return;
+          }
+          saveBF(bf);
+
           const errorMessage = (err.message || '').toLowerCase();
           if (errorMessage.includes('email not confirmed')) {
             showError('Email Belum Diverifikasi', 'Buka email verifikasi dari Supabase, lalu klik tautannya sebelum mencoba login kembali.');
           } else if (errorMessage.includes('invalid login credentials')) {
-            showError('Email atau Password Salah', 'Periksa kembali email dan password Anda. Pastikan email yang digunakan sama dengan saat registrasi.');
+            showError('Email atau Password Salah', `Kredensial tidak cocok (Percobaan gagal ke-${bf.attempts} dari ${MAX_ATTEMPTS}).`);
           } else if (errorMessage.includes('role akun tidak sesuai')) {
             showError('Akses Role Tidak Sesuai', err.message);
           } else if (err.code === 'PROFILE_UNAVAILABLE') {

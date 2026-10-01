@@ -1,0 +1,9 @@
+# Scratch & Local temporary test scripts
+scratch/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
