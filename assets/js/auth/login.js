@@ -249,7 +249,7 @@
           .eq('id', data.user.id)
           .single();
         if (profileError) {
-          const profileSetupError = new Error('Profil akun belum tersedia. Jalankan supabase-schema.sql di Supabase SQL Editor.');
+          const profileSetupError = new Error('Profil akun belum tersedia. Jalankan supabase-complete-schema.sql di Supabase SQL Editor.');
           profileSetupError.code = 'PROFILE_UNAVAILABLE';
           profileSetupError.cause = profileError;
           throw profileSetupError;
