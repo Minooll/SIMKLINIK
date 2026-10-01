@@ -1014,6 +1014,61 @@
     let petugasSearchQuery = '';
     let petugasActiveFilter = 'all'; // 'all' | 'pasien' | 'dokter'
 
+    // Natural Language Analytics Console Handler ("Tanya Data Klinik")
+    const formAiAnalytics = document.getElementById('formAiAnalytics');
+    if (formAiAnalytics) {
+      formAiAnalytics.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const queryInput = document.getElementById('aiAnalyticsQuery');
+        const resultBox = document.getElementById('aiAnalyticsResultBox');
+        const submitBtn = document.getElementById('btnSubmitAnalytics');
+        const query = queryInput ? queryInput.value.trim() : '';
+
+        if (!query || !resultBox) return;
+
+        setButtonLoading(submitBtn, true);
+        resultBox.hidden = false;
+        resultBox.innerHTML = '<span class="btn-spinner"></span> Menganalisis data klinik dengan AI...';
+
+        try {
+          if (!window.aiService) throw new Error('Layanan AI belum siap.');
+
+          const datasetSummary = {
+            totalQueueToday: 12,
+            patientsRegisteredToday: 36,
+            activeDoctors: 8,
+            paidPercentage: '92%',
+            topDiagnosisSample: ['Faringitis Akut (J02.9)', 'Dispepsia (K29.7)', 'Hipertensi Primer (I10)'],
+            activeServices: ['Poli Umum', 'Poli Gigi', 'Poli Anak', 'Laboratorium']
+          };
+
+          const analysis = await window.aiService.queryClinicalAnalytics(query, datasetSummary);
+          const formatted = analysis
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n- /g, '<br>• ')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+
+          resultBox.innerHTML = formatted;
+        } catch (err) {
+          resultBox.innerHTML = `<span class="error-text">Gagal memproses analitik: ${err.message}</span>`;
+        } finally {
+          setButtonLoading(submitBtn, false);
+        }
+      });
+
+      // Delegate quick analytics chips
+      document.querySelector('.ai-analytics-chips')?.addEventListener('click', (e) => {
+        const chip = e.target.closest('.ai-stat-chip');
+        if (chip && chip.dataset.query) {
+          const queryInput = document.getElementById('aiAnalyticsQuery');
+          if (queryInput) queryInput.value = chip.dataset.query;
+          formAiAnalytics.dispatchEvent(new Event('submit'));
+        }
+      });
+    }
+
     // New Patient Walk-in Form Modal handler
     const formNewPatient = document.getElementById('formNewPatient');
     const btnSubmitNewPatient = document.getElementById('btnSubmitNewPatient');
