@@ -1150,6 +1150,9 @@
 
         if (!query || !resultBox) return;
 
+        const restoreBanner = document.getElementById('aiRestoreBanner');
+        if (restoreBanner) restoreBanner.hidden = true;
+
         setButtonLoading(submitBtn, true);
         resultBox.hidden = false;
         resultBox.innerHTML = `
@@ -1185,16 +1188,26 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                 <strong>Jawaban Asisten AI (Analisis Data Klinik)</strong>
               </div>
-              <button type="button" class="ai-hide-btn" id="btnHideAiAnalytics" aria-label="Sembunyikan jawaban AI">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                <span>Sembunyikan</span>
-              </button>
+              <div class="ai-result-actions">
+                <button type="button" class="ai-hide-btn" id="btnHideAiAnalytics" aria-label="Sembunyikan jawaban AI (tersimpan)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  <span>Sembunyikan</span>
+                </button>
+                <button type="button" class="ai-close-btn" id="btnCloseAiAnalytics" aria-label="Tutup dan hapus jawaban AI">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  <span>Tutup Jawaban</span>
+                </button>
+              </div>
             </div>
             <div class="ai-result-content">
               ${formatted}
             </div>
             <div class="ai-result-footer">
               <button type="button" class="ai-hide-btn" id="btnHideAiAnalyticsBottom" aria-label="Sembunyikan jawaban AI">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                <span>Sembunyikan Jawaban</span>
+              </button>
+              <button type="button" class="ai-close-btn" id="btnCloseAiAnalyticsBottom" aria-label="Tutup dan hapus jawaban AI">
                 <span>Tutup Jawaban &times;</span>
               </button>
             </div>
@@ -1206,10 +1219,14 @@
               <div class="ai-result-meta error-text">
                 <strong>Gagal Memproses Analitik</strong>
               </div>
-              <button type="button" class="ai-hide-btn" id="btnHideAiAnalytics" aria-label="Sembunyikan pesan error">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                <span>Sembunyikan</span>
-              </button>
+              <div class="ai-result-actions">
+                <button type="button" class="ai-hide-btn" id="btnHideAiAnalytics" aria-label="Sembunyikan pesan error">
+                  <span>Sembunyikan</span>
+                </button>
+                <button type="button" class="ai-close-btn" id="btnCloseAiAnalytics" aria-label="Tutup pesan error">
+                  <span>Tutup &times;</span>
+                </button>
+              </div>
             </div>
             <div class="ai-result-content error-text">${friendlyErr}</div>
           `;
@@ -1218,13 +1235,52 @@
         }
       });
 
-      // Hide AI response button handler via event delegation on resultBox
+      // Separation of Hide (preserve content) vs Close (delete content)
       const resultBox = document.getElementById('aiAnalyticsResultBox');
+      const restoreBanner = document.getElementById('aiRestoreBanner');
+      const btnRestoreAi = document.getElementById('btnRestoreAiAnalytics');
+      const btnDismissAi = document.getElementById('btnDismissAiAnalytics');
+
       if (resultBox) {
         resultBox.addEventListener('click', (e) => {
+          // 1. Sembunyikan: Hanya sembunyikan box, TIDAK menghapus innerHTML jawaban
           if (e.target.closest('#btnHideAiAnalytics, #btnHideAiAnalyticsBottom, .ai-hide-btn')) {
             resultBox.hidden = true;
+            if (restoreBanner && resultBox.innerHTML.trim()) {
+              restoreBanner.hidden = false;
+            }
+            if (window.Toast) {
+              window.Toast.info('Jawaban bot disembunyikan. Anda dapat menampilkannya kembali.');
+            }
+            return;
           }
+
+          // 2. Tutup Jawaban: Menghapus jawaban bot secara permanen
+          if (e.target.closest('#btnCloseAiAnalytics, #btnCloseAiAnalyticsBottom, .ai-close-btn')) {
+            resultBox.innerHTML = '';
+            resultBox.hidden = true;
+            if (restoreBanner) restoreBanner.hidden = true;
+            if (window.Toast) {
+              window.Toast.success('Jawaban bot telah ditutup dan dihapus.');
+            }
+          }
+        });
+      }
+
+      // Handler untuk mengembalikan (unhide) jawaban bot yang masih tersimpan
+      if (btnRestoreAi && resultBox) {
+        btnRestoreAi.addEventListener('click', () => {
+          resultBox.hidden = false;
+          if (restoreBanner) restoreBanner.hidden = true;
+        });
+      }
+
+      // Handler untuk menghapus permanen dari restore banner
+      if (btnDismissAi && resultBox) {
+        btnDismissAi.addEventListener('click', () => {
+          resultBox.innerHTML = '';
+          resultBox.hidden = true;
+          if (restoreBanner) restoreBanner.hidden = true;
         });
       }
 

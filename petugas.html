@@ -143,6 +143,21 @@
             <button type="button" class="ai-stat-chip" data-query="Berapa rata-rata waktu tunggu antrean poli umum hari ini?">⏱️ Efisiensi Antrean</button>
           </div>
           <div id="aiAnalyticsResultBox" class="ai-analytics-result-box" hidden></div>
+          <div id="aiRestoreBanner" class="ai-restore-banner" hidden>
+            <div class="ai-restore-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Jawaban bot AI disembunyikan (tersimpan).</span>
+            </div>
+            <div class="ai-restore-actions">
+              <button type="button" id="btnRestoreAiAnalytics" class="btn-restore-ai">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Tampilkan Jawaban</span>
+              </button>
+              <button type="button" id="btnDismissAiAnalytics" class="btn-dismiss-ai" title="Hapus jawaban bot">
+                <span>Hapus &times;</span>
+              </button>
+            </div>
+          </div>
         </section>
 
         <section class="stats-grid" id="statsGrid"></section>
