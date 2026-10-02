@@ -1459,28 +1459,40 @@
         if (welcomeTitle) welcomeTitle.textContent = 'Jadwal Praktik Seluruh Dokter';
         if (welcomeCopy) welcomeCopy.textContent = 'Master jadwal praktik dokter seluruh poliklinik, jam konsultasi, ruangan, dan kuota pasien.';
         if (statsGrid) {
-          statsGrid.innerHTML = `
-            <article class="stat-card">
-              <div class="stat-top"><span>Total Dokter</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">10 Dokter</strong>
-              <small class="stat-note">4 Poliklinik klinik</small>
+          const dokterStatsMeta = [
+            { label: 'Total Dokter', val: '10 Dokter', note: '4 Poliklinik klinik', iconClass: 'stat-icon--blue', icon: ICONS.dokter || ICONS.sparkle, hint: 'Buka jadwal' },
+            { label: 'Dokter Aktif', val: '08 Praktik', note: '2 Dokter cuti/off', iconClass: 'stat-icon--mint', icon: ICONS.jadwal || ICONS.sparkle, hint: 'Lihat dokter' },
+            { label: 'Ruang Layanan', val: '4 Ruangan', note: 'Umum, Gigi, Anak, Lab', iconClass: 'stat-icon--gold', icon: ICONS.sparkle, hint: 'Cek ruangan' },
+            { label: 'Kapasitas Pasien', val: '185 Kuota', note: 'Maksimal per hari', iconClass: 'stat-icon--purple', icon: ICONS.pasien || ICONS.sparkle, hint: 'Lihat kuota' }
+          ];
+
+          statsGrid.innerHTML = dokterStatsMeta.map(s => `
+            <article class="stat-card stat-card--interactive" data-action="open-agenda-petugas-dokter" role="button" tabindex="0" aria-label="${s.label}: ${s.hint}">
+              <div class="stat-top">
+                <span>${s.label}</span>
+                <span class="stat-icon ${s.iconClass}">${s.icon}</span>
+              </div>
+              <strong class="stat-value">${s.val}</strong>
+              <div class="stat-bottom">
+                <small class="stat-note">${s.note}</small>
+                <span class="stat-action-hint">${s.hint} &rarr;</span>
+              </div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Dokter Aktif</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">08 Praktik</strong>
-              <small class="stat-note">2 Dokter cuti/off</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Ruang Layanan</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">4 Ruangan</strong>
-              <small class="stat-note">Umum, Gigi, Anak, Lab</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Kapasitas Pasien</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">185 Kuota</strong>
-              <small class="stat-note">Maksimal per hari</small>
-            </article>
-          `;
+          `).join('');
+
+          statsGrid.onclick = (e) => {
+            const card = e.target.closest('.stat-card--interactive');
+            if (card) {
+              openFullAgendaPetugasModal('dokter');
+            }
+          };
+
+          statsGrid.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.target.closest('.stat-card--interactive')?.click();
+            }
+          };
         }
 
         let allDocs = await window.appointmentService.getAllDoctorsWithSchedules();
@@ -1567,28 +1579,40 @@
         if (welcomeTitle) welcomeTitle.textContent = 'Data Induk Pasien Seluruh Poliklinik';
         if (welcomeCopy) welcomeCopy.textContent = 'Pencarian data rekam medis dan master data pasien klinik terlengkap.';
         if (statsGrid) {
-          statsGrid.innerHTML = `
-            <article class="stat-card">
-              <div class="stat-top"><span>Total Pasien</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">36 Pasien</strong>
-              <small class="stat-note">Terdaftar di SIMKLINIK</small>
+          const pasienStatsMeta = [
+            { label: 'Total Pasien', val: '36 Pasien', note: 'Terdaftar di SIMKLINIK', iconClass: 'stat-icon--blue', icon: ICONS.pasien || ICONS.sparkle, hint: 'Buka master data' },
+            { label: 'Kunjungan Hari Ini', val: '12 Kunjungan', note: 'Terjadwal di semua poli', iconClass: 'stat-icon--mint', icon: ICONS.jadwal || ICONS.sparkle, hint: 'Lihat daftar' },
+            { label: 'Verifikasi NIK', val: '100%', note: 'Sesuai KTP / BPJS', iconClass: 'stat-icon--gold', icon: ICONS.check || ICONS.sparkle, hint: 'Cek validasi' },
+            { label: 'Standar RME', val: 'Valid', note: 'Permenkes 24/2022', iconClass: 'stat-icon--purple', icon: ICONS['rekam-medis'] || ICONS.sparkle, hint: 'Data lengkap' }
+          ];
+
+          statsGrid.innerHTML = pasienStatsMeta.map(s => `
+            <article class="stat-card stat-card--interactive" data-action="open-data-petugas-pasien" role="button" tabindex="0" aria-label="${s.label}: ${s.hint}">
+              <div class="stat-top">
+                <span>${s.label}</span>
+                <span class="stat-icon ${s.iconClass}">${s.icon}</span>
+              </div>
+              <strong class="stat-value">${s.val}</strong>
+              <div class="stat-bottom">
+                <small class="stat-note">${s.note}</small>
+                <span class="stat-action-hint">${s.hint} &rarr;</span>
+              </div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Kunjungan Hari Ini</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">12 Kunjungan</strong>
-              <small class="stat-note">Terjadwal di semua poli</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Verifikasi NIK</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">100%</strong>
-              <small class="stat-note">Sesuai KTP / BPJS</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Standar RME</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">Valid</strong>
-              <small class="stat-note">Permenkes 24/2022</small>
-            </article>
-          `;
+          `).join('');
+
+          statsGrid.onclick = (e) => {
+            const card = e.target.closest('.stat-card--interactive');
+            if (card) {
+              openFullDataPetugasModal();
+            }
+          };
+
+          statsGrid.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.target.closest('.stat-card--interactive')?.click();
+            }
+          };
         }
 
         if (agendaTitle) {
@@ -1693,7 +1717,40 @@
       } else if (mode === 'antrean') {
         if (welcomeTitle) welcomeTitle.textContent = 'Antrean Layanan Klinik';
         if (welcomeCopy) welcomeCopy.textContent = 'Kelola urutan dan panggil nomor antrean pasien secara berurutan.';
-        if (statsGrid) statsGrid.innerHTML = '';
+        if (statsGrid) {
+          const antreanStatsMeta = [
+            { label: 'Total Antrean', val: '12 Pasien', note: 'Terdaftar hari ini', iconClass: 'stat-icon--mint', icon: ICONS.antrean || ICONS.sparkle, hint: 'Buka agenda' },
+            { label: 'Pasien Menunggu', val: '4 Pasien', note: 'Di ruang tunggu loket', iconClass: 'stat-icon--gold', icon: ICONS.sparkle, hint: 'Cek antrean' },
+            { label: 'Sedang Dilayani', val: '1 Pasien', note: 'Poli umum aktif', iconClass: 'stat-icon--blue', icon: ICONS.pasien || ICONS.sparkle, hint: 'Panggil loket' },
+            { label: 'Selesai Dilayani', val: '7 Pasien', note: 'Lanjut farmasi / kasir', iconClass: 'stat-icon--purple', icon: ICONS.check || ICONS.sparkle, hint: 'Riwayat antrean' }
+          ];
+
+          statsGrid.innerHTML = antreanStatsMeta.map(s => `
+            <article class="stat-card stat-card--interactive" data-action="open-agenda-petugas-antrean" role="button" tabindex="0" aria-label="${s.label}: ${s.hint}">
+              <div class="stat-top">
+                <span>${s.label}</span>
+                <span class="stat-icon ${s.iconClass}">${s.icon}</span>
+              </div>
+              <strong class="stat-value">${s.val}</strong>
+              <div class="stat-bottom">
+                <small class="stat-note">${s.note}</small>
+                <span class="stat-action-hint">${s.hint} &rarr;</span>
+              </div>
+            </article>
+          `).join('');
+
+          statsGrid.onclick = (e) => {
+            const card = e.target.closest('.stat-card--interactive');
+            if (card) openFullAgendaPetugasModal('antrean');
+          };
+
+          statsGrid.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.target.closest('.stat-card--interactive')?.click();
+            }
+          };
+        }
         if (agendaTitle) agendaTitle.textContent = 'Monitor Antrean Live';
 
         if (tableHead) tableHead.innerHTML = '<th>No. Antrean</th><th>Pasien / No. RM</th><th>Layanan / Dokter</th><th>Status</th><th>Kontrol Petugas</th>';
@@ -1744,7 +1801,40 @@
       } else if (mode === 'pembayaran') {
         if (welcomeTitle) welcomeTitle.textContent = 'Kasir & Pembayaran';
         if (welcomeCopy) welcomeCopy.textContent = 'Penerbitan invoice dan penyelesaian transaksi konsultasi & farmasi obat.';
-        if (statsGrid) statsGrid.innerHTML = '';
+        if (statsGrid) {
+          const payStatsMeta = [
+            { label: 'Total Tagihan', val: 'Rp 4,2jt', note: 'Konsultasi & obat', iconClass: 'stat-icon--purple', icon: ICONS.pembayaran || ICONS.sparkle, hint: 'Lihat tagihan' },
+            { label: 'Tagihan Lunas', val: '92%', note: '28 transaksi selesai', iconClass: 'stat-icon--mint', icon: ICONS.check || ICONS.sparkle, hint: 'Cek pelunasan' },
+            { label: 'Menunggu Bayar', val: '3 Pasien', note: 'Siap di loket kasir', iconClass: 'stat-icon--gold', icon: ICONS.sparkle, hint: 'Proses kasir' },
+            { label: 'Metode Bayar', val: 'QRIS & Tunai', note: 'Integrasi kasir klinik', iconClass: 'stat-icon--blue', icon: ICONS.pembayaran || ICONS.sparkle, hint: 'Rincian kasir' }
+          ];
+
+          statsGrid.innerHTML = payStatsMeta.map(s => `
+            <article class="stat-card stat-card--interactive" role="button" tabindex="0" aria-label="${s.label}: ${s.hint}">
+              <div class="stat-top">
+                <span>${s.label}</span>
+                <span class="stat-icon ${s.iconClass}">${s.icon}</span>
+              </div>
+              <strong class="stat-value">${s.val}</strong>
+              <div class="stat-bottom">
+                <small class="stat-note">${s.note}</small>
+                <span class="stat-action-hint">${s.hint} &rarr;</span>
+              </div>
+            </article>
+          `).join('');
+
+          statsGrid.onclick = (e) => {
+            const tableWrap = document.querySelector('.table-wrap');
+            if (tableWrap) tableWrap.scrollIntoView({ behavior: 'smooth' });
+          };
+
+          statsGrid.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.target.closest('.stat-card--interactive')?.click();
+            }
+          };
+        }
         if (agendaTitle) agendaTitle.textContent = 'Daftar Tagihan Hari Ini';
 
         if (tableHead) tableHead.innerHTML = '<th>No. Invoice</th><th>Pasien</th><th>Total Tagihan</th><th>Status</th><th>Aksi Kasir</th>';
@@ -1797,10 +1887,10 @@
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
         if (statsGrid) {
           const petugasStatsMeta = [
-            { view: 'antrean', label: 'Antrean aktif', val: '12', note: '4 pasien menunggu', iconClass: 'stat-icon--mint', icon: ICONS.antrean || ICONS.sparkle, hint: 'Lihat detail' },
-            { view: 'pasien', label: 'Terdaftar hari ini', val: '36', note: '+8 pasien dari kemarin', iconClass: 'stat-icon--blue', icon: ICONS.pasien || ICONS.sparkle, hint: 'Lihat detail' },
-            { view: 'dokter', label: 'Jadwal dokter', val: '08', note: '2 dokter tersedia', iconClass: 'stat-icon--gold', icon: ICONS.jadwal || ICONS.sparkle, hint: 'Lihat detail' },
-            { view: 'pembayaran', label: 'Pembayaran', val: 'Rp 4,2jt', note: '92% sudah lunas', iconClass: 'stat-icon--purple', icon: ICONS.pembayaran || ICONS.sparkle, hint: 'Lihat detail' }
+            { view: 'antrean', label: 'Antrean aktif', val: '12', note: '4 pasien menunggu', iconClass: 'stat-icon--mint', icon: ICONS.antrean || ICONS.sparkle, hint: 'Buka modal' },
+            { view: 'pasien', label: 'Terdaftar hari ini', val: '36', note: '+8 pasien dari kemarin', iconClass: 'stat-icon--blue', icon: ICONS.pasien || ICONS.sparkle, hint: 'Buka data' },
+            { view: 'dokter', label: 'Jadwal dokter', val: '08', note: '2 dokter tersedia', iconClass: 'stat-icon--gold', icon: ICONS.jadwal || ICONS.sparkle, hint: 'Buka jadwal' },
+            { view: 'pembayaran', label: 'Pembayaran', val: 'Rp 4,2jt', note: '92% sudah lunas', iconClass: 'stat-icon--purple', icon: ICONS.pembayaran || ICONS.sparkle, hint: 'Lihat kasir' }
           ];
 
           statsGrid.innerHTML = petugasStatsMeta.map(s => `
@@ -1819,8 +1909,16 @@
 
           statsGrid.onclick = (e) => {
             const card = e.target.closest('.stat-card--interactive');
-            if (card && card.dataset.targetView) {
-              location.href = `${location.pathname}?view=${card.dataset.targetView}`;
+            if (!card) return;
+            const targetView = card.dataset.targetView;
+            if (targetView === 'antrean') {
+              openFullAgendaPetugasModal('antrean');
+            } else if (targetView === 'dokter') {
+              openFullAgendaPetugasModal('dokter');
+            } else if (targetView === 'pasien') {
+              openFullDataPetugasModal();
+            } else if (targetView === 'pembayaran') {
+              location.href = `${location.pathname}?view=pembayaran`;
             }
           };
 
@@ -1949,7 +2047,7 @@
       }
     }
 
-    function openFullAgendaPetugasModal() {
+    function openFullAgendaPetugasModal(initialTab) {
       const modal = document.getElementById('modalFullAgendaPetugas');
       const container = document.getElementById('containerFullAgendaPetugas');
       const searchInput = document.getElementById('searchFullAgendaPetugas');
@@ -1958,7 +2056,7 @@
       const tabAntrean = document.getElementById('tabPetugasAntreanKlinik');
       if (!modal || !container) return;
 
-      let currentTab = (petugasActiveFilter === 'dokter') ? 'dokter' : 'antrean';
+      let currentTab = initialTab || ((petugasActiveFilter === 'dokter') ? 'dokter' : 'antrean');
 
       const allDoctors = window.appointmentService ? window.appointmentService.getAllDoctorsWithSchedules() : [];
       let allQueues = [
@@ -2611,19 +2709,37 @@
 
         if (insightTitle) insightTitle.textContent = 'Kepatuhan Regulasi RME & Privasi';
         if (insightContent) {
+          const quotaTotal = activeDoc?.schedule?.quota || 20;
+          const quotaUsed = todayAppts.length;
+          const quotaRemaining = Math.max(0, quotaTotal - quotaUsed);
+          const percentUsed = Math.min(100, Math.round((quotaUsed / quotaTotal) * 100));
+
           insightContent.innerHTML = `
+            <div class="doctor-quota-summary" style="margin-bottom: 16px; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12.5px; font-weight: 600; color: var(--ink);">Kapasitas Kuota Sesi Praktik</span>
+                <span style="font-size: 12px; font-weight: 700; color: #0284c7;">${quotaUsed} / ${quotaTotal} Pasien</span>
+              </div>
+              <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+                <div style="width: ${percentUsed}%; height: 100%; background: linear-gradient(90deg, #0ea5e9, #10b981); border-radius: 999px; transition: width 0.3s ease;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <span>Sisa Kuota: <strong>${quotaRemaining} Kursi</strong></span>
+                <span>${percentUsed}% Terisi</span>
+              </div>
+            </div>
             <div class="activity">
               <span class="activity-icon">${ICONS.check}</span>
               <div>
-                <strong>Validasi Diagnosa ICD-10</strong>
-                <small>Pengisian data klinis terstandarisasi Permenkes No. 24/2022.</small>
+                <strong>Standar RME &amp; SATUSEHAT Kemenkes</strong>
+                <small>Pengisian SOAP, Kode ICD-10 WHO, dan e-Resep tervalidasi Permenkes 24/2022.</small>
               </div>
             </div>
             <div class="activity">
               <span class="activity-icon">${ICONS.sparkle}</span>
               <div>
-                <strong>Perlindungan Data Medis (UU PDP 27/2022)</strong>
-                <small>Akses riwayat RME terenkripsi &amp; jejak audit digital aktif.</small>
+                <strong>Kerahasiaan &amp; Audit Log Medis (UU PDP 27/2022)</strong>
+                <small>Akses berkas digital terenkripsi dengan jejak audit permanen setiap tindakan dokter.</small>
               </div>
             </div>
           `;
