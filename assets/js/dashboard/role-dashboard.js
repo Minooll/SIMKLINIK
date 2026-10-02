@@ -654,13 +654,8 @@
         updateDashboardGreeting();
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
         if (statsGrid) {
-          statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
-            <article class="stat-card">
-              <div class="stat-top"><span>${lbl}</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">${val}</strong>
-              <small class="stat-note">${note}</small>
-            </article>
-          `).join('');
+          statsGrid.innerHTML = '';
+          statsGrid.remove();
         }
 
         if (agendaTitle) agendaTitle.textContent = 'Agenda Janji Temu Terdekat';
@@ -1801,13 +1796,40 @@
         updateDashboardGreeting();
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
         if (statsGrid) {
-          statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
-            <article class="stat-card">
-              <div class="stat-top"><span>${lbl}</span><span class="stat-icon">${ICONS.sparkle}</span></div>
-              <strong class="stat-value">${val}</strong>
-              <small class="stat-note">${note}</small>
+          const petugasStatsMeta = [
+            { view: 'antrean', label: 'Antrean aktif', val: '12', note: '4 pasien menunggu', iconClass: 'stat-icon--mint', icon: ICONS.antrean || ICONS.sparkle, hint: 'Lihat detail' },
+            { view: 'pasien', label: 'Terdaftar hari ini', val: '36', note: '+8 pasien dari kemarin', iconClass: 'stat-icon--blue', icon: ICONS.pasien || ICONS.sparkle, hint: 'Lihat detail' },
+            { view: 'dokter', label: 'Jadwal dokter', val: '08', note: '2 dokter tersedia', iconClass: 'stat-icon--gold', icon: ICONS.jadwal || ICONS.sparkle, hint: 'Lihat detail' },
+            { view: 'pembayaran', label: 'Pembayaran', val: 'Rp 4,2jt', note: '92% sudah lunas', iconClass: 'stat-icon--purple', icon: ICONS.pembayaran || ICONS.sparkle, hint: 'Lihat detail' }
+          ];
+
+          statsGrid.innerHTML = petugasStatsMeta.map(s => `
+            <article class="stat-card stat-card--interactive" data-target-view="${s.view}" role="button" tabindex="0" aria-label="${s.label}: ${s.hint}">
+              <div class="stat-top">
+                <span>${s.label}</span>
+                <span class="stat-icon ${s.iconClass}">${s.icon}</span>
+              </div>
+              <strong class="stat-value">${s.val}</strong>
+              <div class="stat-bottom">
+                <small class="stat-note">${s.note}</small>
+                <span class="stat-action-hint">${s.hint} &rarr;</span>
+              </div>
             </article>
           `).join('');
+
+          statsGrid.onclick = (e) => {
+            const card = e.target.closest('.stat-card--interactive');
+            if (card && card.dataset.targetView) {
+              location.href = `${location.pathname}?view=${card.dataset.targetView}`;
+            }
+          };
+
+          statsGrid.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.target.closest('.stat-card--interactive')?.click();
+            }
+          };
         }
 
         // Fetch ALL clinic appointments across all doctors
@@ -2486,27 +2508,72 @@
         if (welcomeCopy) welcomeCopy.textContent = `${docSpecialization} · ${docServiceName} · Kelola agenda janji temu, pemeriksaan klinis (SOAP), dan rekam medis pasien Anda.`;
         if (statsGrid) {
           statsGrid.innerHTML = `
-            <article class="stat-card">
-              <div class="stat-top"><span>Pasien Terjadwal</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+            <article class="stat-card stat-card--interactive" data-action="open-agenda-modal" role="button" tabindex="0" aria-label="Pasien Terjadwal: Buka Agenda">
+              <div class="stat-top">
+                <span>Pasien Terjadwal</span>
+                <span class="stat-icon stat-icon--blue">${ICONS.pasien || ICONS.sparkle}</span>
+              </div>
               <strong class="stat-value" id="docStatPatientCount">-</strong>
-              <small class="stat-note">Pasien terdaftar hari ini</small>
+              <div class="stat-bottom">
+                <small class="stat-note">Pasien terdaftar hari ini</small>
+                <span class="stat-action-hint">Lihat detail &rarr;</span>
+              </div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Poliklinik</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+            <article class="stat-card stat-card--interactive" data-target-view="jadwal" role="button" tabindex="0" aria-label="Poliklinik: Buka Jadwal Praktik">
+              <div class="stat-top">
+                <span>Poliklinik</span>
+                <span class="stat-icon stat-icon--mint">${ICONS.jadwal || ICONS.sparkle}</span>
+              </div>
               <strong class="stat-value">${docServiceName.replace('Poli ', '')}</strong>
-              <small class="stat-note">${activeDoc?.schedule?.room || 'Ruang Konsultasi'}</small>
+              <div class="stat-bottom">
+                <small class="stat-note">${activeDoc?.schedule?.room || 'Ruang Konsultasi'}</small>
+                <span class="stat-action-hint">Jadwal poli &rarr;</span>
+              </div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Kuota Tersedia</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+            <article class="stat-card stat-card--interactive" data-action="open-agenda-modal" role="button" tabindex="0" aria-label="Kuota Tersedia: Buka Agenda">
+              <div class="stat-top">
+                <span>Kuota Tersedia</span>
+                <span class="stat-icon stat-icon--gold">${ICONS.sparkle}</span>
+              </div>
               <strong class="stat-value">${activeDoc?.schedule?.quota ? activeDoc.schedule.quota - 4 : 16}</strong>
-              <small class="stat-note">Maks. ${activeDoc?.schedule?.quota || 20} pasien / hari</small>
+              <div class="stat-bottom">
+                <small class="stat-note">Maks. ${activeDoc?.schedule?.quota || 20} pasien / hari</small>
+                <span class="stat-action-hint">Cek kuota &rarr;</span>
+              </div>
             </article>
-            <article class="stat-card">
-              <div class="stat-top"><span>Standar RME</span><span class="stat-icon">${ICONS.sparkle}</span></div>
+            <article class="stat-card stat-card--interactive" data-action="open-medical-modal" role="button" tabindex="0" aria-label="Standar RME: Buka Berkas RME">
+              <div class="stat-top">
+                <span>Standar RME</span>
+                <span class="stat-icon stat-icon--purple">${ICONS['rekam-medis'] || ICONS.sparkle}</span>
+              </div>
               <strong class="stat-value">100%</strong>
-              <small class="stat-note">Permenkes 24/2022 (Valid)</small>
+              <div class="stat-bottom">
+                <small class="stat-note">Permenkes 24/2022 (Valid)</small>
+                <span class="stat-action-hint">Berkas RME &rarr;</span>
+              </div>
             </article>
           `;
+
+          statsGrid.onclick = (e) => {
+            const card = e.target.closest('.stat-card--interactive');
+            if (!card) return;
+            const action = card.dataset.action;
+            const targetView = card.dataset.targetView;
+            if (action === 'open-agenda-modal') {
+              if (typeof openFullAgendaDokterModal === 'function') openFullAgendaDokterModal();
+            } else if (action === 'open-medical-modal') {
+              if (typeof openFullMedicalDokterModal === 'function') openFullMedicalDokterModal();
+            } else if (targetView) {
+              location.href = `${location.pathname}?view=${targetView}`;
+            }
+          };
+
+          statsGrid.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.target.closest('.stat-card--interactive')?.click();
+            }
+          };
         }
 
         if (agendaTitle) agendaTitle.textContent = `Agenda Janji Temu Pasien (${docFullName})`;

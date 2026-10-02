@@ -565,6 +565,62 @@ input, select, textarea {
   color: #dc2626;
 }
 
+.stat-icon--purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stat-card--interactive {
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s ease,
+              border-color 0.2s ease,
+              background-color 0.2s ease;
+}
+
+.stat-card--interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(14, 165, 233, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #38bdf8;
+  background: #ffffff;
+}
+
+.stat-card--interactive:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.stat-card--interactive:active {
+  transform: translateY(-1px);
+}
+
+.stat-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  gap: 8px;
+}
+
+.stat-action-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0284c7;
+  opacity: 0.85;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.stat-card--interactive:hover .stat-action-hint {
+  opacity: 1;
+  transform: translateX(3px);
+  color: #0369a1;
+}
+
 .stat-value {
   display: block;
   font-family: var(--font-heading);
