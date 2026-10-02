@@ -304,6 +304,7 @@
           const user = await loginWithSupabase(authEmail, password, selectedRole);
           clearBF(); setLoading(false);
           try {
+            if (user && user.name) localStorage.setItem('simklinik_user_name', user.name);
             if (document.getElementById('rememberMe').checked) localStorage.setItem('simklinik_remember', identifier);
             else localStorage.removeItem('simklinik_remember');
           } catch {}
@@ -373,8 +374,12 @@
             return;
           }
 
+          const regName = registerFullName.value.trim();
+          try {
+            if (regName) localStorage.setItem('simklinik_user_name', regName);
+          } catch {}
           showSuccess({
-            name: registerFullName.value.trim(),
+            name: regName,
             email: registerEmail.value.trim(),
             role: 'Pasien',
             dashboard: 'pasien.html',
@@ -422,9 +427,13 @@
         if (error || !data.session) return;
         const { data: profile } = await supabaseClient
           .from('profiles')
-          .select('role')
+          .select('full_name, username, role')
           .eq('id', data.session.user.id)
           .single();
+        const userName = profile?.full_name || profile?.username || data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
+        if (userName) {
+          try { localStorage.setItem('simklinik_user_name', userName); } catch (_) {}
+        }
         const roleKey = profile?.role === 'Dokter' ? 'dokter' : profile?.role === 'Pasien' ? 'pasien' : 'petugas';
         window.location.href = roleKey + '.html';
       }

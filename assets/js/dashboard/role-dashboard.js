@@ -37,22 +37,37 @@
     return `<span class="status-badge ${cls}">${text}</span>`;
   };
 
+  /* ── Real-time Indonesian Greeting Helper ── */
+  function getTimeGreeting(date = new Date()) {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 11) return 'Selamat pagi';
+    if (hour >= 11 && hour < 15) return 'Selamat siang';
+    if (hour >= 15 && hour < 18) return 'Selamat sore';
+    return 'Selamat malam';
+  }
+
   /* ── Static Mock Definitions (for offline fallback) ── */
   const defaultRoleMeta = {
     dokter: {
-      label: 'Dokter', name: 'dr. Ayu Rahma, Sp.PD', initials: 'AR', greeting: 'Selamat pagi, dr. Ayu', copy: 'Kelola pasien, jadwal praktik, rekam medis (SOAP), dan peresepan obat.',
+      label: 'Dokter', name: 'dr. Ayu Rahma, Sp.PD', initials: 'AR',
+      get greeting() { return `${getTimeGreeting()}, dr. Ayu`; },
+      copy: 'Kelola pasien, jadwal praktik, rekam medis (SOAP), dan peresepan obat.',
       nav: [['dashboard','Dashboard'],['pasien','Pasien saya'],['jadwal','Jadwal praktik'],['rekam-medis','Rekam medis'],['resep','Resep']],
       stats: [['Pasien hari ini','18','+12% dari kemarin'],['Jadwal selesai','06','2 jadwal berikutnya'],['Resep aktif','24','3 perlu ditinjau'],['Rata-rata layanan','18m','4m lebih cepat']],
       dashboard: { title: 'Jadwal konsultasi hari ini', rows: [['08:30','Budi Santoso','Kontrol tekanan darah','Selesai'],['09:15','Siti Aminah','Konsultasi umum','Sedang berjalan'],['10:00','Rizky Pratama','Evaluasi hasil lab','Berikutnya'],['11:30','Maria Lestari','Konsultasi umum','Terjadwal']] }
     },
     petugas: {
-      label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP', greeting: 'Selamat pagi, Nadia', copy: 'Pantau antrean pasien, registrasi walk-in, verifikasi jadwal, dan kasir pembayaran.',
+      label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP',
+      get greeting() { return `${getTimeGreeting()}, Nadia`; },
+      copy: 'Pantau antrean pasien, registrasi walk-in, verifikasi jadwal, dan kasir pembayaran.',
       nav: [['dashboard','Dashboard'],['pasien','Data pasien'],['antrean','Antrean layanan'],['dokter','Jadwal dokter'],['pembayaran','Pembayaran']],
       stats: [['Antrean aktif','12','4 pasien menunggu'],['Terdaftar hari ini','36','+8 pasien dari kemarin'],['Jadwal dokter','08','2 dokter tersedia'],['Pembayaran','Rp 4,2jt','92% sudah lunas']],
       dashboard: { title: 'Antrean poli hari ini', rows: [['08:00','Budi Santoso','Poli Umum · dr. Ayu','Dipanggil'],['08:20','Siti Aminah','Poli Umum · dr. Ayu','Menunggu'],['08:45','Rizky Pratama','Laboratorium','Menunggu'],['09:00','Maria Lestari','Poli Umum · dr. Dimas','Menunggu']] }
     },
     pasien: {
-      label: 'Pasien', name: 'Aulia Rahma', initials: 'AR', greeting: 'Selamat pagi, Aulia', copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
+      label: 'Pasien', name: 'Pasien', initials: 'PS',
+      get greeting() { return `${getTimeGreeting()}, Pasien`; },
+      copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
       nav: [['dashboard','Dashboard'],['janji','Janji saya'],['rekam-medis','Rekam medis'],['resep','Resep saya'],['profil','Profil kesehatan']],
       stats: [['Janji mendatang','02','Kunjungan terdekat hari ini'],['Resep aktif','03','1 resep berakhir minggu ini'],['Hasil RME','05','Semua data terverifikasi'],['Poin kesehatan','840','+80 bulan ini']],
       dashboard: { title: 'Agenda kunjungan saya', rows: [['Hari ini, 09:30','dr. Ayu Rahma · Poli Umum','Pemeriksaan rutin keluhan demam','Terjadwal'],['02 Okt 2026, 10:00','Laboratorium Klinik','Pemeriksaan hematologi lengkap','Terjadwal']] }
@@ -78,9 +93,19 @@
   const headerAvatar = document.getElementById('headerAvatar');
   const dateLabel = document.getElementById('dateLabel');
 
-  if (headerName) headerName.textContent = defaultRoleMeta.name;
+  let initialCachedName = null;
+  try {
+    initialCachedName = localStorage.getItem('simklinik_user_name');
+  } catch (_) {}
+
+  if (headerName) headerName.textContent = initialCachedName || defaultRoleMeta.name;
   if (headerRole) headerRole.textContent = defaultRoleMeta.label;
-  if (headerAvatar) headerAvatar.textContent = defaultRoleMeta.initials;
+  if (headerAvatar) {
+    const avatarInitials = initialCachedName
+      ? initialCachedName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+      : defaultRoleMeta.initials;
+    headerAvatar.textContent = avatarInitials;
+  }
   if (dateLabel) {
     dateLabel.textContent = new Intl.DateTimeFormat('id-ID', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -105,12 +130,93 @@
   };
 
   /* ══════════════════════════════════════════════════════════
-     AUTH SESSION CHECK & PROFILE RESUME
+     CURRENT USER DISPLAY NAME & DASHBOARD GREETING
      ══════════════════════════════════════════════════════════ */
+  let currentUserProfile = null;
   let currentAuthUser = null;
   let currentPatientRecord = null;
   let currentDoctorRecord = null;
 
+  function getCurrentUserDisplayName() {
+    if (role === 'pasien') {
+      // 1. Patient record profile full_name
+      if (currentPatientRecord?.profile?.full_name && currentPatientRecord.profile.full_name.trim()) {
+        return currentPatientRecord.profile.full_name.trim();
+      }
+      // 2. Patient record direct full_name or name
+      if (currentPatientRecord?.full_name && currentPatientRecord.full_name.trim()) {
+        return currentPatientRecord.full_name.trim();
+      }
+      // 3. User profile loaded from profiles table
+      if (currentUserProfile?.full_name && currentUserProfile.full_name.trim()) {
+        return currentUserProfile.full_name.trim();
+      }
+      if (currentUserProfile?.username && currentUserProfile.username.trim()) {
+        return currentUserProfile.username.trim();
+      }
+      // 4. Supabase auth metadata
+      if (currentAuthUser?.user_metadata?.full_name && currentAuthUser.user_metadata.full_name.trim()) {
+        return currentAuthUser.user_metadata.full_name.trim();
+      }
+      if (currentAuthUser?.user_metadata?.name && currentAuthUser.user_metadata.name.trim()) {
+        return currentAuthUser.user_metadata.name.trim();
+      }
+      // 5. Local storage cached name
+      try {
+        const cached = localStorage.getItem('simklinik_user_name');
+        if (cached && cached.trim()) return cached.trim();
+      } catch (_) {}
+      // 6. Header name if already populated and not generic default
+      if (headerName && headerName.textContent && headerName.textContent.trim()) {
+        const hName = headerName.textContent.trim();
+        if (hName !== 'Pasien' && hName !== 'Aulia Rahma') return hName;
+      }
+      // 7. Auth email user prefix
+      if (currentAuthUser?.email) {
+        const prefix = currentAuthUser.email.split('@')[0];
+        return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+      }
+      return 'Pasien';
+    } else if (role === 'petugas') {
+      if (currentUserProfile?.full_name && currentUserProfile.full_name.trim()) {
+        return currentUserProfile.full_name.trim();
+      }
+      if (currentUserProfile?.username && currentUserProfile.username.trim()) {
+        return currentUserProfile.username.trim();
+      }
+      try {
+        const cached = localStorage.getItem('simklinik_user_name');
+        if (cached && cached.trim()) return cached.trim();
+      } catch (_) {}
+      if (headerName && headerName.textContent && headerName.textContent.trim()) {
+        return headerName.textContent.trim();
+      }
+      return 'Petugas';
+    } else if (role === 'dokter') {
+      if (currentDoctorRecord?.profile?.full_name) {
+        return currentDoctorRecord.profile.full_name;
+      }
+      if (currentUserProfile?.full_name) {
+        return currentUserProfile.full_name;
+      }
+      return 'Dokter';
+    }
+    return '';
+  }
+
+  function updateDashboardGreeting() {
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    if (!welcomeTitle) return;
+    if (currentView === 'dashboard') {
+      const greetingTime = getTimeGreeting();
+      const displayName = getCurrentUserDisplayName();
+      welcomeTitle.textContent = `${greetingTime}, ${displayName}`;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     AUTH SESSION CHECK & PROFILE RESUME
+     ══════════════════════════════════════════════════════════ */
   async function checkAuthSession() {
     if (!window.supabaseClient) return null;
     try {
@@ -125,9 +231,15 @@
         .maybeSingle();
 
       if (profile) {
-        if (headerName) headerName.textContent = profile.full_name || profile.username;
-        const initials = (profile.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        currentUserProfile = profile;
+        const displayName = profile.full_name || profile.username;
+        if (headerName) headerName.textContent = displayName;
+        const initials = (profile.full_name || profile.username || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         if (headerAvatar) headerAvatar.textContent = initials;
+        try {
+          if (displayName) localStorage.setItem('simklinik_user_name', displayName);
+        } catch (_) {}
+        updateDashboardGreeting();
 
         // Verify correct dashboard URL
         const actualRole = profile.role === 'Dokter' ? 'dokter' : profile.role === 'Pasien' ? 'pasien' : 'petugas';
@@ -142,6 +254,12 @@
         const patientRes = await window.patientService.getPatientProfile(currentAuthUser.id);
         if (patientRes.success && patientRes.data) {
           currentPatientRecord = patientRes.data;
+          const ptName = currentPatientRecord.profile?.full_name || currentPatientRecord.full_name;
+          if (ptName) {
+            try { localStorage.setItem('simklinik_user_name', ptName); } catch (_) {}
+            if (headerName) headerName.textContent = ptName;
+          }
+          updateDashboardGreeting();
         } else if (window.supabaseClient) {
           try {
             const { data: newPt } = await window.supabaseClient
@@ -152,7 +270,10 @@
               })
               .select('*, profile:profiles(*)')
               .maybeSingle();
-            if (newPt) currentPatientRecord = newPt;
+            if (newPt) {
+              currentPatientRecord = newPt;
+              updateDashboardGreeting();
+            }
           } catch (pe) {
             console.warn('[Auto-create patient]', pe.message);
           }
@@ -165,9 +286,11 @@
           .maybeSingle();
         if (docData) {
           currentDoctorRecord = docData;
+          updateDashboardGreeting();
         }
       }
 
+      updateDashboardGreeting();
       return { user: currentAuthUser, profile };
     } catch (e) {
       console.warn('[SIMKLINIK Auth] Session check notice:', e.message);
@@ -457,6 +580,10 @@
           if (headerName) headerName.textContent = fullName;
           const inits = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'P';
           if (headerAvatar) headerAvatar.textContent = inits;
+          try {
+            localStorage.setItem('simklinik_user_name', fullName);
+          } catch (_) {}
+          updateDashboardGreeting();
 
           window.Toast.success('Data identitas sesuai Kartu Keluarga berhasil diverifikasi dan disimpan.');
           window.Modal.close('modalPatientOnboarding');
@@ -524,7 +651,7 @@
       const patientId = currentPatientRecord ? currentPatientRecord.id : null;
 
       if (currentView === 'dashboard') {
-        if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
+        updateDashboardGreeting();
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
         if (statsGrid) {
           statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
@@ -1030,7 +1157,12 @@
 
         setButtonLoading(submitBtn, true);
         resultBox.hidden = false;
-        resultBox.innerHTML = '<span class="btn-spinner"></span> Menganalisis data klinik dengan AI...';
+        resultBox.innerHTML = `
+          <div class="ai-result-loading">
+            <span class="btn-spinner"></span>
+            <span>Menganalisis data klinik dengan AI...</span>
+          </div>
+        `;
 
         try {
           if (!window.aiService) throw new Error('Layanan AI belum siap.');
@@ -1052,14 +1184,54 @@
             .replace(/\n\n/g, '<br><br>')
             .replace(/\n/g, '<br>');
 
-          resultBox.innerHTML = formatted;
+          resultBox.innerHTML = `
+            <div class="ai-result-header">
+              <div class="ai-result-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <strong>Jawaban Asisten AI (Analisis Data Klinik)</strong>
+              </div>
+              <button type="button" class="ai-hide-btn" id="btnHideAiAnalytics" aria-label="Sembunyikan jawaban AI">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Sembunyikan</span>
+              </button>
+            </div>
+            <div class="ai-result-content">
+              ${formatted}
+            </div>
+            <div class="ai-result-footer">
+              <button type="button" class="ai-hide-btn" id="btnHideAiAnalyticsBottom" aria-label="Sembunyikan jawaban AI">
+                <span>Tutup Jawaban &times;</span>
+              </button>
+            </div>
+          `;
         } catch (err) {
           const friendlyErr = window.translateError ? window.translateError(err.message) : err.message;
-          resultBox.innerHTML = `<span class="error-text">Gagal memproses analitik: ${friendlyErr}</span>`;
+          resultBox.innerHTML = `
+            <div class="ai-result-header">
+              <div class="ai-result-meta error-text">
+                <strong>Gagal Memproses Analitik</strong>
+              </div>
+              <button type="button" class="ai-hide-btn" id="btnHideAiAnalytics" aria-label="Sembunyikan pesan error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Sembunyikan</span>
+              </button>
+            </div>
+            <div class="ai-result-content error-text">${friendlyErr}</div>
+          `;
         } finally {
           setButtonLoading(submitBtn, false);
         }
       });
+
+      // Hide AI response button handler via event delegation on resultBox
+      const resultBox = document.getElementById('aiAnalyticsResultBox');
+      if (resultBox) {
+        resultBox.addEventListener('click', (e) => {
+          if (e.target.closest('#btnHideAiAnalytics, #btnHideAiAnalyticsBottom, .ai-hide-btn')) {
+            resultBox.hidden = true;
+          }
+        });
+      }
 
       // Delegate quick analytics chips
       document.querySelector('.ai-analytics-chips')?.addEventListener('click', (e) => {
@@ -1626,7 +1798,7 @@
         }
       } else {
         // mode === 'all' (Semua Data Antrean & Kunjungan)
-        if (welcomeTitle) welcomeTitle.textContent = defaultRoleMeta.greeting;
+        updateDashboardGreeting();
         if (welcomeCopy) welcomeCopy.textContent = defaultRoleMeta.copy;
         if (statsGrid) {
           statsGrid.innerHTML = defaultRoleMeta.stats.map(([lbl, val, note]) => `
@@ -2856,6 +3028,9 @@
   const logoutBtn = document.getElementById('logoutButton');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
+      try {
+        localStorage.removeItem('simklinik_user_name');
+      } catch (_) {}
       if (window.supabaseClient) {
         try {
           await window.supabaseClient.auth.signOut();
@@ -2887,4 +3062,12 @@
       initDokterPortal();
     }
   })();
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      getTimeGreeting,
+      getCurrentUserDisplayName,
+      updateDashboardGreeting
+    };
+  }
 })();
