@@ -65,66 +65,8 @@
      * Get medical records handled by a doctor
      */
     async getDoctorRecords(doctorId) {
-      const fallbackDoctorRecords = [
-        {
-          id: 'rec-1',
-          record_date: '2026-09-26T08:30:00Z',
-          subjective: 'Pasien mengeluhkan pusing dan tengkuk terasa berat sejak 3 hari.',
-          objective: 'TD: 140/90 mmHg, Nadi: 82x/m, Suhu: 36.6 C, Kesadaran: Compos Mentis.',
-          vital_signs: { systolic: 140, diastolic: 90, pulse: 82, temperature: 36.6 },
-          assessment: 'Hipertensi Primer (Stage 1)',
-          diagnosis_icd10: 'I10 - Essential (primary) hypertension',
-          treatment_plan: 'Amlodipine 5mg 1x1 malam, modifikasi diet rendah garam.',
-          finalized_at: '2026-09-26T08:45:00Z',
-          status: 'FINAL',
-          patient: {
-            id: 'p-1',
-            no_rm: 'RM-000001',
-            profile: { full_name: 'Budi Santoso' }
-          },
-          prescriptions: [
-            {
-              id: 'rx-1',
-              prescription_number: 'RX-20260926-0001',
-              status: 'Diterbitkan',
-              prescription_items: [
-                { id: 'item-1', medicine_name: 'Amlodipine', dosage: '5 mg', frequency: '1x1 malam', quantity: 30 }
-              ]
-            }
-          ]
-        },
-        {
-          id: 'rec-2',
-          record_date: '2026-09-26T09:15:00Z',
-          subjective: 'Demam tinggi 3 hari, menggigil di malam hari, batuk kering.',
-          objective: 'TD: 110/75 mmHg, Nadi: 90x/m, Suhu: 38.4 C, Faring hiperemis (+).',
-          vital_signs: { systolic: 110, diastolic: 75, pulse: 90, temperature: 38.4 },
-          assessment: 'Faringitis Akut',
-          diagnosis_icd10: 'J02.9 - Acute pharyngitis, unspecified',
-          treatment_plan: 'Paracetamol 500mg 3x1 p.r.n, Amoxicillin 500mg 3x1, istirahat cukup.',
-          finalized_at: '2026-09-26T09:30:00Z',
-          status: 'FINAL',
-          patient: {
-            id: 'p-2',
-            no_rm: 'RM-000002',
-            profile: { full_name: 'Siti Aminah' }
-          },
-          prescriptions: [
-            {
-              id: 'rx-2',
-              prescription_number: 'RX-20260926-0002',
-              status: 'Diterbitkan',
-              prescription_items: [
-                { id: 'item-2', medicine_name: 'Paracetamol', dosage: '500 mg', frequency: '3x1 p.c.', quantity: 10 },
-                { id: 'item-3', medicine_name: 'Amoxicillin', dosage: '500 mg', frequency: '3x1 p.c. habiskan', quantity: 15 }
-              ]
-            }
-          ]
-        }
-      ];
-
       const client = getClient();
-      if (!client) return { success: true, data: fallbackDoctorRecords };
+      if (!client) return { success: true, data: [] };
 
       try {
         let query = client
@@ -156,10 +98,10 @@
 
         const { data, error } = await query;
         if (error) throw error;
-        return { success: true, data: (data && data.length > 0) ? data : fallbackDoctorRecords };
+        return { success: true, data: data || [] };
       } catch (err) {
         console.warn('[medicalRecordService.getDoctorRecords]', err.message);
-        return { success: true, data: fallbackDoctorRecords };
+        return { success: true, data: [] };
       }
     },
 

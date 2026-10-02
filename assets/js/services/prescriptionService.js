@@ -123,40 +123,8 @@
      * Get prescriptions issued by a doctor
      */
     async getDoctorPrescriptions(doctorId) {
-      const fallbackDoctorRx = [
-        {
-          id: 'rx-1',
-          prescription_number: 'RX-20260926-0001',
-          status: 'Diterbitkan',
-          notes: 'Minum teratur setelah makan malam',
-          created_at: '2026-09-26T08:45:00Z',
-          patient: {
-            no_rm: 'RM-000001',
-            profile: { full_name: 'Budi Santoso' }
-          },
-          prescription_items: [
-            { id: 'i-1', medicine_name: 'Amlodipine', dosage: '5 mg', frequency: '1x1 malam', quantity: 30 }
-          ]
-        },
-        {
-          id: 'rx-2',
-          prescription_number: 'RX-20260926-0002',
-          status: 'Disiapkan',
-          notes: 'Antibiotik harus dihabiskan',
-          created_at: '2026-09-26T09:30:00Z',
-          patient: {
-            no_rm: 'RM-000002',
-            profile: { full_name: 'Siti Aminah' }
-          },
-          prescription_items: [
-            { id: 'i-2', medicine_name: 'Paracetamol', dosage: '500 mg', frequency: '3x1 p.c.', quantity: 10 },
-            { id: 'i-3', medicine_name: 'Amoxicillin', dosage: '500 mg', frequency: '3x1 p.c. habiskan', quantity: 15 }
-          ]
-        }
-      ];
-
       const client = getClient();
-      if (!client) return { success: true, data: fallbackDoctorRx };
+      if (!client) return { success: true, data: [] };
 
       try {
         let query = client
@@ -191,10 +159,10 @@
 
         const { data, error } = await query;
         if (error) throw error;
-        return { success: true, data: (data && data.length > 0) ? data : fallbackDoctorRx };
+        return { success: true, data: data || [] };
       } catch (err) {
         console.warn('[prescriptionService.getDoctorPrescriptions]', err.message);
-        return { success: true, data: fallbackDoctorRx };
+        return { success: true, data: [] };
       }
     },
 

@@ -53,24 +53,24 @@
       get greeting() { return `${getTimeGreeting()}, dr. Ayu`; },
       copy: 'Kelola pasien, jadwal praktik, rekam medis (SOAP), dan peresepan obat.',
       nav: [['dashboard','Dashboard'],['pasien','Pasien saya'],['jadwal','Jadwal praktik'],['rekam-medis','Rekam medis'],['resep','Resep']],
-      stats: [['Pasien hari ini','18','+12% dari kemarin'],['Jadwal selesai','06','2 jadwal berikutnya'],['Resep aktif','24','3 perlu ditinjau'],['Rata-rata layanan','18m','4m lebih cepat']],
-      dashboard: { title: 'Jadwal konsultasi hari ini', rows: [['08:30','Budi Santoso','Kontrol tekanan darah','Selesai'],['09:15','Siti Aminah','Konsultasi umum','Sedang berjalan'],['10:00','Rizky Pratama','Evaluasi hasil lab','Berikutnya'],['11:30','Maria Lestari','Konsultasi umum','Terjadwal']] }
+      stats: [['Pasien hari ini','0','Pasien terdaftar'],['Jadwal selesai','0','Jadwal praktik'],['Resep aktif','0','Resep diterbitkan'],['Rata-rata layanan','-','Standar Permenkes']],
+      dashboard: { title: 'Jadwal konsultasi hari ini', rows: [] }
     },
     petugas: {
       label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP',
       get greeting() { return `${getTimeGreeting()}, Nadia`; },
       copy: 'Pantau antrean pasien, registrasi walk-in, verifikasi jadwal, dan kasir pembayaran.',
       nav: [['dashboard','Dashboard'],['pasien','Data pasien'],['antrean','Antrean layanan'],['dokter','Jadwal dokter'],['pembayaran','Pembayaran']],
-      stats: [['Antrean aktif','12','4 pasien menunggu'],['Terdaftar hari ini','36','+8 pasien dari kemarin'],['Jadwal dokter','08','2 dokter tersedia'],['Pembayaran','Rp 4,2jt','92% sudah lunas']],
-      dashboard: { title: 'Antrean poli hari ini', rows: [['08:00','Budi Santoso','Poli Umum · dr. Ayu','Dipanggil'],['08:20','Siti Aminah','Poli Umum · dr. Ayu','Menunggu'],['08:45','Rizky Pratama','Laboratorium','Menunggu'],['09:00','Maria Lestari','Poli Umum · dr. Dimas','Menunggu']] }
+      stats: [['Antrean aktif','0','Pasien antrean'],['Terdaftar hari ini','0','Pasien klinik'],['Jadwal dokter','10','Dokter tersedia'],['Pembayaran','Rp 0','Kasir klinik']],
+      dashboard: { title: 'Antrean poli hari ini', rows: [] }
     },
     pasien: {
       label: 'Pasien', name: 'Pasien', initials: 'PS',
       get greeting() { return `${getTimeGreeting()}, Pasien`; },
       copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
       nav: [['dashboard','Dashboard'],['janji','Janji saya'],['rekam-medis','Rekam medis'],['resep','Resep saya'],['profil','Profil kesehatan']],
-      stats: [['Janji mendatang','02','Kunjungan terdekat hari ini'],['Resep aktif','03','1 resep berakhir minggu ini'],['Hasil RME','05','Semua data terverifikasi'],['Poin kesehatan','840','+80 bulan ini']],
-      dashboard: { title: 'Agenda kunjungan saya', rows: [['Hari ini, 09:30','dr. Ayu Rahma · Poli Umum','Pemeriksaan rutin keluhan demam','Terjadwal'],['02 Okt 2026, 10:00','Laboratorium Klinik','Pemeriksaan hematologi lengkap','Terjadwal']] }
+      stats: [['Janji mendatang','0','Belum ada janji'],['Resep aktif','0','Belum ada resep'],['Hasil RME','0','Belum ada berkas'],['Poin kesehatan','0','Pasien aktif']],
+      dashboard: { title: 'Agenda kunjungan saya', rows: [] }
     }
   }[role];
 
@@ -1445,22 +1445,6 @@
       if (petugasActiveFilter === 'all' || petugasActiveFilter === 'pasien') {
         const ptRes = await window.patientService.searchPatients(query);
         let pts = (ptRes.success && ptRes.data) ? ptRes.data : [];
-        if (pts.length === 0) {
-          const samplePts = [
-            { no_rm: 'RM-000001', nik: '3201234567890001', profile: { full_name: 'Budi Santoso', phone: '081234567890' } },
-            { no_rm: 'RM-000002', nik: '3201234567890002', profile: { full_name: 'Siti Aminah', phone: '081234567891' } },
-            { no_rm: 'RM-000003', nik: '3201234567890003', profile: { full_name: 'Rizky Pratama', phone: '081345678900' } },
-            { no_rm: 'RM-000005', nik: '3201234567890005', profile: { full_name: 'Fajar Nugroho', phone: '081234567800' } },
-            { no_rm: 'RM-000015', nik: '3201234567890015', profile: { full_name: 'Ratna Dewi', phone: '081298765400' } },
-            { no_rm: 'RM-000016', nik: '3201234567890016', profile: { full_name: 'Hendra Kusuma', phone: '081298765411' } },
-            { no_rm: 'RM-000021', nik: '3201234567890021', profile: { full_name: 'Ananda Kenzo', phone: '081345678999' } }
-          ];
-          pts = samplePts.filter(p =>
-            p.no_rm.toLowerCase().includes(q) ||
-            p.nik.toLowerCase().includes(q) ||
-            (p.profile?.full_name || '').toLowerCase().includes(q)
-          );
-        }
         matchedPts = pts.slice(0, 4);
       }
 
@@ -1683,34 +1667,11 @@
           patients = ptRes.data;
         }
 
-        const samplePts = [
-          { no_rm: 'RM-000001', nik: '3201234567890001', profile: { full_name: 'Budi Santoso', phone: '081234567890' }, blood_type: 'O', status_layanan: 'Dipanggil' },
-          { no_rm: 'RM-000002', nik: '3201234567890002', profile: { full_name: 'Siti Aminah', phone: '081234567891' }, blood_type: 'A', status_layanan: 'Menunggu' },
-          { no_rm: 'RM-000003', nik: '3201234567890003', profile: { full_name: 'Rizky Pratama', phone: '081345678900' }, blood_type: 'B', status_layanan: 'Sedang berjalan' },
-          { no_rm: 'RM-000005', nik: '3201234567890005', profile: { full_name: 'Fajar Nugroho', phone: '081234567800' }, blood_type: 'AB', status_layanan: 'Menunggu' },
-          { no_rm: 'RM-000015', nik: '3201234567890015', profile: { full_name: 'Ratna Dewi', phone: '081298765400' }, blood_type: 'O', status_layanan: 'Menunggu' },
-          { no_rm: 'RM-000016', nik: '3201234567890016', profile: { full_name: 'Hendra Kusuma', phone: '081298765411' }, blood_type: 'B', status_layanan: 'Menunggu' },
-          { no_rm: 'RM-000021', nik: '3201234567890021', profile: { full_name: 'Ananda Kenzo', phone: '081345678999' }, blood_type: 'A', status_layanan: 'Menunggu' }
-        ];
-
-        if (patients.length === 0) {
-          if (petugasSearchQuery) {
-            const q = petugasSearchQuery.toLowerCase();
-            patients = samplePts.filter(p =>
-              p.no_rm.toLowerCase().includes(q) ||
-              p.nik.toLowerCase().includes(q) ||
-              (p.profile?.full_name || '').toLowerCase().includes(q)
-            );
-          } else {
-            patients = samplePts;
-          }
-        }
-
         if (scheduleList) {
           if (patients.length > 0) {
             scheduleList.innerHTML = patients.map((pt) => `
               <div class="schedule-item">
-                <time class="schedule-time">${pt.no_rm}</time>
+                <time class="schedule-time">${pt.no_rm || '-'}</time>
                 <div>
                   <strong>${pt.profile?.full_name || 'Pasien'}</strong>
                   <small>NIK: ${pt.nik || '-'} · Telp: ${pt.profile?.phone || pt.phone || '-'} (Gol. ${pt.blood_type || '-'})</small>
@@ -1719,7 +1680,7 @@
               </div>
             `).join('');
           } else {
-            scheduleList.innerHTML = `<div class="empty-state-card"><p>Tidak ada data pasien yang cocok dengan pencarian.</p></div>`;
+            scheduleList.innerHTML = `<div class="empty-state-card"><p>${petugasSearchQuery ? 'Tidak ada data pasien yang cocok dengan pencarian.' : 'Belum ada data pasien terdaftar di database.'}</p></div>`;
           }
         }
 
@@ -1817,19 +1778,10 @@
           queues = queueRes.data;
         }
 
-        if (queues.length === 0) {
-          queues = [
-            { id: 'demo-1', queue_number: 'A-021', status: 'Dipanggil', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
-            { id: 'demo-2', queue_number: 'A-022', status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
-            { id: 'demo-3', queue_number: 'B-008', status: 'Menunggu', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, service: { name: 'Laboratorium' }, doctor: { profile: { full_name: 'dr. Budi Santoso, Sp.PK' } } },
-            { id: 'demo-4', queue_number: 'G-012', status: 'Menunggu', patient: { no_rm: 'RM-000016', profile: { full_name: 'Hendra Kusuma' } }, service: { name: 'Poli Gigi' }, doctor: { profile: { full_name: 'drg. Siti Nurhaliza' } } }
-          ];
-        }
-
         if (petugasSearchQuery) {
           const q = petugasSearchQuery.toLowerCase();
           queues = queues.filter(qn =>
-            qn.queue_number.toLowerCase().includes(q) ||
+            (qn.queue_number || '').toLowerCase().includes(q) ||
             (qn.patient?.profile?.full_name || '').toLowerCase().includes(q) ||
             (qn.patient?.no_rm || '').toLowerCase().includes(q) ||
             (qn.doctor?.profile?.full_name || '').toLowerCase().includes(q)
@@ -1851,7 +1803,7 @@
               </tr>
             `).join('');
           } else {
-            tableBody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Tidak ada nomor antrean yang sesuai pencarian.</td></tr>';
+            tableBody.innerHTML = `<tr><td colspan="5" class="table-empty-row p-4">${petugasSearchQuery ? 'Tidak ada nomor antrean yang sesuai pencarian.' : 'Belum ada antrean pasien untuk hari ini.'}</td></tr>`;
           }
         }
       } else if (mode === 'pembayaran') {
@@ -1901,18 +1853,10 @@
           payments = payRes.data;
         }
 
-        if (payments.length === 0) {
-          payments = [
-            { id: 'demo-p-1', invoice_number: 'INV-2026-0041', total_amount: 85000, status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } } },
-            { id: 'demo-p-2', invoice_number: 'INV-2026-0040', total_amount: 75000, status: 'Lunas', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } } },
-            { id: 'demo-p-3', invoice_number: 'INV-2026-0039', total_amount: 140000, status: 'Lunas', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } } }
-          ];
-        }
-
         if (petugasSearchQuery) {
           const q = petugasSearchQuery.toLowerCase();
           payments = payments.filter(p =>
-            p.invoice_number.toLowerCase().includes(q) ||
+            (p.invoice_number || '').toLowerCase().includes(q) ||
             (p.patient?.profile?.full_name || '').toLowerCase().includes(q)
           );
         }
@@ -1934,7 +1878,7 @@
               </tr>
             `).join('');
           } else {
-            tableBody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Tidak ada invoice pembayaran yang sesuai pencarian.</td></tr>';
+            tableBody.innerHTML = `<tr><td colspan="5" class="table-empty-row p-4">${petugasSearchQuery ? 'Tidak ada invoice pembayaran yang sesuai pencarian.' : 'Belum ada transaksi pembayaran untuk hari ini.'}</td></tr>`;
           }
         }
       } else {
@@ -2103,7 +2047,7 @@
       }
     }
 
-    function openFullAgendaPetugasModal(initialTab) {
+    async function openFullAgendaPetugasModal(initialTab) {
       const modal = document.getElementById('modalFullAgendaPetugas');
       const container = document.getElementById('containerFullAgendaPetugas');
       const searchInput = document.getElementById('searchFullAgendaPetugas');
@@ -2115,15 +2059,23 @@
       let currentTab = initialTab || ((petugasActiveFilter === 'dokter') ? 'dokter' : 'antrean');
 
       const allDoctors = window.appointmentService ? window.appointmentService.getAllDoctorsWithSchedules() : [];
-      let allQueues = [
-        { queue_number: 'A-021', time: '08:30 WIB', status: 'Dipanggil', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
-        { queue_number: 'A-022', time: '09:00 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } } },
-        { queue_number: 'A-023', time: '09:30 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000005', profile: { full_name: 'Fajar Nugroho' } }, service: { name: 'Poli Umum' }, doctor: { profile: { full_name: 'dr. Dimas Putra' } } },
-        { queue_number: 'B-008', time: '08:45 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, service: { name: 'Laboratorium Klinik' }, doctor: { profile: { full_name: 'dr. Budi Santoso, Sp.PK' } } },
-        { queue_number: 'G-012', time: '09:15 WIB', status: 'Dipanggil', patient: { no_rm: 'RM-000016', profile: { full_name: 'Hendra Kusuma' } }, service: { name: 'Poli Gigi & Mulut' }, doctor: { profile: { full_name: 'drg. Siti Nurhaliza' } } },
-        { queue_number: 'G-013', time: '10:00 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000015', profile: { full_name: 'Ratna Dewi' } }, service: { name: 'Poli Gigi & Mulut' }, doctor: { profile: { full_name: 'drg. Cynthia Dewi' } } },
-        { queue_number: 'P-005', time: '09:00 WIB', status: 'Menunggu', patient: { no_rm: 'RM-000021', profile: { full_name: 'Ananda Kenzo' } }, service: { name: 'Poli Spesialis Anak' }, doctor: { profile: { full_name: 'dr. Hendra Kurniawan, Sp.A' } } }
-      ];
+      let allQueues = [];
+      if (window.queueService) {
+        try {
+          const qRes = await window.queueService.getTodayQueue();
+          if (qRes && qRes.success && Array.isArray(qRes.data)) {
+            allQueues = qRes.data.map(q => ({
+              id: q.id,
+              queue_number: q.queue_number,
+              time: q.called_at ? new Date(q.called_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB' : 'Hari ini',
+              status: q.status || 'Menunggu',
+              patient: q.patient,
+              service: q.service,
+              doctor: q.doctor
+            }));
+          }
+        } catch (_) {}
+      }
 
       function renderContent() {
         const query = (searchInput?.value || '').toLowerCase().trim();
@@ -2134,12 +2086,14 @@
 
           let filteredDocs = allDoctors;
           if (query) {
-            filteredDocs = allDoctors.filter(d =>
-              d.full_name.toLowerCase().includes(query) ||
-              d.service_name.toLowerCase().includes(query) ||
-              d.schedule.days.toLowerCase().includes(query) ||
-              d.schedule.room.toLowerCase().includes(query)
-            );
+            filteredDocs = allDoctors.filter(d => {
+              const docName = (d.profile?.full_name || d.full_name || '').toLowerCase();
+              const srvName = (d.service?.name || d.service_name || '').toLowerCase();
+              const daysStr = (d.schedule?.days || '').toLowerCase();
+              const roomStr = (d.schedule?.room || '').toLowerCase();
+              const hoursStr = (d.schedule?.hours || (d.schedule?.start_time ? `${d.schedule.start_time} - ${d.schedule.end_time} WIB` : '')).toLowerCase();
+              return docName.includes(query) || srvName.includes(query) || daysStr.includes(query) || roomStr.includes(query) || hoursStr.includes(query);
+            });
           }
 
           if (badgeCount) badgeCount.textContent = `${filteredDocs.length} Dokter Terjadwal`;
@@ -2163,17 +2117,25 @@
                 </tr>
               </thead>
               <tbody>
-                ${filteredDocs.map(d => `
+                ${filteredDocs.map(d => {
+                  const docName = d.profile?.full_name || d.full_name || 'Dokter';
+                  const srvName = d.service?.name || d.service_name || 'Poliklinik';
+                  const daysStr = d.schedule?.days || 'Senin - Jumat';
+                  const hoursStr = d.schedule?.hours || (d.schedule?.start_time ? `${d.schedule.start_time} - ${d.schedule.end_time} WIB` : '08:00 - 14:00 WIB');
+                  const roomStr = d.schedule?.room || 'Ruang Poli';
+                  const quotaVal = d.schedule?.quota || 20;
+                  return `
                   <tr>
-                    <td class="table-primary"><strong>${d.full_name}</strong></td>
-                    <td><strong>${d.service_name}</strong></td>
-                    <td>${d.schedule.days}</td>
-                    <td>${d.schedule.start_time} - ${d.schedule.end_time} WIB</td>
-                    <td>${d.schedule.room}</td>
-                    <td><strong>${d.schedule.quota}</strong> Pasien</td>
+                    <td class="table-primary"><strong>${escapeJsStr(docName)}</strong></td>
+                    <td><strong>${escapeJsStr(srvName)}</strong></td>
+                    <td>${escapeJsStr(daysStr)}</td>
+                    <td>${escapeJsStr(hoursStr)}</td>
+                    <td>${escapeJsStr(roomStr)}</td>
+                    <td><strong>${quotaVal}</strong> Pasien</td>
                     <td>${statusBadge(d.is_active ? 'Aktif' : 'Cuti')}</td>
                   </tr>
-                `).join('')}
+                  `;
+                }).join('')}
               </tbody>
             </table>
           `;
@@ -2184,19 +2146,19 @@
           let filteredQueues = allQueues;
           if (query) {
             filteredQueues = allQueues.filter(q =>
-              q.queue_number.toLowerCase().includes(query) ||
+              (q.queue_number || '').toLowerCase().includes(query) ||
               (q.patient?.profile?.full_name || '').toLowerCase().includes(query) ||
               (q.patient?.no_rm || '').toLowerCase().includes(query) ||
               (q.service?.name || '').toLowerCase().includes(query) ||
               (q.doctor?.profile?.full_name || '').toLowerCase().includes(query) ||
-              q.status.toLowerCase().includes(query)
+              (q.status || '').toLowerCase().includes(query)
             );
           }
 
           if (badgeCount) badgeCount.textContent = `${filteredQueues.length} Antrean Pasien`;
 
           if (filteredQueues.length === 0) {
-            container.innerHTML = '<div class="table-empty-row p-4">Tidak ada antrean yang cocok dengan pencarian.</div>';
+            container.innerHTML = `<div class="table-empty-row p-4">${query ? 'Tidak ada antrean yang cocok dengan pencarian.' : 'Belum ada antrean pasien untuk hari ini.'}</div>`;
             return;
           }
 
@@ -2217,15 +2179,15 @@
               <tbody>
                 ${filteredQueues.map(q => `
                   <tr>
-                    <td class="table-primary"><strong>${q.queue_number}</strong></td>
-                    <td>${q.time}</td>
-                    <td><strong>${q.patient?.profile?.full_name || 'Pasien'}</strong></td>
-                    <td><span class="mono-code">${q.patient?.no_rm || '-'}</span></td>
-                    <td>${q.service?.name || '-'}</td>
-                    <td>${q.doctor?.profile?.full_name || '-'}</td>
-                    <td>${statusBadge(q.status)}</td>
+                    <td class="table-primary"><strong>${escapeJsStr(q.queue_number || '-')}</strong></td>
+                    <td>${escapeJsStr(q.time || '-')}</td>
+                    <td><strong>${escapeJsStr(q.patient?.profile?.full_name || 'Pasien')}</strong></td>
+                    <td><span class="mono-code">${escapeJsStr(q.patient?.no_rm || '-')}</span></td>
+                    <td>${escapeJsStr(q.service?.name || '-')}</td>
+                    <td>${escapeJsStr(q.doctor?.profile?.full_name || '-')}</td>
+                    <td>${statusBadge(q.status || 'Menunggu')}</td>
                     <td>
-                      <button type="button" class="action-btn-sm action-btn-primary" onclick="alert('Memanggil nomor antrean ${q.queue_number} ke ruang ${escapeJsStr(q.service?.name || 'Pemeriksaan')}!')">Panggil</button>
+                      <button type="button" class="action-btn-sm action-btn-primary" onclick="alert('Memanggil nomor antrean ${escapeJsStr(q.queue_number || '')} ke ruang ${escapeJsStr(q.service?.name || 'Pemeriksaan')}!')">Panggil</button>
                     </td>
                   </tr>
                 `).join('')}
@@ -2272,23 +2234,10 @@
         }
       }
 
-      if (patients.length === 0) {
-        patients = [
-          { no_rm: 'RM-000001', nik: '3201234567890001', profile: { full_name: 'Budi Santoso', phone: '081234567890', address: 'Jl. Merdeka No. 12, Jakarta' }, birth_date: '1985-05-12', gender: 'Laki-laki', blood_type: 'O' },
-          { no_rm: 'RM-000002', nik: '3201234567890002', profile: { full_name: 'Siti Aminah', phone: '081234567891', address: 'Jl. Sudirman Kav. 45, Jakarta' }, birth_date: '1992-08-23', gender: 'Perempuan', blood_type: 'A' },
-          { no_rm: 'RM-000003', nik: '3201234567890003', profile: { full_name: 'Rizky Pratama', phone: '081234567892', address: 'Jl. Gatot Subroto No. 8, Jakarta' }, birth_date: '2000-01-15', gender: 'Laki-laki', blood_type: 'B' },
-          { no_rm: 'RM-000004', nik: '3201234567890004', profile: { full_name: 'Dewi Lestari', phone: '081234567893', address: 'Jl. Kebon Jeruk No. 3, Jakarta Barat' }, birth_date: '1988-11-04', gender: 'Perempuan', blood_type: 'AB' },
-          { no_rm: 'RM-000005', nik: '3201234567890005', profile: { full_name: 'Fajar Nugroho', phone: '081234567800', address: 'Jl. Rasuna Said No. 19, Jakarta Selatan' }, birth_date: '1979-03-30', gender: 'Laki-laki', blood_type: 'O' },
-          { no_rm: 'RM-000015', nik: '3201234567890015', profile: { full_name: 'Ratna Dewi', phone: '081298765400', address: 'Jl. Tebet Barat Dalam No. 10, Jakarta' }, birth_date: '1995-07-19', gender: 'Perempuan', blood_type: 'O' },
-          { no_rm: 'RM-000016', nik: '3201234567890016', profile: { full_name: 'Hendra Kusuma', phone: '081298765411', address: 'Jl. Menteng Raya No. 5, Jakarta Pusat' }, birth_date: '1983-12-01', gender: 'Laki-laki', blood_type: 'B' },
-          { no_rm: 'RM-000021', nik: '3201234567890021', profile: { full_name: 'Ananda Kenzo', phone: '081345678999', address: 'Jl. Cempaka Putih No. 14, Jakarta' }, birth_date: '2018-04-10', gender: 'Laki-laki', blood_type: 'A' }
-        ];
-      }
-
       function renderRows(filteredList) {
         if (badgeCount) badgeCount.textContent = `${filteredList.length} Pasien Terdaftar`;
         if (filteredList.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="8" class="table-empty-row">Tidak ada data pasien yang sesuai pencarian.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="8" class="table-empty-row p-4">Belum ada data pasien terdaftar di database. Silakan gunakan tombol Tambah Pasien Walk-in.</td></tr>';
           return;
         }
 
@@ -2739,6 +2688,24 @@
           todayAppts = apptRes.data;
         }
 
+        const docPrimaryAction = document.getElementById('primaryAction');
+        if (docPrimaryAction) {
+          docPrimaryAction.onclick = () => {
+            if (todayAppts.length > 0) {
+              const pt = todayAppts[0];
+              window.openDoctorSoapModal(
+                pt.patient?.no_rm || '',
+                pt.patient?.profile?.full_name || 'Pasien',
+                pt.chief_complaint || 'Pemeriksaan Klinis',
+                pt.patient?.id || '',
+                pt.id || ''
+              );
+            } else {
+              window.openDoctorSoapModal('', 'Pasien Konsultasi Langsung', 'Pemeriksaan Klinis');
+            }
+          };
+        }
+
         const statCount = document.getElementById('docStatPatientCount');
         if (statCount) statCount.textContent = String(todayAppts.length);
 
@@ -3026,20 +2993,10 @@
         }
       }
 
-      if (appts.length === 0) {
-        appts = [
-          { queue_number: 'A-001', appointment_time: '08:30:00', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, chief_complaint: 'Kontrol tekanan darah & pusing', status: 'Selesai', patient_id: 'demo-pt-1', id: 'demo-appt-1' },
-          { queue_number: 'A-002', appointment_time: '09:15:00', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, chief_complaint: 'Demam menggigil dan flu batuk', status: 'Sedang berjalan', patient_id: 'demo-pt-2', id: 'demo-appt-2' },
-          { queue_number: 'A-003', appointment_time: '10:00:00', patient: { no_rm: 'RM-000003', profile: { full_name: 'Rizky Pratama' } }, chief_complaint: 'Evaluasi hasil tes laboratorium darah', status: 'Menunggu', patient_id: 'demo-pt-3', id: 'demo-appt-3' },
-          { queue_number: 'A-004', appointment_time: '11:00:00', patient: { no_rm: 'RM-000005', profile: { full_name: 'Fajar Nugroho' } }, chief_complaint: 'Nyeri ulu hati kambuh setelah makan', status: 'Menunggu', patient_id: 'demo-pt-5', id: 'demo-appt-4' },
-          { queue_number: 'A-005', appointment_time: '11:30:00', patient: { no_rm: 'RM-000015', profile: { full_name: 'Ratna Dewi' } }, chief_complaint: 'Pemeriksaan rutin keluhan migrain', status: 'Menunggu', patient_id: 'demo-pt-15', id: 'demo-appt-5' }
-        ];
-      }
-
       function renderRows(filteredList) {
         if (badgeCount) badgeCount.textContent = `${filteredList.length} Pasien`;
         if (filteredList.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="7" class="table-empty-row">Tidak ada antrean pasien yang cocok dengan pencarian.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="7" class="table-empty-row p-4">Belum ada antrean janji temu pasien untuk jadwal dokter ini hari ini.</td></tr>';
           return;
         }
         tableBody.innerHTML = filteredList.map((a, idx) => {
@@ -3108,10 +3065,10 @@
 
       if (records.length === 0) {
         const apptRes = await window.appointmentService.getDoctorTodayAppointments(activeDoctorId);
-        const sampleAppts = (apptRes.success && apptRes.data) ? apptRes.data : [];
-        if (sampleAppts.length > 0) {
-          records = sampleAppts.map(a => ({
-            record_date: a.appointment_date || '26 Sep 2026',
+        const actualAppts = (apptRes.success && apptRes.data) ? apptRes.data : [];
+        if (actualAppts.length > 0) {
+          records = actualAppts.map(a => ({
+            record_date: a.appointment_date || 'Hari ini',
             patient: a.patient,
             subjective: a.chief_complaint || 'Pemeriksaan klinis keluhan umum',
             objective: 'TD: 120/80 mmHg, N: 78x/m, S: 36.6 C',
@@ -3119,19 +3076,13 @@
             treatment_plan: 'Edukasi dan anjuran istirahat teratur',
             finalized_at: a.status === 'Selesai' ? '2026-09-26T10:00:00Z' : null
           }));
-        } else {
-          records = [
-            { record_date: '26 Sep 2026', patient: { no_rm: 'RM-000001', profile: { full_name: 'Budi Santoso' } }, subjective: 'Demam tinggi menggigil sejak 2 hari yang lalu', objective: 'TD: 120/80 mmHg, N: 88x/m, S: 38.5 C', assessment: 'Febris Akut ec Suspek ISPA (R50.9)', treatment_plan: 'Paracetamol 500mg 3x1, Amoxicillin 500mg 3x1', finalized_at: '2026-09-26T09:15:00Z' },
-            { record_date: '25 Sep 2026', patient: { no_rm: 'RM-000002', profile: { full_name: 'Siti Aminah' } }, subjective: 'Batuk kering dan rasa gatal di tenggorokan', objective: 'Faring hiperemis ringan, tonsil T1-T1', assessment: 'Faringitis Akut (ICD-10 J02.9)', treatment_plan: 'Dextromethorphan syrup 3x1 cth', finalized_at: '2026-09-25T11:00:00Z' },
-            { record_date: '24 Sep 2026', patient: { no_rm: 'RM-000005', profile: { full_name: 'Fajar Nugroho' } }, subjective: 'Nyeri perut sebelah kiri atas setelah makan pedas', objective: 'Nyeri tekan epigastrium (+), bising usus normal', assessment: 'Dispepsia Fungsional (ICD-10 K30)', treatment_plan: 'Omeprazole 20mg 2x1 a.c., Antasida sirup', finalized_at: '2026-09-24T14:20:00Z' }
-          ];
         }
       }
 
       function renderRows(filteredList) {
         if (badgeCount) badgeCount.textContent = `${filteredList.length} Pemeriksaan`;
         if (filteredList.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="8" class="table-empty-row">Tidak ada berkas medis yang cocok dengan pencarian.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="8" class="table-empty-row p-4">Belum ada riwayat berkas rekam medis untuk dokter ini.</td></tr>';
           return;
         }
         tableBody.innerHTML = filteredList.map(r => {
