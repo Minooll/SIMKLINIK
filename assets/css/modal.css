@@ -184,3 +184,46 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* Mobile Responsive Modal & Toast */
+@media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+  .modal-container {
+    max-height: 95vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-bottom: 0;
+  }
+  .modal-header {
+    padding: 1rem 1.15rem;
+  }
+  .modal-body {
+    padding: 1.15rem 1rem;
+    max-height: calc(95vh - 125px);
+  }
+  .modal-footer {
+    padding: 0.85rem 1rem;
+    flex-wrap: wrap;
+    justify-content: stretch;
+    gap: 0.5rem;
+  }
+  .modal-footer .btn {
+    flex: 1 1 45%;
+    text-align: center;
+    justify-content: center;
+  }
+  .toast-container {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    align-items: center;
+  }
+  .toast {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+

@@ -69,4 +69,34 @@ test('Modal and booking dialog enforce vertical scrolling and flex bounding', ()
   assert.match(pasienHtml, /id="booking-form"\s+class="modal-form"/i, 'booking-form must have class modal-form');
 });
 
+test('Mobile responsive design system is thoroughly implemented across all stylesheets', () => {
+  const dashCss = fs.readFileSync(path.join(__dirname, '../assets/css/dashboard.css'), 'utf8');
+  const authCss = fs.readFileSync(path.join(__dirname, '../assets/css/auth.css'), 'utf8');
+  const aiChatCss = fs.readFileSync(path.join(__dirname, '../assets/css/ai-chat.css'), 'utf8');
+  const modalCss = fs.readFileSync(path.join(__dirname, '../assets/css/modal.css'), 'utf8');
+  const roleCss = fs.readFileSync(path.join(__dirname, '../assets/css/role-pages.css'), 'utf8');
+
+  // dashboard.css: mobile sticky header, horizontal nav-menu, font-size 16px to prevent iOS auto-zoom
+  assert.match(dashCss, /@media\s*\(max-width:\s*768px\)/i);
+  assert.match(dashCss, /\.nav-menu\s*\{[^}]*overflow-x:\s*auto/i);
+  assert.match(dashCss, /font-size:\s*16px\s*!important/i);
+
+  // auth.css: mobile auth wrapper and role tabs
+  assert.match(authCss, /@media\s*\(max-width:\s*768px\)/i);
+  assert.match(authCss, /\.role-tab/i);
+
+  // ai-chat.css: mobile slide-up bottom sheet
+  assert.match(aiChatCss, /@media\s*\(max-width:\s*768px\)/i);
+  assert.match(aiChatCss, /\.ai-chat-drawer\s*\{[^}]*width:\s*100vw/i);
+
+  // modal.css: mobile modal and toasts
+  assert.match(modalCss, /@media\s*\(max-width:\s*768px\)/i);
+  assert.match(modalCss, /\.modal-footer\s*\.btn/i);
+
+  // role-pages.css: mobile ticket card, tables min-width, and doctor preview
+  assert.match(roleCss, /@media\s*\(max-width:\s*768px\)/i);
+  assert.match(roleCss, /table\s*\{[^}]*min-width:/i);
+});
+
+
 
