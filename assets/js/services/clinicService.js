@@ -40,7 +40,8 @@ const PURWOREJO_DOCTORS_DATA = [
     specialty: 'Dokter Umum',
     sip_number: 'SIP-PWR-001/2024',
     daily_quota: 20,
-    is_active: true
+    is_active: true,
+    status: 'aktif'
   },
   {
     id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
@@ -49,7 +50,8 @@ const PURWOREJO_DOCTORS_DATA = [
     specialty: 'Dokter Gigi',
     sip_number: 'SIP-PWR-002/2024',
     daily_quota: 15,
-    is_active: true
+    is_active: true,
+    status: 'aktif'
   },
   {
     id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
@@ -58,7 +60,8 @@ const PURWOREJO_DOCTORS_DATA = [
     specialty: 'Spesialis Anak',
     sip_number: 'SIP-PWR-003/2024',
     daily_quota: 25,
-    is_active: true
+    is_active: true,
+    status: 'aktif'
   },
   {
     id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
@@ -67,7 +70,8 @@ const PURWOREJO_DOCTORS_DATA = [
     specialty: 'Dokter Umum',
     sip_number: 'SIP-PWR-004/2024',
     daily_quota: 20,
-    is_active: true
+    is_active: true,
+    status: 'aktif'
   }
 ];
 
@@ -113,8 +117,12 @@ function generateReferralCode(prefix = 'KLINIK') {
 /**
  * Ambil daftar dokter yang berpraktik di klinik tertentu
  */
-async function getDoctorsByClinic(clinicId) {
-  return PURWOREJO_DOCTORS_DATA.filter(d => d.clinic_id === clinicId && d.is_active);
+async function getDoctorsByClinic(clinicId, includeCuti = true) {
+  return PURWOREJO_DOCTORS_DATA.filter(d => {
+    if (d.clinic_id !== clinicId || !d.is_active) return false;
+    if (!includeCuti && d.status === 'cuti') return false;
+    return true;
+  });
 }
 
 /**
@@ -128,10 +136,55 @@ async function createDoctor(doctorData) {
     specialty: doctorData.specialty || 'Dokter Umum',
     sip_number: doctorData.sip_number,
     daily_quota: Number(doctorData.daily_quota) || 20,
-    is_active: true
+    is_active: true,
+    status: 'aktif'
   };
   PURWOREJO_DOCTORS_DATA.push(newDoctor);
   return newDoctor;
+}
+
+/**
+ * Mengedit data dokter oleh Pemilik Klinik
+ */
+async function updateDoctor(doctorId, updatedFields) {
+  const doc = PURWOREJO_DOCTORS_DATA.find(d => d.id === doctorId && d.is_active);
+  if (!doc) {
+    throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
+  }
+
+  if (updatedFields.full_name) doc.full_name = updatedFields.full_name.trim();
+  if (updatedFields.specialty) doc.specialty = updatedFields.specialty.trim();
+  if (updatedFields.sip_number) doc.sip_number = updatedFields.sip_number.trim();
+  if (updatedFields.daily_quota !== undefined) doc.daily_quota = Number(updatedFields.daily_quota);
+  if (updatedFields.status) doc.status = updatedFields.status;
+
+  return { ...doc };
+}
+
+/**
+ * Mengubah status cuti dokter (toggle 'aktif' <-> 'cuti')
+ */
+async function toggleDoctorCuti(doctorId) {
+  const doc = PURWOREJO_DOCTORS_DATA.find(d => d.id === doctorId && d.is_active);
+  if (!doc) {
+    throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
+  }
+
+  doc.status = (doc.status === 'cuti') ? 'aktif' : 'cuti';
+  return { success: true, doctor: { ...doc }, status: doc.status };
+}
+
+/**
+ * Menghapus dokter dari klinik oleh Pemilik Klinik
+ */
+async function deleteDoctor(doctorId) {
+  const docIndex = PURWOREJO_DOCTORS_DATA.findIndex(d => d.id === doctorId);
+  if (docIndex === -1) {
+    throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
+  }
+
+  PURWOREJO_DOCTORS_DATA[docIndex].is_active = false;
+  return { success: true, doctorId };
 }
 
 if (typeof window !== 'undefined') {
@@ -141,6 +194,9 @@ if (typeof window !== 'undefined') {
   window.generateReferralCode = generateReferralCode;
   window.getDoctorsByClinic = getDoctorsByClinic;
   window.createDoctor = createDoctor;
+  window.updateDoctor = updateDoctor;
+  window.toggleDoctorCuti = toggleDoctorCuti;
+  window.deleteDoctor = deleteDoctor;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -150,6 +206,9 @@ if (typeof module !== 'undefined' && module.exports) {
     getClinicById,
     generateReferralCode,
     getDoctorsByClinic,
-    createDoctor
+    createDoctor,
+    updateDoctor,
+    toggleDoctorCuti,
+    deleteDoctor
   };
 }

@@ -2,7 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { validateReferralCodeFormat, checkRateLimit, recordFailedAttempt, resetAttempts } = require('../assets/js/auth/multiRoleAuth.js');
+const {
+  validateReferralCodeFormat,
+  checkRateLimit,
+  recordFailedAttempt,
+  resetAttempts,
+  requestPasswordReset
+} = require('../assets/js/auth/multiRoleAuth.js');
 
 test('multiRoleAuth - Referral code validation and brute force rate limiting', () => {
   // Test code format: PWR-[PREFIX]-[6 ALPHANUMERIC]
@@ -26,11 +32,26 @@ test('multiRoleAuth - Referral code validation and brute force rate limiting', (
   assert.ok(lockedStatus.remainingMinutes > 0);
 });
 
-test('login.html contains 3 role tabs and no legacy petugas references', () => {
+test('multiRoleAuth - requestPasswordReset validates email and dispatches reset instructions', async () => {
+  const invalidRes = await requestPasswordReset('invalid-email');
+  assert.strictEqual(invalidRes.success, false);
+
+  const emptyRes = await requestPasswordReset('');
+  assert.strictEqual(emptyRes.success, false);
+
+  const validRes = await requestPasswordReset('pasien@purworejo.id');
+  assert.strictEqual(validRes.success, true);
+  assert.match(validRes.message, /pasien@purworejo\.id/i);
+});
+
+test('login.html contains 3 role tabs, forgot password trigger, modal, and no legacy petugas references', () => {
   const html = fs.readFileSync(path.join(__dirname, '../login.html'), 'utf8');
   assert.match(html, /data-role=["']pasien["']/i);
   assert.match(html, /data-role=["']dokter["']/i);
   assert.match(html, /data-role=["']pemilik["']/i);
   assert.doesNotMatch(html, /data-role=["']petugas["']/i);
   assert.match(html, /id=["']referral-code-input["']/i);
+  // Forgot password requirements
+  assert.match(html, /id=["']link-forgot-password["']/i);
+  assert.match(html, /id=["']modal-forgot-password["']/i);
 });

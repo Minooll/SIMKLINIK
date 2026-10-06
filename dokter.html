@@ -19,9 +19,19 @@
           <div class="brand-subtitle">Ruang Praktik Dokter</div>
         </div>
       </div>
-      <nav class="nav-menu">
-        <a class="nav-item active" href="dokter.html">📋 Antrean & Formulir RME</a>
-        <a class="nav-item" href="index.html">🌐 Portal Publik</a>
+      <nav class="nav-menu" id="doctor-nav-menu">
+        <a class="nav-item active" href="javascript:void(0)" data-view="view-ruang-periksa" id="nav-ruang-periksa">
+          📋 Ruang Periksa & SOAP
+        </a>
+        <a class="nav-item" href="javascript:void(0)" data-view="view-antrean-lengkap" id="nav-antrean-lengkap">
+          👥 Daftar Antrean Hari Ini
+        </a>
+        <a class="nav-item" href="javascript:void(0)" data-view="view-arsip-rme" id="nav-arsip-rme">
+          🗂️ Arsip RME Selesai
+        </a>
+        <a class="nav-item" href="index.html">
+          🌐 Portal Publik
+        </a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="window.logout()">
@@ -34,7 +44,7 @@
     <main class="main-content">
       <header class="topbar">
         <div>
-          <h1 class="page-title">Pemeriksaan Pasien & Rekam Medis (RME SOAP)</h1>
+          <h1 class="page-title" id="doctor-page-title">Pemeriksaan Pasien & Rekam Medis (RME SOAP)</h1>
           <span style="font-size: 0.8rem; color: var(--text-muted);" id="doctor-clinic-indicator">
             Klinik Pratama Sehat Mandiri Purworejo (Kec. Purworejo Kota)
           </span>
@@ -48,90 +58,146 @@
       </header>
 
       <div class="content-body">
-        <div style="display: grid; grid-template-columns: 360px 1fr; gap: 2rem;">
-          <!-- Kolom Kiri: Antrean Pasien Hari Ini -->
-          <div>
-            <div class="card" style="margin-bottom: 1.5rem;">
-              <div class="card-header">
-                <h2 style="font-size: 1.125rem; font-weight: 700;">Antrean Pasien Hari Ini</h2>
-                <span class="queue-badge lengang" id="doctor-crowd-badge">LENGANG</span>
+        <!-- VIEW 1: RUANG PERIKSA & SOAP FORM -->
+        <section id="view-ruang-periksa" class="dashboard-view active">
+          <div style="display: grid; grid-template-columns: 360px 1fr; gap: 2rem;">
+            <!-- Kolom Kiri: Antrean Pasien Hari Ini -->
+            <div>
+              <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                  <h2 style="font-size: 1.125rem; font-weight: 800;">Antrean Pasien Hari Ini</h2>
+                  <span class="queue-badge lengang" id="doctor-crowd-badge">LENGANG</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                  Tanggal: <strong id="current-date-text">Hari Ini</strong>
+                </p>
+                
+                <div id="today-queue-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <!-- Dinamis diisi queue items -->
+                </div>
               </div>
-              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                Tanggal: <strong id="current-date-text">Hari Ini</strong>
-              </p>
-              
-              <div id="today-queue-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <!-- Dinamis diisi queue items -->
+            </div>
+
+            <!-- Kolom Kanan: Lembar Formulir SOAP RME Sekuensial -->
+            <div>
+              <div class="card" style="border-top: 4px solid var(--primary);">
+                <div class="card-header">
+                  <div>
+                    <span class="queue-badge lengang" style="margin-bottom: 0.35rem;">PASIEN AKTIF DIPERIKSA</span>
+                    <h2 style="font-size: 1.35rem; font-weight: 900; color: var(--primary-dark);" id="current-patient-header">
+                      No. Antrean: A-01 — Tn. Santoso (NIK: 330601xxxxxxxxxx)
+                    </h2>
+                  </div>
+                </div>
+
+                <!-- SOAP Form -->
+                <form id="soap-form">
+                  <div class="soap-grid" style="margin-bottom: 1.5rem;">
+                    <!-- Subjective -->
+                    <div class="soap-field">
+                      <label class="soap-label" for="soap-subjective">
+                        <span>📝</span> S (Subjective) — Anamnesis & Keluhan Utama
+                      </label>
+                      <textarea id="soap-subjective" class="soap-textarea" placeholder="Pasien mengeluhkan demam sejak 3 hari, pusing, batuk kering..." required></textarea>
+                    </div>
+
+                    <!-- Objective -->
+                    <div class="soap-field">
+                      <label class="soap-label" for="soap-objective">
+                        <span>🩺</span> O (Objective) — Tanda Vital & Pemeriksaan Fisik
+                      </label>
+                      <textarea id="soap-objective" class="soap-textarea" placeholder="TD: 120/80 mmHg, Nadi: 82x/m, Suhu: 38.2°C, RR: 18x/m. Faring hiperemis..." required></textarea>
+                    </div>
+
+                    <!-- Assessment -->
+                    <div class="soap-field">
+                      <label class="soap-label" for="soap-assessment">
+                        <span>🔍</span> A (Assessment) — Diagnosa Klinis & ICD-10
+                      </label>
+                      <textarea id="soap-assessment" class="soap-textarea" placeholder="Febris Akut ec Suspect Viral Infection (ICD-10: A09)..." required></textarea>
+                    </div>
+
+                    <!-- Plan -->
+                    <div class="soap-field">
+                      <label class="soap-label" for="soap-plan">
+                        <span>💊</span> P (Plan) — Terapi Medis, Edukasi & Resep Obat
+                      </label>
+                      <textarea id="soap-plan" class="soap-textarea" placeholder="Paracetamol 500mg 3x1 tablet, Vitamin C 500mg 1x1. Istirahat cukup..." required></textarea>
+                    </div>
+                  </div>
+
+                  <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="soap-label" for="soap-prescription">
+                      <span>🏷️</span> Catatan Resep Tambahan / Instruksi Farmasi
+                    </label>
+                    <input type="text" id="soap-prescription" class="form-input" placeholder="Diminum sesudah makan, habiskan antibiotik jika ada.">
+                  </div>
+
+                  <!-- Action Button -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">
+                      💡 Menyimpan lembar SOAP akan secara otomatis memanggil antrean pasien berikutnya.
+                    </span>
+                    <button type="submit" id="btn-finalize-rme" class="btn btn-primary" style="padding: 0.85rem 1.5rem; font-size: 0.95rem;">
+                      💾 Selesai & Simpan RME ➔
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
+        </section>
 
-          <!-- Kolom Kanan: Lembar Formulir SOAP RME Sekuensial -->
-          <div>
-            <div class="card" style="border-top: 4px solid var(--primary);">
-              <div class="card-header">
-                <div>
-                  <span class="queue-badge lengang" style="margin-bottom: 0.25rem;">PASIEN AKTIF DIPERIKSA</span>
-                  <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--primary-dark);" id="current-patient-header">
-                    No. Antrean: A-01 — Tn. Santoso (NIK: 330601xxxxxxxxxx)
-                  </h2>
-                </div>
+        <!-- VIEW 2: DAFTAR ANTREAN LENGKAP -->
+        <section id="view-antrean-lengkap" class="dashboard-view">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800;">Daftar Seluruh Antrean Pasien Hari Ini</h2>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">
+                  Pantau urutan giliran, status kehadiran, dan penegakan aturan kunci pembatalan 12 jam.
+                </p>
               </div>
+            </div>
 
-              <!-- SOAP Form -->
-              <form id="soap-form">
-                <div class="soap-grid" style="margin-bottom: 1.5rem;">
-                  <!-- Subjective -->
-                  <div class="soap-field">
-                    <label class="soap-label" for="soap-subjective">
-                      S (Subjective) — Anamnesis & Keluhan Utama
-                    </label>
-                    <textarea id="soap-subjective" class="soap-textarea" placeholder="Pasien mengeluhkan demam sejak 3 hari, pusing, batuk kering..." required></textarea>
-                  </div>
-
-                  <!-- Objective -->
-                  <div class="soap-field">
-                    <label class="soap-label" for="soap-objective">
-                      O (Objective) — Tanda Vital & Pemeriksaan Fisik
-                    </label>
-                    <textarea id="soap-objective" class="soap-textarea" placeholder="TD: 120/80 mmHg, Nadi: 82x/m, Suhu: 38.2°C, RR: 18x/m. Faring hiperemis..." required></textarea>
-                  </div>
-
-                  <!-- Assessment -->
-                  <div class="soap-field">
-                    <label class="soap-label" for="soap-assessment">
-                      A (Assessment) — Diagnosa Klinis & ICD-10
-                    </label>
-                    <textarea id="soap-assessment" class="soap-textarea" placeholder="Febris Akut ec Suspect Viral Infection (ICD-10: A09)..." required></textarea>
-                  </div>
-
-                  <!-- Plan -->
-                  <div class="soap-field">
-                    <label class="soap-label" for="soap-plan">
-                      P (Plan) — Terapi Medis, Edukasi & Resep Obat
-                    </label>
-                    <textarea id="soap-plan" class="soap-textarea" placeholder="Paracetamol 500mg 3x1 tablet, Vitamin C 500mg 1x1. Istirahat cukup..." required></textarea>
-                  </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                  <label class="soap-label" for="soap-prescription">Catatan Resep Tambahan / Instruksi Farmasi</label>
-                  <input type="text" id="soap-prescription" class="form-input" placeholder="Diminum sesudah makan, habiskan antibiotik jika ada.">
-                </div>
-
-                <!-- Action Button -->
-                <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border);">
-                  <span style="font-size: 0.85rem; color: var(--text-muted);">
-                    Menyimpan lembar SOAP akan secara otomatis memanggil antrean pasien berikutnya.
-                  </span>
-                  <button type="submit" id="btn-finalize-rme" class="btn btn-primary" style="padding: 0.875rem 1.5rem; font-size: 1rem;">
-                    💾 Selesai & Simpan RME ➔
-                  </button>
-                </div>
-              </form>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.925rem;">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); background: var(--bg-subtle);">
+                    <th style="padding: 0.85rem 1rem;">No. Antrean</th>
+                    <th style="padding: 0.85rem 1rem;">Nama Pasien</th>
+                    <th style="padding: 0.85rem 1rem;">Jadwal Jam</th>
+                    <th style="padding: 0.85rem 1rem;">Status</th>
+                    <th style="padding: 0.85rem 1rem;">Ketentuan Pembatalan</th>
+                  </tr>
+                </thead>
+                <tbody id="full-queue-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
+        </section>
+
+        <!-- VIEW 3: ARSIP RME SELESAI HARI INI -->
+        <section id="view-arsip-rme" class="dashboard-view">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800;">Arsip Lembar RME SOAP Selesai Diperiksa</h2>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">
+                  Riwayat dokumen resume rekam medis elektronik yang telah difinalisasi pada sesi hari ini.
+                </p>
+              </div>
+            </div>
+
+            <div id="archived-rme-list" style="display: flex; flex-direction: column; gap: 1rem;">
+              <div style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+                Belum ada berkas RME yang selesai pada sesi saat ini. Formulir yang disimpan akan otomatis terarsip di sini.
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -187,12 +253,46 @@
     ];
 
     let currentActiveAppt = activeQueue[0];
+    let archivedRecords = [];
+
+    // Tab Switching Logic
+    const doctorNavItems = document.querySelectorAll('#doctor-nav-menu .nav-item[data-view]');
+    const doctorViews = document.querySelectorAll('.dashboard-view');
+    const doctorPageTitle = document.getElementById('doctor-page-title');
+
+    doctorNavItems.forEach(item => {
+      item.addEventListener('click', () => {
+        doctorNavItems.forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+
+        const targetViewId = item.dataset.view;
+        doctorViews.forEach(v => {
+          if (v.id === targetViewId) {
+            v.classList.add('active');
+          } else {
+            v.classList.remove('active');
+          }
+        });
+
+        if (targetViewId === 'view-ruang-periksa') {
+          doctorPageTitle.textContent = 'Pemeriksaan Pasien & Rekam Medis (RME SOAP)';
+        } else if (targetViewId === 'view-antrean-lengkap') {
+          doctorPageTitle.textContent = 'Daftar Seluruh Antrean Pasien Hari Ini';
+        } else if (targetViewId === 'view-arsip-rme') {
+          doctorPageTitle.textContent = 'Arsip RME Selesai Diperiksa';
+        }
+      });
+    });
 
     function renderQueue() {
       const container = document.getElementById('today-queue-list');
       container.innerHTML = '';
 
+      const tableBody = document.getElementById('full-queue-table-body');
+      tableBody.innerHTML = '';
+
       activeQueue.forEach(item => {
+        // Render left column card
         const div = document.createElement('div');
         div.style.padding = '0.875rem';
         div.style.borderRadius = 'var(--radius-md)';
@@ -211,11 +311,11 @@
               ${item.status.toUpperCase()}
             </span>
           </div>
-          <div style="font-weight: 600; font-size: 0.95rem;">${item.patient_name || 'Pasien Purworejo'}</div>
+          <div style="font-weight: 700; font-size: 0.95rem;">${item.patient_name || 'Pasien Purworejo'}</div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Jam Janji: ${item.appointment_time}</div>
           <div>
             <button type="button" class="btn ${isAllowedCancel ? 'btn-danger' : 'btn-disabled'}" 
-              style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+              style="padding: 0.25rem 0.55rem; font-size: 0.75rem;"
               ${!isAllowedCancel ? 'disabled' : ''}
               onclick="handleDoctorCancel('${item.id}', '${item.appointment_date}', '${item.appointment_time}')">
               ${isAllowedCancel ? 'Batalkan Janji' : 'Terkunci (<12 Jam)'}
@@ -223,12 +323,33 @@
           </div>
         `;
         container.appendChild(div);
+
+        // Render full queue table row
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--border)';
+        tr.innerHTML = `
+          <td style="padding: 1rem; font-weight: 800; color: var(--primary-dark);">${item.queue_number}</td>
+          <td style="padding: 1rem; font-weight: 700;">${item.patient_name}</td>
+          <td style="padding: 1rem; color: var(--text-muted);">${item.appointment_time} WIB</td>
+          <td style="padding: 1rem;">
+            <span class="queue-badge ${item.status === 'sedang_diperiksa' ? 'lengang' : (item.status === 'selesai' ? 'sedang' : 'padat')}">
+              ${item.status.toUpperCase()}
+            </span>
+          </td>
+          <td style="padding: 1rem;">
+            <span style="font-size: 0.8rem; font-weight: 600; color: ${isAllowedCancel ? 'var(--success)' : 'var(--danger)'};">
+              ${isAllowedCancel ? '✓ Bebas Dibatalkan' : '🔒 Terkunci (Kurang dari 12 Jam)'}
+            </span>
+          </td>
+        `;
+        tableBody.appendChild(tr);
       });
 
-      // Update Header
+      // Update Current Patient Header
       if (currentActiveAppt && currentActiveAppt.status === 'sedang_diperiksa') {
         document.getElementById('current-patient-header').textContent = 
           `No. Antrean: ${currentActiveAppt.queue_number} — ${currentActiveAppt.patient_name || 'Pasien Purworejo'}`;
+        document.getElementById('btn-finalize-rme').disabled = false;
       } else {
         document.getElementById('current-patient-header').textContent = 
           'Seluruh Pasien Hari Ini Selesai Diperiksa.';
@@ -250,6 +371,46 @@
       }
     }
 
+    function renderArchive() {
+      const archiveContainer = document.getElementById('archived-rme-list');
+      if (archivedRecords.length === 0) {
+        archiveContainer.innerHTML = `
+          <div style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+            Belum ada berkas RME yang selesai pada sesi saat ini. Formulir yang disimpan akan otomatis terarsip di sini.
+          </div>
+        `;
+        return;
+      }
+
+      archiveContainer.innerHTML = '';
+      archivedRecords.forEach(rec => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.border = '1px solid var(--border)';
+        card.style.background = 'var(--bg-surface)';
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <strong style="color: var(--primary-dark); font-size: 1.05rem;">${rec.patient_name}</strong>
+              <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem;">(${rec.appointment_time} WIB)</span>
+            </div>
+            <span class="queue-badge lengang">SELESAI DIPERIKSA</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem; background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md);">
+            <div>
+              <strong>S:</strong> ${rec.soap_subjective}<br>
+              <strong>O:</strong> ${rec.soap_objective}
+            </div>
+            <div>
+              <strong>A:</strong> ${rec.soap_assessment}<br>
+              <strong>P:</strong> ${rec.soap_plan}
+            </div>
+          </div>
+        `;
+        archiveContainer.appendChild(card);
+      });
+    }
+
     // Submit SOAP RME
     document.getElementById('soap-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -258,6 +419,8 @@
       const payload = {
         appointment_id: currentActiveAppt.id,
         patient_id: currentActiveAppt.patient_id,
+        patient_name: currentActiveAppt.patient_name,
+        appointment_time: currentActiveAppt.appointment_time,
         doctor_id: currentDoctorId,
         clinic_id: currentClinicId,
         soap_subjective: document.getElementById('soap-subjective').value.trim(),
@@ -269,6 +432,7 @@
 
       const result = await window.finalizeRmeAndAdvanceQueue(payload, activeQueue);
       if (result.success) {
+        archivedRecords.unshift(payload);
         window.showToast('Lembar RME berhasil disimpan! Antrean berikutnya dibuka.', 'success');
         document.getElementById('soap-form').reset();
 
@@ -279,6 +443,7 @@
         }
 
         renderQueue();
+        renderArchive();
       }
     });
 

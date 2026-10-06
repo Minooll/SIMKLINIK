@@ -19,10 +19,19 @@
           <div class="brand-subtitle">Portal Pemilik Faskes</div>
         </div>
       </div>
-      <nav class="nav-menu">
-        <a class="nav-item active" href="pemilik.html">🏢 Profil & Kode Unik</a>
-        <a class="nav-item" href="#section-doctors">👨‍⚕️ Kelola Dokter</a>
-        <a class="nav-item" href="index.html">🌐 Katalog Publik</a>
+      <nav class="nav-menu" id="owner-nav-menu">
+        <a class="nav-item active" href="javascript:void(0)" data-view="view-profil-klinik" id="nav-profil">
+          🏢 Profil & Kode Unik
+        </a>
+        <a class="nav-item" href="javascript:void(0)" data-view="view-kelola-dokter" id="nav-dokter">
+          👨‍⚕️ Kelola Dokter & Cuti
+        </a>
+        <a class="nav-item" href="javascript:void(0)" data-view="view-statistik" id="nav-statistik">
+          📊 Statistik Operasional
+        </a>
+        <a class="nav-item" href="index.html">
+          🌐 Katalog Publik
+        </a>
       </nav>
       <div class="sidebar-footer">
         <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="window.logout()">
@@ -34,7 +43,12 @@
     <!-- Main Content -->
     <main class="main-content">
       <header class="topbar">
-        <h1 class="page-title">Manajemen Klinik & Tenaga Medis</h1>
+        <div>
+          <h1 class="page-title" id="page-title-text">Profil Fasilitas Kesehatan</h1>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="owner-subtitle-text">
+            Pengaturan profil institusi, kode referral unik, dan manajemen dokter faskes
+          </span>
+        </div>
         <div class="topbar-actions">
           <div class="user-badge">
             <span>🏥</span>
@@ -44,110 +58,212 @@
       </header>
 
       <div class="content-body">
-        <!-- Section 1: Profil & Kode Unik Klinik -->
-        <div class="grid-3" style="margin-bottom: 2rem;">
-          <div class="card" style="grid-column: span 2;">
-            <div class="card-header">
-              <h2 style="font-size: 1.125rem; font-weight: 700;">Identitas Klinik di Purworejo</h2>
-              <span class="queue-badge lengang">STATUS AKTIF</span>
+        <!-- VIEW 1: PROFIL & KODE UNIK KLINIK -->
+        <section id="view-profil-klinik" class="dashboard-view active">
+          <div class="grid-3" style="margin-bottom: 2rem;">
+            <!-- Profil Klinik -->
+            <div class="card" style="grid-column: span 2;">
+              <div class="card-header">
+                <div>
+                  <h2 style="font-size: 1.15rem; font-weight: 800;">Identitas Klinik di Purworejo</h2>
+                  <p style="font-size: 0.85rem; color: var(--text-muted);">Data operasional faskes terdaftar regional Purworejo</p>
+                </div>
+                <span class="queue-badge lengang">FASKES AKTIF</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div>
+                  <label style="font-size: 0.775rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                    Nama Fasilitas Kesehatan
+                  </label>
+                  <div style="font-weight: 800; font-size: 1.1rem; color: var(--text-main); margin-top: 0.25rem;" id="clinic-name-text">
+                    Klinik Pratama Sehat Mandiri Purworejo
+                  </div>
+                </div>
+                <div>
+                  <label style="font-size: 0.775rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                    Wilayah Kecamatan
+                  </label>
+                  <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary-dark); margin-top: 0.25rem;" id="clinic-district-text">
+                    Purworejo Kota
+                  </div>
+                </div>
+                <div style="grid-column: span 2;">
+                  <label style="font-size: 0.775rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                    Alamat Lengkap & Kontak
+                  </label>
+                  <div style="color: var(--text-main); font-weight: 600; margin-top: 0.25rem;" id="clinic-address-text">
+                    Jl. Jenderal Sudirman No. 45, Purworejo (Telp: 0275-321111)
+                  </div>
+                </div>
+              </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div>
-                <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Nama Fasilitas Kesehatan</label>
-                <div style="font-weight: 700; font-size: 1.05rem;" id="clinic-name-text">Klinik Pratama Sehat Mandiri Purworejo</div>
+
+            <!-- Card Kode Unik Kriptografis -->
+            <div class="card" style="border-left: 4px solid var(--primary); background: #f0fdfa;">
+              <div class="card-header">
+                <h2 style="font-size: 1.125rem; font-weight: 800; color: var(--primary-dark);">Kode Unik Kriptografis</h2>
               </div>
-              <div>
-                <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Wilayah Kecamatan</label>
-                <div style="font-weight: 700; font-size: 1.05rem;" id="clinic-district-text">Purworejo Kota</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.45;">
+                Bagikan kode unik ini kepada dokter resmi klinik Anda saat melakukan login untuk otentikasi ketat faskes.
+              </p>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: white; padding: 0.85rem 1rem; border-radius: var(--radius-md); border: 2px dashed var(--primary);">
+                <span id="clinic-referral-code" style="font-family: monospace; font-size: 1.35rem; font-weight: 900; color: var(--primary-dark); letter-spacing: 1.5px;">
+                  PWR-SEHAT-9X8K2M
+                </span>
               </div>
-              <div style="grid-column: span 2;">
-                <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Alamat Lengkap</label>
-                <div style="color: var(--text-main);" id="clinic-address-text">Jl. Jenderal Sudirman No. 45, Purworejo</div>
+              <button type="button" id="btn-copy-code" class="btn btn-primary" style="margin-top: 1.25rem; width: 100%;">
+                📋 Salin Kode Unik
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: KELOLA DOKTER & CUTI -->
+        <section id="view-kelola-dokter" class="dashboard-view">
+          <div id="section-doctors" class="card">
+            <div class="card-header">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800;">Daftar Dokter Praktik & Kuota Harian</h2>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">
+                  Kelola profil dokter, sesuaikan kuota pasien per hari, tandai status cuti, atau hapus dokter dari klinik.
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="window.showModal('modal-add-doctor')">
+                + Daftarkan Dokter Baru
+              </button>
+            </div>
+
+            <div style="overflow-x: auto; margin-top: 0.5rem;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.925rem;">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); background: var(--bg-subtle);">
+                    <th style="padding: 0.85rem 1rem;">Nama Dokter</th>
+                    <th style="padding: 0.85rem 1rem;">Spesialisasi</th>
+                    <th style="padding: 0.85rem 1rem;">Nomor SIP</th>
+                    <th style="padding: 0.85rem 1rem;">Kuota Harian</th>
+                    <th style="padding: 0.85rem 1rem;">Status</th>
+                    <th style="padding: 0.85rem 1rem; text-align: right;">Aksi Manajemen</th>
+                  </tr>
+                </thead>
+                <tbody id="doctor-table-body">
+                  <!-- Dynamically loaded -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 3: STATISTIK OPERASIONAL FASKES -->
+        <section id="view-statistik" class="dashboard-view">
+          <div class="grid-3" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+              <div class="stat-icon teal">👨‍⚕️</div>
+              <div>
+                <div class="stat-value" id="stat-total-doctors">0</div>
+                <div class="stat-label">Total Dokter Terdaftar</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon blue">🎫</div>
+              <div>
+                <div class="stat-value" id="stat-total-quota">0</div>
+                <div class="stat-label">Total Kuota Harian Pasien</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon emerald">🟢</div>
+              <div>
+                <div class="stat-value" id="stat-active-doctors">0</div>
+                <div class="stat-label">Dokter Aktif Praktik</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon amber">🏖️</div>
+              <div>
+                <div class="stat-value" id="stat-cuti-doctors">0</div>
+                <div class="stat-label">Dokter Sedang Cuti</div>
               </div>
             </div>
           </div>
 
-          <!-- Card Kode Unik Kriptografis -->
-          <div class="card" style="border-left: 4px solid var(--primary); background: #f0fdfa;">
-            <div class="card-header">
-              <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--primary-dark);">Kode Unik Kriptografis</h2>
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-              Bagikan kode unik ini kepada dokter resmi klinik Anda untuk login dan mengunci otentikasi.
+          <div class="card">
+            <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem;">Kebijakan Manajemen Kuota Faskes Purworejo</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+              Dokter yang diberi status <strong>Cuti</strong> secara otomatis disembunyikan dari pemilihan booking pasien baru di aplikasi untuk mencegah antrean menumpuk tanpa dokter pengganti. Kuota harian faskes akan disesuaikan secara real-time dengan dokter aktif yang bertugas hari itu.
             </p>
-            <div style="display: flex; align-items: center; gap: 0.5rem; background: white; padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px dashed var(--primary);">
-              <span id="clinic-referral-code" style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); letter-spacing: 1px;">
-                PWR-SEHAT-9X8K2M
-              </span>
-            </div>
-            <button type="button" id="btn-copy-code" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">
-              📋 Salin Kode Unik
-            </button>
           </div>
-        </div>
-
-        <!-- Section 2: Kelola Dokter & Alokasi Kuota -->
-        <div id="section-doctors" class="card">
-          <div class="card-header">
-            <div>
-              <h2 style="font-size: 1.25rem; font-weight: 700;">Daftar Dokter Praktik & Kuota Harian</h2>
-              <p style="font-size: 0.875rem; color: var(--text-muted);">Atur kapasitas maksimal pasien per dokter per hari.</p>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="window.showModal('modal-add-doctor')">
-              + Daftarkan Dokter Baru
-            </button>
-          </div>
-
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.925rem;">
-              <thead>
-                <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted);">
-                  <th style="padding: 0.75rem 1rem;">Nama Dokter</th>
-                  <th style="padding: 0.75rem 1rem;">Spesialisasi</th>
-                  <th style="padding: 0.75rem 1rem;">Nomor SIP</th>
-                  <th style="padding: 0.75rem 1rem;">Kuota Harian</th>
-                  <th style="padding: 0.75rem 1rem;">Status</th>
-                </tr>
-              </thead>
-              <tbody id="doctor-table-body">
-                <!-- Dynamically loaded -->
-              </tbody>
-            </table>
-          </div>
-        </div>
+        </section>
       </div>
     </main>
   </div>
 
-  <!-- Modal Tambah Dokter Baru -->
+  <!-- MODAL: Tambah Dokter Baru -->
   <div class="modal-backdrop" id="modal-add-doctor">
     <div class="modal-container">
       <div class="modal-header">
-        <h3 class="modal-title">Daftarkan Dokter Baru ke Klinik</h3>
+        <h3 class="modal-title">👨‍⚕️ Daftarkan Dokter Baru ke Klinik</h3>
         <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
       </div>
       <form id="doctor-form">
         <div class="modal-body">
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label">Nama Lengkap & Gelar</label>
+          <div class="form-group">
+            <label class="form-label" for="doctor-name-input">Nama Lengkap & Gelar <span style="color:var(--danger)">*</span></label>
             <input type="text" id="doctor-name-input" class="form-input" placeholder="dr. Fulan Sp.PD" required>
           </div>
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label">Bidang Spesialisasi</label>
-            <input type="text" id="doctor-spec-input" class="form-input" placeholder="Dokter Umum / Gigi / Spesialis Anak" required>
+          <div class="form-group">
+            <label class="form-label" for="doctor-spec-input">Bidang Spesialisasi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="doctor-spec-input" class="form-input" placeholder="Dokter Umum / Dokter Gigi / Spesialis Anak" required>
           </div>
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label">Nomor Surat Izin Praktik (SIP)</label>
+          <div class="form-group">
+            <label class="form-label" for="doctor-sip-input">Nomor Surat Izin Praktik (SIP) <span style="color:var(--danger)">*</span></label>
             <input type="text" id="doctor-sip-input" class="form-input" placeholder="SIP-PWR-005/2026" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Alokasi Kuota Pasien per Hari</label>
+            <label class="form-label" for="doctor-quota-input">Alokasi Kuota Pasien per Hari <span style="color:var(--danger)">*</span></label>
             <input type="number" id="doctor-quota-input" class="form-input" value="20" min="1" max="100" required>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal>Batal</button>
-          <button type="submit" class="btn btn-primary">Simpan Data Dokter</button>
+          <button type="submit" class="btn btn-primary">Simpan Dokter Baru</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Data Dokter -->
+  <div class="modal-backdrop" id="modal-edit-doctor">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit Informasi Dokter Praktik</h3>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="form-edit-doctor">
+        <input type="hidden" id="edit-doctor-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="edit-doctor-name">Nama Lengkap & Gelar <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="edit-doctor-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-doctor-spec">Bidang Spesialisasi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="edit-doctor-spec" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-doctor-sip">Nomor Surat Izin Praktik (SIP) <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="edit-doctor-sip" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-doctor-quota">Alokasi Kuota Pasien per Hari <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="edit-doctor-quota" class="form-input" min="1" max="100" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
         </div>
       </form>
     </div>
@@ -160,33 +276,186 @@
   <script src="assets/js/services/clinicService.js"></script>
   <script>
     const currentClinicId = '11111111-1111-1111-1111-111111111111';
+    let localDoctorsList = [];
+
+    // Tab Switching Logic
+    const navItems = document.querySelectorAll('#owner-nav-menu .nav-item[data-view]');
+    const views = document.querySelectorAll('.dashboard-view');
+    const pageTitleText = document.getElementById('page-title-text');
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        navItems.forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+
+        const targetViewId = item.dataset.view;
+        views.forEach(v => {
+          if (v.id === targetViewId) {
+            v.classList.add('active');
+          } else {
+            v.classList.remove('active');
+          }
+        });
+
+        if (targetViewId === 'view-profil-klinik') {
+          pageTitleText.textContent = 'Profil Fasilitas Kesehatan';
+        } else if (targetViewId === 'view-kelola-dokter') {
+          pageTitleText.textContent = 'Manajemen Dokter & Jadwal Cuti';
+        } else if (targetViewId === 'view-statistik') {
+          pageTitleText.textContent = 'Statistik Operasional Faskes';
+        }
+      });
+    });
 
     async function loadOwnerDashboard() {
       const clinic = await window.getClinicById(currentClinicId);
       if (clinic) {
         document.getElementById('clinic-name-text').textContent = clinic.name;
         document.getElementById('clinic-district-text').textContent = clinic.district;
-        document.getElementById('clinic-address-text').textContent = clinic.address;
+        document.getElementById('clinic-address-text').textContent = clinic.address + ` (Telp: ${clinic.phone || '-'})`;
         document.getElementById('clinic-referral-code').textContent = clinic.referral_code;
       }
 
-      const doctors = await window.getDoctorsByClinic(currentClinicId);
+      // Ambil seluruh dokter (termasuk yang cuti)
+      localDoctorsList = await window.getDoctorsByClinic(currentClinicId, true);
+      renderDoctorsTable(localDoctorsList);
+      updateStats(localDoctorsList);
+    }
+
+    function renderDoctorsTable(doctors) {
       const tbody = document.getElementById('doctor-table-body');
       tbody.innerHTML = '';
+
+      if (!doctors || doctors.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+              Belum ada dokter terdaftar di klinik ini. Klik "+ Daftarkan Dokter Baru" untuk menambahkan.
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
       doctors.forEach(doc => {
         const tr = document.createElement('tr');
         tr.style.borderBottom = '1px solid var(--border)';
+        const isCuti = doc.status === 'cuti';
+
         tr.innerHTML = `
-          <td style="padding: 1rem; font-weight: 600;">${doc.full_name}</td>
+          <td style="padding: 1rem; font-weight: 700; color: var(--text-main);">
+            ${doc.full_name}
+          </td>
           <td style="padding: 1rem; color: var(--text-muted);">${doc.specialty}</td>
-          <td style="padding: 1rem; font-family: monospace;">${doc.sip_number}</td>
+          <td style="padding: 1rem; font-family: monospace; font-size: 0.85rem;">${doc.sip_number}</td>
           <td style="padding: 1rem;"><strong style="color: var(--primary-dark);">${doc.daily_quota}</strong> pasien/hari</td>
-          <td style="padding: 1rem;"><span class="queue-badge lengang">Aktif</span></td>
+          <td style="padding: 1rem;">
+            <span class="queue-badge ${isCuti ? 'cuti' : 'aktif'}">
+              ${isCuti ? '🏖️ Cuti' : '🟢 Aktif'}
+            </span>
+          </td>
+          <td style="padding: 1rem; text-align: right;">
+            <div class="action-btn-group">
+              <button type="button" class="table-action-btn edit" onclick="openEditDoctorModal('${doc.id}')" title="Edit Data Dokter">
+                ✏️ Edit
+              </button>
+              <button type="button" class="table-action-btn ${isCuti ? 'aktif' : 'cuti'}" onclick="handleToggleCuti('${doc.id}')" title="${isCuti ? 'Aktifkan Dokter' : 'Tandai Dokter Cuti'}">
+                ${isCuti ? '🟢 Aktifkan' : '🏖️ Set Cuti'}
+              </button>
+              <button type="button" class="table-action-btn delete" onclick="handleDeleteDoctor('${doc.id}', '${doc.full_name}')" title="Hapus Dokter">
+                🗑️ Hapus
+              </button>
+            </div>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
+
+    function updateStats(doctors) {
+      const total = doctors.length;
+      let totalQuota = 0;
+      let activeCount = 0;
+      let cutiCount = 0;
+
+      doctors.forEach(d => {
+        totalQuota += Number(d.daily_quota) || 0;
+        if (d.status === 'cuti') {
+          cutiCount++;
+        } else {
+          activeCount++;
+        }
+      });
+
+      document.getElementById('stat-total-doctors').textContent = total;
+      document.getElementById('stat-total-quota').textContent = totalQuota;
+      document.getElementById('stat-active-doctors').textContent = activeCount;
+      document.getElementById('stat-cuti-doctors').textContent = cutiCount;
+    }
+
+    // Modal Edit Dokter
+    window.openEditDoctorModal = function(doctorId) {
+      const doc = localDoctorsList.find(d => d.id === doctorId);
+      if (!doc) return;
+
+      document.getElementById('edit-doctor-id').value = doc.id;
+      document.getElementById('edit-doctor-name').value = doc.full_name;
+      document.getElementById('edit-doctor-spec').value = doc.specialty;
+      document.getElementById('edit-doctor-sip').value = doc.sip_number;
+      document.getElementById('edit-doctor-quota').value = doc.daily_quota;
+
+      window.showModal('modal-edit-doctor');
+    };
+
+    // Submit Edit Dokter
+    document.getElementById('form-edit-doctor').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit-doctor-id').value;
+      const name = document.getElementById('edit-doctor-name').value.trim();
+      const spec = document.getElementById('edit-doctor-spec').value.trim();
+      const sip = document.getElementById('edit-doctor-sip').value.trim();
+      const quota = document.getElementById('edit-doctor-quota').value;
+
+      try {
+        await window.updateDoctor(id, {
+          full_name: name,
+          specialty: spec,
+          sip_number: sip,
+          daily_quota: quota
+        });
+        window.showToast(`Data dokter ${name} berhasil diperbarui!`, 'success');
+        window.closeModal('modal-edit-doctor');
+        await loadOwnerDashboard();
+      } catch (err) {
+        window.showToast(err.message, 'error');
+      }
+    });
+
+    // Toggle Cuti
+    window.handleToggleCuti = async function(doctorId) {
+      try {
+        const res = await window.toggleDoctorCuti(doctorId);
+        const newStatus = res.status === 'cuti' ? 'sedang cuti' : 'kembali aktif';
+        window.showToast(`Status dokter ${res.doctor.full_name} kini ${newStatus}.`, 'success');
+        await loadOwnerDashboard();
+      } catch (err) {
+        window.showToast(err.message, 'error');
+      }
+    };
+
+    // Hapus Dokter
+    window.handleDeleteDoctor = async function(doctorId, doctorName) {
+      if (!confirm(`Apakah Anda yakin ingin menghapus ${doctorName} dari daftar dokter klinik ini?`)) {
+        return;
+      }
+      try {
+        await window.deleteDoctor(doctorId);
+        window.showToast(`Dokter ${doctorName} telah dihapus.`, 'success');
+        await loadOwnerDashboard();
+      } catch (err) {
+        window.showToast(err.message, 'error');
+      }
+    };
 
     // Tombol Salin Kode Unik
     document.getElementById('btn-copy-code').addEventListener('click', () => {
