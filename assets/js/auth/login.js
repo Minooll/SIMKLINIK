@@ -332,8 +332,12 @@
 
         const roleKey = profileRoleKey;
         const dashboard = roleKey + '.html';
+        const rawName = profile.full_name || profile.username || data.user.email;
+        const cleanName = (rawName && !rawName.toLowerCase().includes('petugas'))
+          ? rawName
+          : (selectedRole === 'dokter' ? 'dr. Spesialis' : 'Pasien Mandiri');
         return {
-          name: profile.full_name || profile.username || data.user.email,
+          name: cleanName,
           email: data.user.email,
           role: profile.role,
           dashboard,
@@ -373,7 +377,10 @@
           const user = await loginWithSupabase(authEmail, password, selectedRole);
           clearBF(); setLoading(false);
           try {
-            if (user && user.name) localStorage.setItem('simklinik_user_name', user.name);
+            if (user && user.name) {
+              const safeName = !user.name.toLowerCase().includes('petugas') ? user.name : 'Pasien Mandiri';
+              localStorage.setItem('simklinik_user_name', safeName);
+            }
             if (document.getElementById('rememberMe').checked) localStorage.setItem('simklinik_remember', identifier);
             else localStorage.removeItem('simklinik_remember');
           } catch {}

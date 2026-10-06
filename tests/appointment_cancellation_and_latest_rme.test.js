@@ -127,7 +127,7 @@ test('pasien.html contains 12-hour cancellation notice in modalBooking and lates
   assert.match(html, /id="lowerTableWrap"/);
 });
 
-test('CSS files define grey action-btn-locked and latest-rme-card styles', () => {
+test('CSS files define grey action-btn-locked, latest-rme-card, and AI explainer styles', () => {
   const fs = require('node:fs');
   const path = require('node:path');
   const css = fs.readFileSync(path.join(__dirname, '../assets/css/role-pages.css'), 'utf-8');
@@ -141,19 +141,22 @@ test('CSS files define grey action-btn-locked and latest-rme-card styles', () =>
   // Modal policy notice styling
   assert.match(modalCss, /\.modal-policy-notice/);
 
-  // Latest RME card and buy medication button
+  // Latest RME card, rx box, and AI Medication Explainer button
   assert.match(css, /\.latest-rme-card/);
-  assert.match(css, /\.btn-buy-medication/);
+  assert.match(css, /\.btn-ai-explain-med-primary/);
   assert.match(css, /\.latest-rme-rx-box/);
 });
 
-test('role-dashboard.js exposes cancellation and pharmacy helpers', () => {
+test('role-dashboard.js exposes cancellation and AI medication explainer helpers', () => {
   const fs = require('node:fs');
   const path = require('node:path');
   const js = fs.readFileSync(path.join(__dirname, '../assets/js/dashboard/role-dashboard.js'), 'utf-8');
 
   assert.match(js, /window\.showCancelLockedNotice/);
   assert.match(js, /window\.handleCancelAppointment/);
-  assert.match(js, /window\.handleBuyMedicationFromRme/);
+  assert.match(js, /window\.openMedicationExplainer/);
   assert.match(js, /action-btn-locked/);
+  assert.match(js, /btn-ai-explain-med-primary/);
+  // Tebus obat button is removed from latest RME card
+  assert.doesNotMatch(js, /<button class="btn-buy-medication">/);
 });

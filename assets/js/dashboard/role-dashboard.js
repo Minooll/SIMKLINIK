@@ -73,7 +73,7 @@
       dashboard: { title: 'Jadwal konsultasi hari ini', rows: [] }
     },
     pasien: {
-      label: 'Pasien', name: 'Sahabat Sehat', initials: 'SS',
+      label: 'Pasien', name: 'Pasien Mandiri', initials: 'PM',
       get greeting() { return `${getTimeGreeting()}, Sahabat Sehat`; },
       copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
       nav: [['dashboard', 'Dashboard'], ['janji', 'Janji saya'], ['rekam-medis', 'Rekam medis'], ['resep', 'Resep saya'], ['profil', 'Profil kesehatan']],
@@ -101,6 +101,26 @@
   const headerAvatar = document.getElementById('headerAvatar');
   const dateLabel = document.getElementById('dateLabel');
 
+  /* ── Header Profile Sanitizer & Updater ── */
+  function sanitizeDisplayName(name) {
+    if (!name || typeof name !== 'string') return role === 'dokter' ? 'Dokter' : 'Pasien Mandiri';
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.toLowerCase().includes('petugas') || trimmed.toLowerCase() === 'pasien') {
+      return role === 'dokter' ? 'Dokter' : 'Pasien Mandiri';
+    }
+    return trimmed;
+  }
+
+  function updateHeaderProfile(name, roleLabel) {
+    const cleanName = sanitizeDisplayName(name);
+    if (headerName) headerName.textContent = cleanName;
+    if (headerRole) headerRole.textContent = roleLabel || (role === 'dokter' ? 'Dokter' : 'Pasien');
+    if (headerAvatar) {
+      const inits = cleanName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || (role === 'dokter' ? 'DR' : 'PM');
+      headerAvatar.textContent = inits;
+    }
+  }
+
   let initialCachedName = null;
   try {
     const raw = localStorage.getItem('simklinik_user_name');
@@ -109,14 +129,7 @@
     }
   } catch (_) { }
 
-  if (headerName) headerName.textContent = initialCachedName || defaultRoleMeta.name;
-  if (headerRole) headerRole.textContent = defaultRoleMeta.label;
-  if (headerAvatar) {
-    const avatarInitials = initialCachedName
-      ? initialCachedName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-      : defaultRoleMeta.initials;
-    headerAvatar.textContent = avatarInitials;
-  }
+  updateHeaderProfile(initialCachedName, defaultRoleMeta.label);
   if (dateLabel) {
     dateLabel.textContent = new Intl.DateTimeFormat('id-ID', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -229,13 +242,31 @@
         .maybeSingle();
 
       if (profile) {
+        // If an obsolete Petugas account tries to stay logged in, terminate session
+        const isPetugas = Boolean(
+          profile.role === 'Petugas' ||
+          (profile.username && profile.username.toLowerCase().includes('petugas')) ||
+          (profile.full_name && profile.full_name.toLowerCase().includes('petugas')) ||
+          (currentAuthUser.email && currentAuthUser.email.toLowerCase().includes('petugas'))
+        );
+        if (isPetugas) {
+          try {
+            await window.supabaseClient.auth.signOut();
+            localStorage.clear();
+            sessionStorage.clear();
+          } catch (_) { }
+          window.location.replace('login.html');
+          return null;
+        }
+
         currentUserProfile = profile;
         const displayName = profile.full_name || profile.username;
-        if (headerName) headerName.textContent = displayName;
-        const initials = (profile.full_name || profile.username || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-        if (headerAvatar) headerAvatar.textContent = initials;
+        updateHeaderProfile(displayName, role === 'dokter' ? 'Dokter' : 'Pasien');
         try {
-          if (displayName) localStorage.setItem('simklinik_user_name', displayName);
+          const clean = sanitizeDisplayName(displayName);
+          if (clean && !clean.toLowerCase().includes('petugas')) {
+            localStorage.setItem('simklinik_user_name', clean);
+          }
         } catch (_) { }
         updateDashboardGreeting();
 
@@ -254,8 +285,9 @@
           currentPatientRecord = patientRes.data;
           const ptName = currentPatientRecord.profile?.full_name || currentPatientRecord.full_name;
           if (ptName) {
-            try { localStorage.setItem('simklinik_user_name', ptName); } catch (_) { }
-            if (headerName) headerName.textContent = ptName;
+            const cleanPt = sanitizeDisplayName(ptName);
+            try { localStorage.setItem('simklinik_user_name', cleanPt); } catch (_) { }
+            updateHeaderProfile(cleanPt, 'Pasien');
           }
           updateDashboardGreeting();
         } else if (window.supabaseClient) {
@@ -850,9 +882,7 @@
 
         if (res.success && res.data) {
           currentPatientRecord = { ...(currentPatientRecord || {}), ...res.data };
-          if (headerName) headerName.textContent = fullName;
-          const inits = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'P';
-          if (headerAvatar) headerAvatar.textContent = inits;
+          updateHeaderProfile(fullName, 'Pasien');
           try {
             localStorage.setItem('simklinik_user_name', fullName);
           } catch (_) { }
@@ -1188,7 +1218,7 @@
                 <div class="rx-box-header">
                   <div class="rx-box-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-                    <span>Resep Obat Elektronik Siap Ditebus (RME)</span>
+                    <span>Resep Obat Elektronik Terverifikasi (RME)</span>
                   </div>
                   <span class="rx-box-num">${rxNumber}</span>
                 </div>
@@ -1206,12 +1236,9 @@
               </div>
 
               <div class="latest-rme-actions">
-                <button type="button" class="btn-buy-medication" onclick="window.handleBuyMedicationFromRme('${escapeJsStr(rxNumber)}', ${rxItems.length}, '${escapeJsStr(rxItems.map(i => i.medicine_name || i.name).join(', '))}')">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
-                  <span>Tebus / Beli Obat di Apotek</span>
-                </button>
-                <button type="button" class="btn-ai-explain-med-outline" onclick="window.openMedicationExplainer('${escapeJsStr(planStr)}', '${escapeJsStr(diagStr)}')">
-                  ✨ Jelaskan Aturan Obat (AI Apoteker)
+                <button type="button" class="btn-ai-explain-med-primary" onclick="window.openMedicationExplainer('${escapeJsStr(planStr)}', '${escapeJsStr(diagStr)}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                  <span>Tanya Aturan &amp; Efek Samping Obat (AI Apoteker)</span>
                 </button>
               </div>
             </div>
@@ -1354,7 +1381,7 @@
         }
       } else if (currentView === 'resep') {
         if (welcomeTitle) welcomeTitle.textContent = 'Resep Obat Elektronik';
-        if (welcomeCopy) welcomeCopy.textContent = 'Daftar resep obat aktif yang diresepkan oleh dokter dan siap ditebus di farmasi.';
+        if (welcomeCopy) welcomeCopy.textContent = 'Daftar resep obat elektronik aktif terverifikasi yang diresepkan oleh dokter pemeriksa.';
         if (statsGrid) statsGrid.innerHTML = '';
         if (agendaTitle) agendaTitle.textContent = 'Resep & Aturan Minum';
 
