@@ -1,5 +1,5 @@
 # Product Requirements Document (PRD)
-# SIMKLINIK 2.0 — Platform Agregator Multi-Klinik Regional Kabupaten Purworejo
+# SIMKLINIK Purworejo — Platform Agregator Klinik Multi-Tenant Regional
 
 ---
 
@@ -7,263 +7,193 @@
 
 | Properti | Keterangan |
 |---|---|
-| **Nama Produk** | SIMKLINIK (Sistem Informasi Manajemen Klinik Regional) |
-| **Versi Dokumen** | 2.0 (Regional Multi-Clinic Platform & 2-Role Direct Healthcare Model) |
-| **Tanggal Efektif** | 6 Oktober 2026 |
-| **Status Dokumen** | **APPROVED & ACTIVE IMPLEMENTATION** |
-| **Wilayah Sasaran** | Kabupaten Purworejo, Jawa Tengah (Pilot: Purworejo Kota, Kutoarjo, Banyuurip) |
-| **Model Ekosistem** | **2-Peran Mandiri (Direct Pasien $\leftrightarrow$ Dokter per Klinik)** |
-| **Regulasi & Standar** | Permenkes No. 24/2022 (RME SOAP & ICD-10), UU PDP No. 27/2022, WCAG 2.1 AA |
-| **Stack Teknologi** | HTML5 Semantic, Vanilla CSS (Design Tokens), Vanilla ES6+, Supabase PostgreSQL 15, Gemini 2.0 Flash |
+| **Nama Proyek** | Sistem Informasi Manajemen Klinik Multi-Tenant Regional (SIMKLINIK Purworejo) |
+| **Judul Penelitian** | Pengembangan Aplikasi Klinik, Penjadwalan Dokter, Manajemen Antrean, Registrasi Pasien |
+| **Versi Dokumen** | 2.0 (Revamped Multi-Tenant Regional & AI-Powered Architecture) |
+| **Tanggal Pembaruan** | 06 Oktober 2026 |
+| **Wilayah Fokus** | Kabupaten Purworejo, Jawa Tengah (Purworejo Kota, Kutoarjo, Banyuurip, Bayan, dsb) |
+| **Status Dokumen** | Disetujui untuk Implementasi Penuh (Ready for Antigravity IDE) |
+| **Platform Target** | Web & Mobile Responsive (Desktop, Tablet, Smartphone) |
+| **Teknologi Utama** | Vanilla ES6+ Modular, Supabase (PostgreSQL 15 & Realtime RLS), Google Gemini 2.0 Flash REST API |
 
 ---
 
 ## 1. Ringkasan Eksekutif (Executive Summary)
 
-**SIMKLINIK 2.0** merepresentasikan transformasi arsitektur menyeluruh dari sistem informasi klinik mandiri (*single-tenant internal software*) menjadi **Platform Agregator Layanan Faskes Regional Terpadu** yang berfokus di **Kabupaten Purworejo, Jawa Tengah**.
+**SIMKLINIK Purworejo** adalah platform operasional fasilitas kesehatan tingkat pertama (klinik pratama dan mandiri) berbasis *multi-tenant* yang dirancang untuk mengintegrasikan seluruh klinik di wilayah **Kabupaten Purworejo, Jawa Tengah** ke dalam satu ekosistem terpadu.
 
-Platform ini memecahkan masalah fragmentasi layanan kesehatan primer di tingkat kabupaten dengan mengintegrasikan klinik-klinik pratama swasta dan mandiri ke dalam satu ekosistem digital bersama. Melalui platform ini, masyarakat Purworejo dapat:
-1. Menemukan faskes klinik terdekat berdasarkan kecamatan (*Purworejo Kota*, *Kutoarjo*, *Banyuurip*).
-2. Memantau kepadatan antrean pasien dan ketersediaan kuota dokter secara *live* antar-klinik.
-3. Melakukan reservasi langsung ke dokter spesialis/umum di faskes pilihan.
-
-### Eliminasi Peran Petugas (The 2-Role Paradigm Shift)
-Dalam arsitektur 2.0, sistem mengeliminasi ketergantungan pada loket fisik petugas admisi:
-- **Alasan Eliminasi:** Keberadaan peran petugas loket pada sistem digital menciptakan *bottleneck* manual (antrean fisik di loket, waktu tunggu input ganda, dan friksi administratif).
-- **Model Baru (Pasien $\leftrightarrow$ Dokter Langsung):** Pasien melakukan pendaftaran mandiri terintegrasi NIK, memilih faskes & dokter, serta terbit tiket antrean secara otomatis. Di ruang periksa, dokter mengelola, memanggil (*Panggil*), dan melayani (*Layani*) antrean secara mandiri tanpa perantara.
+Platform ini memecahkan masalah fragmentasi layanan kesehatan di daerah dengan menghubungkan tiga pemangku kepentingan utama:
+1. **Pemilik Klinik (*Clinic Owner / Tenant Admin*):** Mendaftarkan dan mengelola profil klinik, menerbitkan kode unik otentikasi dokter, serta mengelola daftar dokter dan kapasitas kuota harian.
+2. **Dokter (*Medical Practitioner*):** Mengakses dashboard klinik menggunakan Google OAuth yang terikat dengan kode unik kriptografis klinik, memantau antrean *live*, mengoperasikan formulir Rekam Medis Elektronik (RME SOAP) yang aktif otomatis saat waktu periksa tiba, serta menikmati alur sekuensial antrean otomatis (menyelesaikan RME otomatis memajukan antrean dan memuat form pasien berikutnya).
+3. **Pasien (*Patient*):** Menjelajahi katalog klinik di Purworejo, memanfaatkan **AI Chatbot Cerdas (Gemini 2.0 Flash)** untuk konsultasi gejala awal dengan analisis tingkat keramaian antrean dan sisa kuota dokter terkini, melengkapi profil kesehatan mandiri (termasuk No. KK dan alergi), melakukan pemesanan kuota pemeriksaan dengan proteksi aturan pembatalan 12 jam, memantau tiket antrean secara *real-time*, serta mengakses riwayat RME pasca pemeriksaan.
 
 ---
 
-## 2. Latar Belakang & Pernyataan Masalah
+## 2. Pernyataan Masalah & Batasan Wilayah (Problem Statement)
 
-### 2.1 Konteks Wilayah: Kabupaten Purworejo
-Kabupaten Purworejo memiliki karakteristik geografis yang membagi pusat aktivitas dan sebaran faskes:
-- **Kecamatan Purworejo (Pusat Pemerintahan & Kota):** Kepadatan penduduk tinggi dengan konsentrasi klinik umum dan spesialis gigi.
-- **Kecamatan Kutoarjo (Sentra Perdagangan & Transportasi Barat):** Mobilitas tinggi, membutuhkan faskes dengan layanan rawat jalan dan fasilitas bersalin/KIA.
-- **Kecamatan Banyuurip (Wilayah Penyangga Strategis):** Area berkembang di jalur arteri yang membutuhkan akses faskes keluarga dan pemeriksaan laboratorium cepat.
-
-### 2.2 Pernyataan Masalah (*Problem Statements*)
-1. **Ketimpangan Beban Antrean Antar-Faskes:** Pasien sering menumpuk di satu klinik di pusat kota Purworejo hingga antrean membeludak, sementara klinik di kecamatan tetangga (Kutoarjo/Banyuurip) masih memiliki kuota dokter yang longgar.
-2. **Ketiadaan Visibilitas Lintas Faskes:** Pasien harus mendatangi klinik secara fisik atau menghubungi satu per satu melalui WhatsApp untuk menanyakan apakah dokter praktik hari ini atau apakah kuota masih tersedia.
-3. **Penyelenggaraan RME yang Terisolasi:** Banyak klinik pratama di daerah belum mengadopsi Rekam Medis Elektronik (RME) berstandar Permenkes No. 24/2022 karena mahalnya biaya pembangunan server internal.
-4. **Friksi Loket Konvensional:** Antrean fisik di loket pendaftaran memperlambat penanganan medis darurat/akut dan menurunkan kepuasan pasien.
+### 2.1 Konteks Lapangan di Kabupaten Purworejo
+* **Pencarian Faskes Tradisional:** Pasien di Purworejo kesulitan mengetahui klinik mana yang memiliki dokter praktik pada hari/jam tertentu, apakah kuota masih tersedia, atau seberapa panjang antrean ruang tunggu sebelum mereka datang ke lokasi.
+* **Penumpukan Antrean Fisik:** Pasien harus datang pagi-pagi buta ke klinik di area Kutoarjo atau Purworejo Kota hanya untuk mengambil karcis antrean kertas di loket, menimbulkan ketidakpastian waktu tunggu hingga berjam-jam (melanggar standar SPM waktu tunggu rawat jalan Kepmenkes No. 129/2008 $\le$ 60 menit).
+* **Fragmentasi Data Klinik Mandiri:** Klinik-klinik swasta di Purworejo umumnya belum memiliki SIMRS/SIMKlinik awan mandiri karena kendala biaya pengadaan dan pemeliharaan server.
+* **Beban Dokter dalam Administrasi:** Dokter menghabiskan waktu konsultasi untuk navigasi manual berkas rekam medis dan memanggil antrean secara manual.
 
 ---
 
-## 3. Visi Produk, Sasaran & Nilai Kebaruan (Novelty)
-
-### 3.1 Visi Produk
-Menjadi infrastruktur digital agregator kesehatan nomor satu di Kabupaten Purworejo yang menghubungkan masyarakat dengan faskes primer terpercaya secara transparan, adil, cepat, dan terstandar nasional.
-
-### 3.2 Nilai Kebaruan Penelitian & Pengembangan (Novelty)
-- **Regional Healthcare Balancing:** Mengurangi beban puncak faskes kota dengan mendistribusikan pasien ke klinik mitra sekitarnya berbasis data waktu-nyata (*real-time queue load*).
-- **AI-Powered Clinic & Queue Triage:** Menyediakan konteks data faskes (`window.getClinicsContextForAi()`) yang menghubungkan keluhan awam pasien dengan rekomendasi klinik spesifik, jarak tempuh, dan estimasi waktu tunggu antrean.
-- **Ultra-Lean 2-Role Operation:** Memberdayakan klinik kecil mandiri untuk langsung go-digital tanpa perlu merekrut staf administrasi TI khusus.
-
----
-
-## 4. Jaringan 3 Klinik Pilot (Kabupaten Purworejo)
-
-Platform SIMKLINIK 2.0 diluncurkan dengan 3 klinik percontohan terdaftar:
-
-| Kode Klinik | Nama Fasilitas Kesehatan | Kecamatan | Alamat Lengkap | Layanan Poliklinik | Jam Operasional |
-|---|---|---|---|---|---|
-| `KLN-PWR-01` | **Klinik Pratama Sehat Mandiri Purworejo** | Purworejo (Kota) | Jl. Brigjen Katamso No. 42, Pangenrejo | Poli Umum, Poli Gigi, Farmasi | 08:00 - 21:00 WIB |
-| `KLN-PWR-02` | **Klinik Pratama & Bersalin Kutoarjo Medika** | Kutoarjo | Jl. Pangeran Diponegoro No. 18 | Poli Umum, Poli KIA/Kebidanan, UGD 24 Jam, Farmasi | 24 Jam (Poli: 08:00 - 20:00) |
-| `KLN-PWR-03` | **Klinik Pratama Keluarga Banyuurip** | Banyuurip | Jl. Tentara Pelajar No. 88, Boro Kulon | Poli Umum, Laboratorium Darah Cepat, Farmasi | 07:30 - 20:30 WIB |
-
----
-
-## 5. Persona Pengguna & Alur Kerja (User Personas & Workflows)
-
-### 5.1 Persona 1: Pasien Mandiri
-- **Profil:** Budi Santoso, 34 tahun, warga Pangenrejo, Purworejo Kota.
-- **Kebutuhan:** Memeriksakan keluhan sakit gigi tanpa harus menunggu 2 jam di ruang tunggu faskes; ingin melihat riwayat diagnosa dan obat dari kunjungan sebelumnya.
-- **Alur Kerja Pasien:**
-  1. Pasien membuka portal `pasien.html`.
-  2. Sistem menampilkan sapaan dinamis waktu nyata (*Pagi/Siang/Sore/Malam, Budi*).
-  3. Pasien memfilter klinik berdasarkan kecamatan (*Purworejo, Kutoarjo, Banyuurip*).
-  4. Pasien memeriksa status operasional dan kuota dokter.
-  5. Jika profil identitas (NIK/kontak) atau profil medis (golongan darah/alergi) belum lengkap, sistem memicu modal dialog pengisian wajib demi keselamatan klinis.
-  6. Pasien memilih faskes, poliklinik, dokter, dan waktu reservasi.
-  7. Tiket nomor antrean (`A-001`, `B-002`) terbit secara instan dan live status terpantau di dasbor.
-
-### 5.2 Persona 2: Dokter Faskes Mandiri
-- **Profil:** dr. Dimas Putra, 38 tahun, dokter praktik di Klinik Pratama Sehat Mandiri Purworejo.
-- **Kebutuhan:** Antarmuka ringkas tanpa distraksi; dapat memanggil pasien berikutnya langsung dari meja periksa, melihat riwayat RME sebelumnya, mencatat SOAP ICD-10, dan menerbitkan e-resep.
-- **Alur Kerja Dokter:**
-  1. Dokter login melalui `login.html` memilih role **Dokter**.
-  2. Dokter masuk ke `dokter.html` dan memilih klinik aktif melalui switcher header (`#doctorClinicSelector`).
-  3. Dasbor dokter memuat antrean tersaring hanya untuk faskes dan jadwal praktiknya.
-  4. Dokter menekan tombol **Panggil Antrean** $\rightarrow$ status pasien berubah menjadi `CALLED` disertai notifikasi audio/visual.
-  5. Pasien masuk ke ruang periksa $\rightarrow$ dokter menekan **Mulai Periksa** (`SERVING`).
-  6. Dokter mengisi formulir Rekam Medis SOAP:
-     - **S (Subjective):** Keluhan utama dan anamnesis.
-     - **O (Objective):** Tanda vital (TD mmHg, Nadi bpm, Suhu °C, RR napas/menit) & pemeriksaan fisik.
-     - **A (Assessment):** Diagnosa primer/sekunder terintegrasi kodifikasi standar ICD-10 WHO.
-     - **P (Plan):** Rencana terapi, edukasi pasien, dan tabel obat e-resep.
-  7. Dokter menekan **Finalisasi RME** $\rightarrow$ dokumen rekam medis terkunci permanen sesuai Permenkes No. 24/2022 dan riwayat langsung muncul di dasbor pasien.
-
----
-
-## 6. Spesifikasi Kebutuhan Fungsional (Functional Requirements)
-
-### 6.1 Modul Direktori Klinik Regional Purworejo
-- **FR-CLN-01 (Katalog Faskes):** Menampilkan kartu klinik interaktif dengan nama, kecamatan, alamat, jam buka, fasilitas poliklinik, dan indikator beban antrean.
-- **FR-CLN-02 (Filter Kecamatan):** Filter instan satu-klik dengan pill filter: *Semua Faskes*, *Kec. Purworejo (Kota)*, *Kec. Kutoarjo*, *Kec. Banyuurip*.
-- **FR-CLN-03 (Booking Shortcut):** Tombol "Buat Janji di Faskes Ini" pada setiap kartu klinik yang otomatis memilihkan faskes tujuan pada formulir reservasi.
-- **FR-CLN-04 (Pengecekan Kuota):** Menghitung sisa kuota dokter per faskes secara real-time dari relasi tabel `doctor_schedules` dan `appointments`.
-
-### 6.2 Modul Portal Pasien & Keselamatan Medis
-- **FR-PAS-01 (Gatekeeper Kelengkapan Profil):** Mencegah pembuatan janji temu jika data mandatori belum diisi:
-  - *Data Kependudukan:* Nama lengkap, NIK 16-digit tervalidasi, No. HP, Alamat domisili.
-  - *Data Profil Medis:* Golongan darah (A, B, AB, O) dan riwayat alergi obat/makanan.
-- **FR-PAS-02 (Antrean Digital Otomatis):** Jika reservasi dijadwalkan pada hari yang sama, sistem langsung menerbitkan entri `queue_entries` dengan nomor urut poli.
-- **FR-PAS-03 (Transparansi RME & E-Resep):** Pasien dapat melihat seluruh riwayat pemeriksaan yang berstatus `FINAL`, catatan diagnosis dokter, serta petunjuk minum obat resep.
-- **FR-PAS-04 (Sapaan Dinamis & Keamanan Akun):** Ucapan selamat datang menyesuaikan zona waktu lokal (WIB) dan integrasi ubah kata sandi mandiri.
-
-### 6.3 Modul Portal Dokter Mandiri & Afiliasi Klinik
-- **FR-DOC-01 (Afiliasi Faskes):** Header selector klinik aktif yang mengisolasi antrean dan kunjungan sesuai faskes tempat dokter bertugas hari itu.
-- **FR-DOC-02 (Kontrol Antrean Meja Periksa):** Tombol aksi cepat *Panggil* dan *Layani* yang memperbarui status antrean secara instan.
-- **FR-DOC-03 (Pencatatan SOAP & Validasi ICD-10):** Validasi otomatis kelengkapan tanda vital dan pencarian kodifikasi diagnosis ICD-10 WHO.
-- **FR-DOC-04 (Penerbitan E-Resep):** Penambahan multi-item obat dengan dosis, jumlah, dan aturan pemakaian tanpa perlu formulir kertas.
-- **FR-DOC-05 (Penguncian Mutlak RME):** Pasca tombol `Finalisasi Rekam Medis` ditekan, record diberi timestamp `finalized_at` dan dilindungi oleh RLS dari perubahan retroaktif.
-
-### 6.4 Modul Kecerdasan Buatan (AI Health & Clinic Recommender Suite)
-- **FR-AI-01 (Konteks Faskes Regional):** Penyediaan API internal `window.getClinicsContextForAi()` yang mengemas profil 3 klinik, koordinat, layanan, dan antrean aktif ke format JSON terstruktur untuk dikonsumsi LLM.
-- **FR-AI-02 (Triage Geografis & Rekomendasi Klinik):** Asisten chatbot cerdas yang menganalisis keluhan pengguna, memetakan ke poliklinik yang sesuai, dan merekomendasikan faskes di Purworejo dengan waktu tunggu paling optimal.
-- **FR-AI-03 (Pemeriksa Keamanan Resep):** Pengecekan potensi interaksi obat atau kontraindikasi alergi pasien berbasis Gemini 2.0 Flash.
-- **FR-AI-04 (Penyusun Draf SOAP Dokter):** Konversi catatan anamnesis bebas menjadi draf terstruktur SOAP 4-bagian.
-
----
-
-## 7. Arsitektur Data & Skema Database Supabase
-
-### 7.1 Tabel Relasional Utama
+## 3. Persona Pengguna & Alur Kerja Lengkap (User Journeys)
 
 ```mermaid
-erDiagram
-    CLINICS ||--o{ PROFILES : "has members"
-    CLINICS ||--o{ DOCTORS : "employs"
-    CLINICS ||--o{ APPOINTMENTS : "hosts"
-    CLINICS ||--o{ QUEUE_ENTRIES : "manages"
-    PROFILES ||--|| PATIENTS : "links"
-    PROFILES ||--|| DOCTORS : "links"
-    PATIENTS ||--o{ APPOINTMENTS : "books"
-    DOCTORS ||--o{ APPOINTMENTS : "attends"
-    APPOINTMENTS ||--o| QUEUE_ENTRIES : "generates"
-    APPOINTMENTS ||--o| MEDICAL_RECORDS : "produces"
-    MEDICAL_RECORDS ||--o{ PRESCRIPTIONS : "contains"
+flowchart TD
+    Login[Portal Masuk: login.html] -->|Pilih Peran| RoleCheck{Peran?}
+    
+    RoleCheck -->|Pemilik Klinik| OwnerFlow[Dashboard Pemilik: pemilik.html]
+    OwnerFlow --> OC1[Kelola Profil Klinik Purworejo]
+    OwnerFlow --> OC2[Generate Kode Unik Kriptografis]
+    OwnerFlow --> OC3[Input Daftar Dokter & Kuota Harian]
 
-    CLINICS {
-        uuid id PK
-        text code UK
-        text name
-        text district
-        text address
-        text operating_hours
-        text[] facilities
-        double latitude
-        double longitude
-        boolean is_active
-    }
+    RoleCheck -->|Dokter| DocAuth[Login Google + Input Kode Unik Klinik]
+    DocAuth --> DocValid{Validasi Kode & Binding}
+    DocValid -->|Valid| DocFlow[Dashboard Dokter: dokter.html]
+    DocValid -->|Salah/Beda Klinik| DocBlock[Tolak Akses & Kunci Brute-Force]
+    DocFlow --> DQ[Monitor Antrean Pasien Hari Ini]
+    DocFlow --> DRME[Template RME Aktif Otomatis Sesuai Tanggal/Jam]
+    DRME --> DFinish[Klik 'Selesai & Simpan RME']
+    DFinish --> DNext[Antrean Bergeser Otomatis -> Muat Template Pasien Berikutnya]
 
-    PROFILES {
-        uuid id PK
-        text full_name
-        text username UK
-        text role "Pasien | Dokter | Admin"
-        uuid clinic_id FK
-    }
+    RoleCheck -->|Pasien| PatAuth[Login Google + Set Username/Password]
+    PatAuth --> PatFlow[Portal Pasien: pasien.html]
+    PatFlow --> PExp[Eksplorasi Klinik Purworejo & Sisa Kuota]
+    PatFlow --> PAIChat[AI Chatbot Triage + Rekomendasi Klinik & Pantau Antrean]
+    PatFlow --> PBook[Pilih Dokter & Jadwal]
+    PBook --> PCheckProfile{Profil Lengkap? No KK & Alergi}
+    PCheckProfile -->|Belum| PFormProfile[Modal Lengkapi Data Diri Wajib]
+    PCheckProfile -->|Lengkap| PConfirmBook[Peringatan Aturan Pembatalan 12 Jam]
+    PConfirmBook --> PTicket[Terbit E-Ticket Antrean Live]
+    PatFlow --> PHistory[Riwayat Kunjungan & Unduh Resume RME]
+```
 
-    PATIENTS {
-        uuid id PK
-        uuid profile_id FK
-        text no_rm UK
-        text nik UK
-        text blood_type
-        text allergies
-    }
+### 3.1 Peran 1: Pemilik Klinik (*Tenant Admin*)
+* **Pendaftaran & Profil Klinik:** Menginput data identitas klinik, kontak WhatsApp, jam operasional, dan lokasi kecamatan di Purworejo (Purworejo, Kutoarjo, Banyuurip, Bayan, Ngombol, Loano, Gebang, Pituruh, Kemiri, Bruno, dsb).
+* **Penerbitan Kode Unik Kriptografis:**
+  * Sistem otomatis menghasilkan kode unik: format `PWR-[KODE_KLINIK]-[6_ALPHANUMERIC]` (contoh: `PWR-SEHAT-9X8K2M`).
+  * Kode ini memiliki tombol salin (*copy button*) untuk diserahkan kepada dokter resmi yang bekerja di kliniknya.
+* **Manajemen Dokter & Alokasi Kuota:**
+  * Menambahkan dokter: Nama Lengkap, Gelar, Spesialisasi, No. SIP, email, kuota maksimal pasien per hari, dan jam praktik.
 
-    DOCTORS {
-        uuid id PK
-        uuid profile_id FK
-        uuid clinic_id FK
-        text str_number
-        text specialization
-    }
+---
 
-    APPOINTMENTS {
-        uuid id PK
-        uuid clinic_id FK
-        uuid patient_id FK
-        uuid doctor_id FK
-        date appointment_date
-        time appointment_time
-        text status "PENDING | CONFIRMED | CANCELLED"
-    }
+### 3.2 Peran 2: Dokter (*Doctor*)
+* **Otentikasi Aman (Strict Binding):**
+  * Login akun Google $\rightarrow$ memasukkan Kode Unik Klinik.
+  * Sistem memvalidasi kode di database: akun Google dokter (`auth.uid()`) diikat secara permanen dengan entitas dokter di klinik tersebut (`doctors.user_id = auth.uid()` dan `clinic_id` terkunci).
+  * Dokter **tidak dapat menyusup atau salah masuk ke klinik lain**.
+* **Dashboard Pasien Hari Ini:**
+  * Menampilkan antrean terurut berdasarkan nomor tiket dan jam janji hari ini.
+* **Aktivasi Template RME Otomatis & Alur Sekuensial:**
+  * Ketika waktu *real-time* memasuki hari dan jam janji temu, sistem otomatis mengaktifkan status pasien antrean pertama menjadi `sedang_diperiksa` dan membuka **Template Formulir RME (SOAP)** di layar dokter.
+  * Komponen RME mencakup:
+    * **Subjective:** Anamnesis & keluhan utama.
+    * **Objective:** Tanda vital (TD, Nadi, Suhu, Pernapasan) & status lokalis.
+    * **Assessment:** Diagnosa klinis & kodifikasi ICD-10.
+    * **Plan:** Resep terapi obat, tindakan medis, edukasi.
+  * **Otomasi Lanjut Antrean:** Saat dokter menekan tombol **"Selesai & Simpan RME"**:
+    1. RME pasien disimpan permanen dan status janji diubah menjadi `selesai`.
+    2. Antrean secara otomatis memajukan nomor panggilan ke pasien nomor berikutnya.
+    3. Layar dokter secara instan mengosongkan input dan memuat data serta template RME pasien antrean berikutnya tanpa reload/klik manual.
+* **Aturan Pembatalan Janji (12 Jam Lock):**
+  * Dokter dapat membatalkan janji jika berhalangan hanya jika sisa waktu $\ge 12$ jam sebelum jam janji temu.
+  * Jika sisa waktu $< 12$ jam: tombol pembatalan berubah dari **Merah** menjadi **Abu-abu (Disabled / Terkunci)** dan memunculkan notifikasi: *"Janji tidak dapat dibatalkan karena waktu pemeriksaan kurang dari 12 jam."*
 
-    QUEUE_ENTRIES {
-        uuid id PK
-        uuid clinic_id FK
-        uuid appointment_id FK
-        text queue_number
-        text status "WAITING | CALLED | SERVING | COMPLETED"
-    }
+---
 
-    MEDICAL_RECORDS {
-        uuid id PK
-        uuid patient_id FK
-        uuid doctor_id FK
-        text subjective
-        text objective
-        text assessment_icd10
-        text plan
-        timestamptz finalized_at
-    }
+### 3.3 Peran 3: Pasien (*Patient*)
+* **Registrasi & Login:** Login cepat menggunakan akun Google, dilanjutkan dengan pengaturan username & password.
+* **Eksplorasi Klinik Purworejo:**
+  * Menyajikan kartu klinik lengkap di Purworejo.
+  * Menampilkan informasi: Alamat/Kecamatan, Daftar Dokter yang praktik hari ini, Jam Buka, **Sisa Kuota Dokter**, dan **Indikator Beban Antrean Saat Ini** (*Lengang: < 5 antrean*, *Sedang: 5–10 antrean*, *Padat: > 10 antrean*).
+* **AI Chatbot Asisten Purworejo (Gemini 2.0 Flash):**
+  * Berupa *floating widget* di pojok kanan bawah.
+  * Pasien dapat mengetikkan keluhan gejala (contoh: *"Saya di Kutoarjo, demam 3 hari dan mata merah, klinik mana yang buka?"*).
+  * AI menganalisis kondisi medis (triage awal) dan memberikan rekomendasi klinik & dokter di Purworejo secara cerdas dengan membaca ketersediaan kuota dan kepadatan antrean saat itu.
+  * Di dalam pesan bot terdapat tombol pintasan langsung: `[📅 Buat Janji di Klinik Ini]`.
+* **Kelengkapan Profil Kesehatan Wajib (Onboarding Pasien):**
+  * Sebelum pertama kali membuat janji temu, pasien diwajibkan melengkapi identitas medis penting:
+    * Nama Lengkap (sesuai KTP)
+    * Nomor Kartu Keluarga (KK) & NIK (16 digit)
+    * Golongan Darah (A, B, AB, O)
+    * Riwayat Alergi Obat / Makanan (atau "Tidak Ada")
+    * Kontak Darurat & Nomor WhatsApp Aktif
+* **Pemesanan Kuota & Peringatan 12 Jam:**
+  * Memilih dokter, tanggal kunjungan, dan sesi jam periksa.
+  * Menampilkan peringatan tegas sebelum *submit*: *"Perhatian: Janji temu hanya dapat dibatalkan maksimal 12 jam sebelum jadwal pemeriksaan."*
+* **Manajemen Antrean Live:**
+  * Menampilkan tiket antrean digital (misal `A-03`) dan monitor nomor yang sedang diperiksa di ruang dokter.
+* **Riwayat Kunjungan & Akses RME:**
+  * Pasien dapat melihat riwayat kunjungan ke klinik-klinik di Purworejo dan membaca salinan RME hasil pemeriksaan dokter setelah status dinyatakan selesai.
+
+---
+
+## 4. Persyaratan Fungsional Detail (Functional Requirements)
+
+| Modul | ID | Deskripsi Kebutuhan |
+|---|---|---|
+| **Auth** | FR-AUTH-01 | Halaman `login.html` menyediakan 3 tab peran: Pasien, Dokter, dan Pemilik Klinik. |
+| **Auth** | FR-AUTH-02 | Dokter wajib memasukkan kode unik klinik setelah Google Sign-In untuk validasi hak akses. |
+| **Auth** | FR-AUTH-03 | Sistem menerapkan *rate-limiting* (kunci 15 menit jika 3 kali salah memasukkan kode unik). |
+| **Owner** | FR-OWN-01 | Pemilik klinik dapat mengedit profil klinik, alamat kecamatan di Purworejo, dan jam buka. |
+| **Owner** | FR-OWN-02 | Sistem mengenerate kode unik kriptografis yang dijamin unik secara global (`UNIQUE INDEX`). |
+| **Owner** | FR-OWN-03 | Pemilik klinik dapat menambah, mengedit, dan menonaktifkan dokter beserta alokasi kuota harian. |
+| **Doctor** | FR-DOC-01 | Dashboard dokter menampilkan daftar antrean pasien terurut berdasarkan waktu kedatangan hari ini. |
+| **Doctor** | FR-DOC-02 | Formulir SOAP RME aktif secara otomatis saat pasien giliran pertama memasuki sesi pemeriksaan. |
+| **Doctor** | FR-DOC-03 | Tombol "Selesai & Simpan RME" secara atomik mengupdate status pasien menjadi `selesai`, memajukan antrean, dan memuat template RME pasien berikutnya. |
+| **Doctor** | FR-DOC-04 | Tombol pembatalan janji terkunci (abu-abu) jika sisa waktu menuju jam janji $< 12$ jam. |
+| **Patient**| FR-PAT-01 | Pasien dapat mencari dan memfilter klinik di Purworejo berdasarkan nama dan kecamatan. |
+| **Patient**| FR-PAT-02 | Sistem menampilkan sisa kuota dokter dan tingkat keramaian antrean per klinik secara live. |
+| **Patient**| FR-PAT-03 | Pasien wajib mengisi No. KK, NIK, Golongan Darah, dan Alergi sebelum janji pertama diproses. |
+| **Patient**| FR-PAT-04 | Pasien menerima tiket digital dan dapat memantau pergerakan antrean dari aplikasi mobile. |
+| **Patient**| FR-PAT-05 | Tombol pembatalan janji oleh pasien terkunci (abu-abu) jika waktu menuju jadwal $< 12$ jam. |
+| **Patient**| FR-PAT-06 | Pasien dapat melihat riwayat kunjungan dan hasil diagnosa/terapi RME yang telah selesai. |
+| **AI**     | FR-AI-01  | AI Chatbot ditenagai Google Gemini 2.0 Flash dengan *context injection* data klinik Purworejo, kuota, dan antrean. |
+| **AI**     | FR-AI-02  | AI mengidentifikasi keluhan, memberikan *smart triage*, menyarankan dokter/klinik, dan menyediakan tombol booking interaktif. |
+
+---
+
+## 5. Logika Bisnis Kunci (*Core Business Logic*)
+
+### 5.1 Rumus Perhitungan Kunci Pembatalan 12 Jam
+Suatu janji temu hanya dapat dibatalkan jika dan hanya jika:
+$$\Delta t = T_{\text{jadwal}} - T_{\text{sekarang}} \ge 12\text{ jam}$$
+* Jika $\Delta t \ge 12\text{ jam}$: `can_cancel = TRUE`, tombol ditampilkan dengan warna merah aktif (`class="danger-button"`).
+* Jika $\Delta t < 12\text{ jam}$: `can_cancel = FALSE`, tombol dinonaktifkan (`disabled`, `class="disabled-button"` berwarna abu-abu), dengan tooltip dan penolakan eksekusi di sisi service backend.
+
+### 5.2 Logika Pemanggilan Antrean Sekuensial Atomik
+Saat dokter menyimpan RME:
+```sql
+-- 1. Finalisasi rekam medis dan update janji saat ini
+UPDATE appointments SET status = 'selesai' WHERE id = current_appointment_id;
+
+-- 2. Ambil antrean berikutnya pada dokter dan tanggal yang sama
+UPDATE appointments 
+SET status = 'sedang_diperiksa' 
+WHERE id = (
+    SELECT id FROM appointments 
+    WHERE doctor_id = current_doctor_id 
+      AND appointment_date = CURRENT_DATE 
+      AND status = 'menunggu' 
+    ORDER BY queue_order ASC 
+    LIMIT 1
+);
 ```
 
 ---
 
-## 8. Kepatuhan Regulasi, Keamanan & Kinerja
+## 6. Persyaratan Non-Fungsional (NFR)
 
-### 8.1 Regulasi Kesehatan & Hukum
-1. **Permenkes No. 24 Tahun 2022 (Rekam Medis Elektronik):**
-   - Struktur data klinis wajib mencakup SOAP lengkap dan kodifikasi ICD-10.
-   - Hak koreksi medis hanya berlaku sebelum finalisasi; pasca finalisasi data terkunci mutlak dan tercatat di audit log.
-2. **UU No. 27 Tahun 2022 (Pelindungan Data Pribadi):**
-   - Data medis pasien diklasifikasikan sebagai Data Pribadi Spesifik.
-   - Penerapan *Row Level Security* (RLS) PostgreSQL memastikan pasien hanya dapat membaca RME milik dirinya sendiri (`auth.uid() = profile_id`).
-   - Dokter hanya dapat mengakses data pasien yang terdaftar dalam reservasi/antrean kliniknya.
-
-### 8.2 Non-Functional Requirements (NFR)
-- **Performa Muat (LCP):** Waktu Largest Contentful Paint $< 1.2$ detik pada koneksi 4G seluler.
-- **Zero Framework Bloat:** Dibangun dengan Vanilla Web stack untuk efisiensi transfer data dan pemeliharaan jangka panjang tanpa ketergantungan paket rapuh.
-- **Aksesibilitas:** Kontras warna minimum 4.5:1, semantik ARIA lengkap pada seluruh dialog modal (`role="dialog"`, `aria-modal="true"`, focus trap).
-
----
-
-## 9. Roadmap Pengembangan & Rilis
-
-```
-Q4 2026: Fase 1 (Selesai & Aktif)
-├── Transformasi Arsitektur Multi-Klinik Regional Kabupaten Purworejo
-├── Implementasi 3 Faskes Pilot (Purworejo Kota, Kutoarjo, Banyuurip)
-├── Eliminasi Total Peran Petugas Loket (Direct Pasien-Dokter)
-├── Integrasi Direktori Klinik & Janji Temu Terpusat
-└── Verifikasi Pengujian Otomatis 100% Pass
-
-Q1 2027: Fase 2 (Pengembangan Lanjutan)
-├── Integrasi AI Chatbot Rekomendasi Faskes & Antrean Mandiri
-├── Integrasi Peta Interaktif Sebaran Faskes Kab. Purworejo (Leaflet / Google Maps)
-└── Fitur Panggilan Suara Antrean Otomatis (Web Speech API) di Meja Dokter
-
-Q2 2027: Fase 3 (Ekspansi Regional)
-├── Pembukaan Kemitraan ke 16 Kecamatan Se-Kabupaten Purworejo
-├── Integrasi Standar SatuSehat Kemenkes RI via FHIR API
-└── Integrasi Bridging BPJS Kesehatan P-Care
-```
-
----
-
-*Dokumen ini diterbitkan secara resmi sebagai acuan tunggal arsitektur dan spesifikasi kebutuhan produk SIMKLINIK 2.0.*
+1. **Keamanan & Kepatuhan Regulasi:**
+   * Kepatuhan **Permenkes No. 24 Tahun 2022** (RME terkunci permanen pasca finalisasi).
+   * Kepatuhan **UU No. 27 Tahun 2022 (UU PDP)** (data medis sensitif diisolasi via PostgreSQL Row Level Security).
+2. **Kinerja & Kecepatan Respons:**
+   * Waktu muat halaman $< 1.5$ detik pada jaringan mobile 4G.
+   * Sinkronisasi pembaruan status antrean real-time $< 500$ ms via Supabase WebSocket channels.
+3. **Ergonomi UI/UX:**
+   * *Clean Clinical Tech Design System* dengan palet warna medis profesional (Primary Teal, Slate Gray, Status Badges).
+   * Responsif sempurna untuk layar smartphone (360px ke atas) hingga desktop klinik (1920px).
