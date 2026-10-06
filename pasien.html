@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Pasien | SIMKLINIK Purworejo</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/role-pages.css">
+  <link rel="stylesheet" href="assets/css/modal.css">
+  <link rel="stylesheet" href="assets/css/ai-chat.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">PWR</div>
+        <div>
+          <div class="brand-title">SIMKLINIK</div>
+          <div class="brand-subtitle">Portal Pasien Regional</div>
+        </div>
+      </div>
+      <nav class="nav-menu">
+        <a class="nav-item active" href="pasien.html" id="nav-faskes">🏥 Cari Klinik & Booking</a>
+        <a class="nav-item" href="#section-ticket" id="nav-antrean">🎫 Tiket Antrean Live</a>
+        <a class="nav-item" href="#section-history" id="nav-riwayat">📄 Riwayat Rekam Medis (RME)</a>
+        <a class="nav-item" href="javascript:void(0)" onclick="window.showModal('modal-profile-onboarding')">
+          👤 Profil Data Medis
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="window.logout()">
+          🚪 Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Fasilitas Kesehatan Kabupaten Purworejo</h1>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">
+            Layanan terintegrasi Klinik Pratama Purworejo Kota, Kutoarjo & Banyuurip
+          </span>
+        </div>
+        <div class="topbar-actions">
+          <div class="user-badge" id="profile-indicator">
+            <span>👤</span>
+            <span id="patient-name-display">Warga Purworejo</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Live Ticket Banner (jika pasien punya antrean aktif) -->
+        <div id="section-ticket" style="margin-bottom: 2rem;">
+          <div class="ticket-card" id="live-ticket-card">
+            <span class="queue-badge lengang" style="background: rgba(255,255,255,0.2); color: #fff;">
+              TIKET ANTREAN HARI INI
+            </span>
+            <div class="ticket-number" id="ticket-number-text">A-02</div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;" id="ticket-clinic-text">
+              Klinik Pratama & Bersalin Kutoarjo Medika
+            </h2>
+            <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem;" id="ticket-doctor-text">
+              dr. Hendra Wijaya, Sp.A — Jam Periksa: 09:00 WIB
+            </p>
+            <div style="display: flex; justify-content: center; gap: 1rem; align-items: center;">
+              <span id="ticket-cancellation-badge" class="queue-badge lengang">DAPAT DIBATALKAN</span>
+              <button type="button" id="btn-cancel-patient-appt" class="btn btn-danger" style="font-size: 0.85rem;">
+                Batalkan Janji Ini
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Kecamatan Purworejo -->
+        <div style="margin-bottom: 1rem;">
+          <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem;">
+            Pilih Wilayah Kecamatan di Purworejo:
+          </h2>
+          <div class="district-bar" id="district-filter">
+            <button type="button" class="district-chip active" data-district="semua">Semua Wilayah</button>
+            <button type="button" class="district-chip" data-district="Purworejo Kota">Purworejo Kota</button>
+            <button type="button" class="district-chip" data-district="Kutoarjo">Kutoarjo</button>
+            <button type="button" class="district-chip" data-district="Banyuurip">Banyuurip</button>
+            <button type="button" class="district-chip" data-district="Bayan">Bayan</button>
+          </div>
+        </div>
+
+        <!-- Grid Katalog Klinik -->
+        <div class="grid-3" id="clinic-grid" style="margin-bottom: 3rem;">
+          <!-- Kartu klinik dirender secara dinamis -->
+        </div>
+
+        <!-- Section Riwayat Rekam Medis (RME) Pasca Pemeriksaan -->
+        <div id="section-history" class="card">
+          <div class="card-header">
+            <div>
+              <h2 style="font-size: 1.25rem; font-weight: 700;">Riwayat Resume Rekam Medis Elektronik (RME)</h2>
+              <p style="font-size: 0.875rem; color: var(--text-muted);">
+                Salinan lembar SOAP dari dokter pasca pemeriksaan yang telah selesai difinalisasi.
+              </p>
+            </div>
+          </div>
+          <div id="rme-history-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
+              Belum ada riwayat pemeriksaan yang selesai.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL 1: Mandatory Onboarding Profil Pasien (KK/NIK/Alergi) -->
+  <div class="modal-backdrop" id="modal-profile-onboarding">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">📋 Lengkapi Profil Rekam Medis Wajib</h3>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="profile-form">
+        <div class="modal-body">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Sesuai standar Permenkes No. 24/2022, data Kartu Keluarga dan NIK wajib dilengkapi sebelum membuat janji temu di klinik.
+          </p>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="input-fullname">Nama Lengkap (Sesuai KTP) <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="input-fullname" class="form-input" placeholder="Bpk. Ahmad Santoso" required value="Bpk. Ahmad Santoso">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="input-no-kk">Nomor Kartu Keluarga (16 Digit) <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="input-no-kk" class="form-input" placeholder="330601xxxxxxxxxx" maxlength="16" required value="3306011234560001">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-nik">Nomor NIK KTP (16 Digit) <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="input-nik" class="form-input" placeholder="330601xxxxxxxxxx" maxlength="16" required value="3306011234560002">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="input-blood-type">Golongan Darah</label>
+              <select id="input-blood-type" class="form-input">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="AB">AB</option>
+                <option value="O" selected>O</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-phone">No. WhatsApp / HP</label>
+              <input type="tel" id="input-phone" class="form-input" placeholder="081234567890" value="081234567890">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-allergies">Riwayat Alergi Obat / Makanan</label>
+            <input type="text" id="input-allergies" class="form-input" placeholder="Contoh: Alergi Amoksisilin, atau tulis 'Tidak ada'" value="Tidak ada">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Tutup</button>
+          <button type="submit" class="btn btn-primary">Simpan Profil Saya</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Booking Kuota Dokter & Peringatan 12 Jam -->
+  <div class="modal-backdrop" id="modal-booking">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">📅 Reservasi Kuota Pemeriksaan Dokter</h3>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="booking-form">
+        <div class="modal-body">
+          <input type="hidden" id="booking-clinic-id">
+          <div style="margin-bottom: 1rem; background: var(--primary-light); padding: 0.875rem; border-radius: var(--radius-md);">
+            <div style="font-weight: 700; color: var(--primary-dark);" id="booking-clinic-name">Klinik Purworejo</div>
+            <div style="font-size: 0.85rem; color: var(--primary-dark);" id="booking-clinic-district">Kecamatan</div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Pilih Dokter Praktik</label>
+            <select id="booking-doctor-select" class="form-input" required>
+              <!-- Filled dynamically -->
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Tanggal Kunjungan</label>
+              <input type="date" id="booking-date-input" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sesi Jam Periksa</label>
+              <select id="booking-time-select" class="form-input" required>
+                <option value="08:30:00">Pagi (08:30 WIB)</option>
+                <option value="10:00:00">Pagi (10:00 WIB)</option>
+                <option value="16:00:00">Sore (16:00 WIB)</option>
+                <option value="19:00:00">Malam (19:00 WIB)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- PERINGATAN KETAT 12 JAM -->
+          <div style="background: var(--warning-bg); border-left: 4px solid var(--warning); padding: 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; color: #92400e;">
+            <strong>⚠️ Perhatian Aturan Pembatalan:</strong><br>
+            Janji temu hanya dapat dibatalkan maksimal <strong>12 jam</strong> sebelum jadwal pemeriksaan. Pembatalan dengan sisa waktu kurang dari 12 jam akan otomatis dikunci oleh sistem.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Batal</button>
+          <button type="submit" class="btn btn-primary">Konfirmasi & Ambil Nomor Antrean</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="config/supabase.js"></script>
+  <script src="config/gemini.js"></script>
+  <script src="assets/js/components/modal.js"></script>
+  <script src="assets/js/components/toast.js"></script>
+  <script src="assets/js/auth/multiRoleAuth.js"></script>
+  <script src="assets/js/services/clinicService.js"></script>
+  <script src="assets/js/services/appointmentService.js"></script>
+  <script src="assets/js/services/queueService.js"></script>
+  <script src="assets/js/services/rmeService.js"></script>
+  <script src="assets/js/services/aiPurworejoService.js"></script>
+  <script src="assets/js/components/aiChatWidget.js"></script>
+  <script>
+    let userProfile = {
+      isComplete: true,
+      no_kk: '3306011234560001',
+      nik: '3306011234560002',
+      full_name: 'Bpk. Ahmad Santoso'
+    };
+
+    let activePatientAppt = {
+      id: 'appt-patient-sample',
+      clinic_name: 'Klinik Pratama & Bersalin Kutoarjo Medika',
+      doctor_name: 'dr. Hendra Wijaya, Sp.A',
+      appointment_date: new Date(Date.now() + 24 * 3600 * 1000).toISOString().split('T')[0],
+      appointment_time: '09:00:00',
+      queue_number: 'A-02',
+      status: 'menunggu'
+    };
+
+    async function loadClinics(district = 'semua') {
+      const clinics = await window.getClinicsByDistrict(district);
+      const grid = document.getElementById('clinic-grid');
+      grid.innerHTML = '';
+
+      for (const clinic of clinics) {
+        const doctors = await window.getDoctorsByClinic(clinic.id);
+        const card = document.createElement('div');
+        card.className = 'clinic-card';
+        card.innerHTML = `
+          <div class="clinic-card-header">
+            <h3 class="clinic-name">${clinic.name}</h3>
+            <span class="clinic-district">📍 Kec. ${clinic.district}</span>
+          </div>
+          <div class="clinic-card-body">
+            <p style="color: var(--text-muted);">${clinic.address}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <span style="font-size: 0.8rem; font-weight: 600;">Status Antrean:</span>
+              <span class="queue-badge lengang">Lengang (< 5)</span>
+            </div>
+            <div>
+              <span style="font-size: 0.8rem; font-weight: 600;">Dokter Praktik:</span>
+              <ul style="padding-left: 1.25rem; font-size: 0.825rem; color: var(--text-muted); margin-top: 0.25rem;">
+                ${doctors.map(d => `<li>${d.full_name} (${d.specialty}) — Kuota: ${d.daily_quota}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+          <div class="clinic-card-footer">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">📞 ${clinic.phone}</span>
+            <button type="button" class="btn btn-primary" onclick="openBookingModal('${clinic.id}')">
+              📅 Buat Janji
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    async function openBookingModal(clinicId) {
+      if (!userProfile.no_kk || !userProfile.nik) {
+        window.showToast('Silakan lengkapi data profil (No. KK & NIK) terlebih dahulu!', 'warning');
+        window.showModal('modal-profile-onboarding');
+        return;
+      }
+
+      const clinic = await window.getClinicById(clinicId);
+      if (!clinic) return;
+
+      document.getElementById('booking-clinic-id').value = clinic.id;
+      document.getElementById('booking-clinic-name').textContent = clinic.name;
+      document.getElementById('booking-clinic-district').textContent = 'Kecamatan ' + clinic.district;
+
+      const doctors = await window.getDoctorsByClinic(clinic.id);
+      const docSelect = document.getElementById('booking-doctor-select');
+      docSelect.innerHTML = doctors.map(d => `<option value="${d.id}">${d.full_name} (${d.specialty})</option>`).join('');
+
+      // Set default tomorrow date
+      const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
+      document.getElementById('booking-date-input').value = tomorrow.toISOString().split('T')[0];
+
+      window.showModal('modal-booking');
+    }
+
+    function renderTicket() {
+      const ticketCard = document.getElementById('live-ticket-card');
+      if (!activePatientAppt || activePatientAppt.status === 'dibatalkan') {
+        ticketCard.style.display = 'none';
+        return;
+      }
+      ticketCard.style.display = 'block';
+      document.getElementById('ticket-number-text').textContent = activePatientAppt.queue_number;
+      document.getElementById('ticket-clinic-text').textContent = activePatientAppt.clinic_name;
+      document.getElementById('ticket-doctor-text').textContent = 
+        `${activePatientAppt.doctor_name} — Jam Periksa: ${activePatientAppt.appointment_time} WIB`;
+
+      const canCancel = window.isCancellationAllowed(activePatientAppt.appointment_date, activePatientAppt.appointment_time);
+      const btnCancel = document.getElementById('btn-cancel-patient-appt');
+      const badge = document.getElementById('ticket-cancellation-badge');
+
+      if (canCancel) {
+        btnCancel.disabled = false;
+        btnCancel.className = 'btn btn-danger';
+        badge.className = 'queue-badge lengang';
+        badge.textContent = 'DAPAT DIBATALKAN';
+      } else {
+        btnCancel.disabled = true;
+        btnCancel.className = 'btn btn-disabled';
+        badge.className = 'queue-badge padat';
+        badge.textContent = 'TERKUNCI (< 12 JAM)';
+      }
+    }
+
+    // Cancel Handler
+    document.getElementById('btn-cancel-patient-appt').addEventListener('click', async () => {
+      if (!activePatientAppt) return;
+      const res = await window.cancelAppointment(activePatientAppt);
+      if (res.success) {
+        window.showToast('Janji temu berhasil dibatalkan.', 'success');
+        activePatientAppt = null;
+        renderTicket();
+      } else {
+        window.showToast(res.message, 'error');
+      }
+    });
+
+    // District Filter Chips
+    document.querySelectorAll('.district-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.district-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        loadClinics(chip.dataset.district);
+      });
+    });
+
+    // Profile Form Handler
+    document.getElementById('profile-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      userProfile.no_kk = document.getElementById('input-no-kk').value.trim();
+      userProfile.nik = document.getElementById('input-nik').value.trim();
+      userProfile.full_name = document.getElementById('input-fullname').value.trim();
+      window.showToast('Data identitas rekam medis berhasil diperbarui!', 'success');
+      window.closeModal('modal-profile-onboarding');
+    });
+
+    // Booking Form Handler
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const clinicId = document.getElementById('booking-clinic-id').value;
+      const clinic = await window.getClinicById(clinicId);
+      const doctorId = document.getElementById('booking-doctor-select').value;
+      const date = document.getElementById('booking-date-input').value;
+      const time = document.getElementById('booking-time-select').value;
+
+      const appt = await window.createAppointment({
+        clinic_id: clinicId,
+        doctor_id: doctorId,
+        patient_id: 'pat-logged-in',
+        appointment_date: date,
+        appointment_time: time
+      });
+
+      activePatientAppt = {
+        ...appt,
+        clinic_name: clinic ? clinic.name : 'Klinik Purworejo',
+        doctor_name: 'dr. Medika'
+      };
+
+      window.showToast('Pemesanan kuota berhasil! Nomor tiket diterbitkan.', 'success');
+      window.closeModal('modal-booking');
+      renderTicket();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadClinics();
+      renderTicket();
+    });
+  </script>
+</body>
+</html>
