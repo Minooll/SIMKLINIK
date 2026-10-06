@@ -1243,4 +1243,180 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
   border-color: #cbd5e1;
 }
 
+/* ══════════════════════════════════════════════════════════
+   PURWOREJO REGIONAL MULTI-CLINIC DIRECTORY STYLES
+   ══════════════════════════════════════════════════════════ */
+.clinics-explorer-section {
+  margin-bottom: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.clinics-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.clinic-pill {
+  background: #f1f5f9;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clinic-pill:hover {
+  background: #e2e8f0;
+  color: var(--ink);
+}
+
+.clinic-pill.is-active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+}
+
+.clinics-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.clinic-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.clinic-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--teal);
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.08);
+}
+
+.clinic-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.clinic-badge-district {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.clinic-queue-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.clinic-queue-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.clinic-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+  line-height: 1.35;
+}
+
+.clinic-card-address {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.clinic-card-hours {
+  font-size: 0.8rem;
+  color: #0369a1;
+  background: #f0f9ff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+
+.clinic-facilities-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 1.25rem;
+}
+
+.clinic-tag {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.btn-clinic-book {
+  width: 100%;
+  background: var(--teal);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-clinic-book:hover {
+  background: var(--teal-hover);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+}
+
 

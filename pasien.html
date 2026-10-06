@@ -82,12 +82,34 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 <span>Ubah Sandi</span>
               </button>
-              <button class="primary-button" id="primaryAction" data-modal-target="modalBooking">
+              <button class="primary-button" id="primaryAction">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <span id="primaryActionText">Buat Janji</span>
               </button>
             </div>
           </section>
+
+          <!-- ══════════════════════════════════════════════════════════
+               DIREKTORI KLINIK REGIONAL KABUPATEN PURWOREJO
+               ══════════════════════════════════════════════════════════ -->
+          <section class="panel clinics-explorer-section" id="clinicsExplorerSection">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">JARINGAN FASKES KABUPATEN PURWOREJO</p>
+                <h2>Pilih &amp; Temukan Klinik Terdekat</h2>
+              </div>
+              <div class="clinics-filter-pills" role="tablist" aria-label="Filter Kecamatan">
+                <button type="button" class="clinic-pill is-active" id="pillAllPurworejo" data-district="all">Semua Faskes</button>
+                <button type="button" class="clinic-pill" id="pillKecPurworejo" data-district="Purworejo">Kec. Purworejo (Kota)</button>
+                <button type="button" class="clinic-pill" id="pillKecKutoarjo" data-district="Kutoarjo">Kec. Kutoarjo</button>
+                <button type="button" class="clinic-pill" id="pillKecBanyuurip" data-district="Banyuurip">Kec. Banyuurip</button>
+              </div>
+            </div>
+            <div class="clinics-cards-grid" id="clinicsCardsGrid">
+              <!-- Rendered via role-dashboard.js -->
+            </div>
+          </section>
+
           <section class="dashboard-grid">
             <div class="panel schedule-panel">
               <div class="panel-heading">
@@ -148,6 +170,12 @@
         </div>
         <form id="formBooking" novalidate>
           <div class="modal-body">
+            <div class="modal-form-group">
+              <label for="bookingClinicSelect">Klinik Tujuan (Kabupaten Purworejo)</label>
+              <select id="bookingClinicSelect" required>
+                <option value="">-- Memuat Klinik Purworejo... --</option>
+              </select>
+            </div>
             <div class="modal-form-group">
               <label for="bookingServiceSelect">Poli Layanan Medis</label>
               <select id="bookingServiceSelect" required>
@@ -254,23 +282,25 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════════
-         MODAL: ONBOARDING DATA DIRI WAJIB PASIEN
-         (Wajib dilengkapi saat pertama kali login / Google OAuth, tidak dapat ditutup)
+         MODAL: ONBOARDING DATA DIRI PASIEN
+         (Dapat dilewati saat pertama kali login, namun wajib diisi sebelum membuat janji)
          ══════════════════════════════════════════════════════════ -->
-    <div class="modal-backdrop" id="modalPatientOnboarding" role="dialog" aria-modal="true" aria-labelledby="modalOnboardingTitle" data-backdrop="static" aria-hidden="true">
+    <div class="modal-backdrop" id="modalPatientOnboarding" role="dialog" aria-modal="true" aria-labelledby="modalOnboardingTitle" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-header">
           <h3 class="modal-title" id="modalOnboardingTitle">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            Lengkapi Data Diri Pasien (Wajib)
+            Lengkapi Data Diri Pasien
           </h3>
-          <!-- Tidak ada tombol close: Wajib dilengkapi sebelum mengakses portal -->
+          <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
         <form id="formPatientOnboarding" novalidate>
           <div class="modal-body">
             <div class="modal-info-box">
               <strong>Verifikasi Identitas Resmi Permenkes No. 24/2022:</strong>
-              Mohon isi data diri sesuai <strong>Kartu Keluarga (KK)</strong> atau <strong>KTP</strong> Anda untuk penerbitan Rekam Medis Elektronik (RME) resmi klinik. Formulir ini wajib dilengkapi sebelum Anda dapat mengakses layanan reservasi dan konsultasi dokter.
+              Mohon isi data diri sesuai <strong>Kartu Keluarga (KK)</strong> atau <strong>KTP</strong> Anda untuk penerbitan Rekam Medis Elektronik (RME) resmi klinik. Anda dapat melengkapinya sekarang atau melewatinya dan mengisi nanti saat akan membuat janji temu dokter.
             </div>
 
             <div class="modal-grid-2">
@@ -313,9 +343,10 @@
             <p class="form-notice" id="onboardingNotice"></p>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-modal-close id="btnSkipOnboarding">Lewati untuk Sekarang</button>
             <button type="submit" class="btn-modal-submit" id="btnSubmitOnboarding">
               <span class="btn-spinner"></span>
-              <span>Simpan Data Diri &amp; Lanjutkan</span>
+              <span>Simpan Data Diri</span>
             </button>
           </div>
         </form>
@@ -324,7 +355,7 @@
 
     <!-- ══════════════════════════════════════════════════════════
          MODAL 3: PROFIL KESEHATAN MANDIRI
-         (Bisa dilewati atau ditutup oleh pasien)
+         (Wajib diisi sebelum reservasi janji temu dokter)
          ══════════════════════════════════════════════════════════ -->
     <div class="modal-backdrop" id="modalHealthProfile" role="dialog" aria-modal="true" aria-labelledby="modalHealthProfileTitle" aria-hidden="true">
       <div class="modal-dialog">
@@ -340,13 +371,13 @@
         <form id="formHealthProfile" novalidate>
           <div class="modal-body">
             <div class="modal-info-box">
-              Informasi riwayat alergi dan kontak darurat bersifat opsional namun sangat membantu dokter dalam memberikan resep dan penanganan medis yang aman.
+              Informasi golongan darah dan riwayat alergi wajib dilengkapi demi keselamatan klinis pasien sebelum reservasi konsultasi dokter.
             </div>
             <div class="modal-grid-2">
               <div class="modal-form-group">
-                <label for="healthBloodType">Golongan Darah</label>
-                <select id="healthBloodType">
-                  <option value="">-- Pilih --</option>
+                <label for="healthBloodType">Golongan Darah <span class="required-star">*</span></label>
+                <select id="healthBloodType" required>
+                  <option value="">-- Pilih Golongan Darah --</option>
                   <option value="A">A</option>
                   <option value="B">B</option>
                   <option value="AB">AB</option>
@@ -355,8 +386,8 @@
                 </select>
               </div>
               <div class="modal-form-group">
-                <label for="healthAllergies">Riwayat Alergi (Obat / Makanan)</label>
-                <input type="text" id="healthAllergies" placeholder="Contoh: Amoxicillin, Paracetamol" />
+                <label for="healthAllergies">Riwayat Alergi (Obat / Makanan) <span class="required-star">*</span></label>
+                <input type="text" id="healthAllergies" placeholder="Contoh: Amoxicillin, Seafood, atau 'Tidak Ada'" required />
               </div>
             </div>
             <div class="modal-form-group">
@@ -367,9 +398,10 @@
               <label for="healthEmergencyPhone">Nomor Telepon Kontak Darurat</label>
               <input type="tel" id="healthEmergencyPhone" placeholder="08xxxxxxxxxx" />
             </div>
+            <p class="form-notice" id="healthProfileNotice"></p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn-modal-cancel" data-modal-close>Lewati untuk Sekarang</button>
+            <button type="button" class="btn-modal-cancel" data-modal-close id="btnCancelHealthProfile">Lewati untuk Sekarang</button>
             <button type="submit" class="btn-modal-submit" id="btnSubmitHealthProfile">
               <span class="btn-spinner"></span>
               <span>Simpan Profil Kesehatan</span>
@@ -419,7 +451,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-modal-cancel" data-modal-close>Tutup</button>
-          <button type="button" class="primary-button" data-modal-target="modalBooking">
+          <button type="button" class="primary-button" id="btnFullAgendaNewBooking">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             <span>+ Buat Janji Baru</span>
           </button>
@@ -515,11 +547,75 @@
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════════
+         MODAL: PERINGATAN WAJIB LENGKAPI DATA SEBELUM BUAT JANJI
+         (Muncul saat pasien hendak membuat janji jika data diri/kesehatan belum lengkap)
+         ══════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="modalRequireProfilePopup" role="dialog" aria-modal="true" aria-labelledby="modalRequireProfileTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalRequireProfileTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="title-warning-icon"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            Lengkapi Data Sebelum Buat Janji
+          </h3>
+          <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-warning-callout">
+            <div class="callout-lead">
+              <strong>Pemberitahuan Wajib:</strong>
+              Untuk keselamatan penanganan klinis dan penerbitan resep/RME resmi klinik, Anda diwajibkan melengkapi <strong>Data Diri Kependudukan</strong> serta <strong>Profil Medis (Golongan Darah &amp; Riwayat Alergi)</strong> terlebih dahulu sebelum melakukan reservasi janji temu dokter.
+            </div>
+          </div>
+
+          <div class="requirement-checklist" id="requirementChecklistContainer">
+            <!-- Card 1: Data Diri KTP/KK -->
+            <div class="req-card" id="reqCardIdentity">
+              <div class="req-card-status-icon" id="reqIconIdentity">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <div class="req-card-info">
+                <div class="req-card-header">
+                  <h4 class="req-card-title">1. Data Diri &amp; Kependudukan</h4>
+                  <span class="req-status-badge req-badge-incomplete" id="reqBadgeIdentity">Wajib Dilengkapi</span>
+                </div>
+                <p class="req-card-desc" id="reqDescIdentity">Nama lengkap, NIK 16 digit, tanggal lahir, jenis kelamin, no HP/WhatsApp, dan alamat domisili.</p>
+              </div>
+            </div>
+
+            <!-- Card 2: Profil Medis / Golongan Darah & Alergi -->
+            <div class="req-card" id="reqCardHealth">
+              <div class="req-card-status-icon" id="reqIconHealth">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <div class="req-card-info">
+                <div class="req-card-header">
+                  <h4 class="req-card-title">2. Golongan Darah &amp; Riwayat Alergi</h4>
+                  <span class="req-status-badge req-badge-incomplete" id="reqBadgeHealth">Wajib Dilengkapi</span>
+                </div>
+                <p class="req-card-desc" id="reqDescHealth">Golongan darah dan riwayat alergi obat/makanan wajib diisi untuk keamanan diagnosis dan peresepan obat dokter.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" data-modal-close id="btnCancelRequireProfile">Nanti Saja</button>
+          <button type="button" class="btn-modal-submit" id="btnGoCompleteProfile">
+            <span>Lengkapi Data Sekarang</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- UI Components & Supabase Data Services -->
     <script src="assets/js/components/modal.js"></script>
     <script src="assets/js/components/toast.js"></script>
     <script src="assets/js/auth/authHelper.js"></script>
     <script src="assets/js/services/patientService.js"></script>
+    <script src="assets/js/services/clinicService.js"></script>
     <script src="assets/js/services/appointmentService.js"></script>
     <script src="assets/js/services/queueService.js"></script>
     <script src="assets/js/services/medicalRecordService.js"></script>
@@ -531,7 +627,10 @@
     <script src="assets/js/dashboard/role-dashboard.js"></script>
     <script>
       window.openBookingModalWithService = (serviceName) => {
-        if (window.Modal) {
+        if (typeof window.handleInitiateBooking === 'function') {
+          const allowed = window.handleInitiateBooking(serviceName);
+          if (!allowed) return;
+        } else if (window.Modal) {
           window.Modal.open('modalBooking');
         }
         const serviceSelect = document.getElementById('bookingServiceSelect');

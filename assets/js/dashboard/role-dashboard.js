@@ -52,24 +52,24 @@
       label: 'Dokter', name: 'dr. Ayu Rahma, Sp.PD', initials: 'AR',
       get greeting() { return `${getTimeGreeting()}, dr. Ayu`; },
       copy: 'Kelola pasien, jadwal praktik, rekam medis (SOAP), dan peresepan obat.',
-      nav: [['dashboard','Dashboard'],['pasien','Pasien saya'],['jadwal','Jadwal praktik'],['rekam-medis','Rekam medis'],['resep','Resep']],
-      stats: [['Pasien hari ini','0','Pasien terdaftar'],['Jadwal selesai','0','Jadwal praktik'],['Resep aktif','0','Resep diterbitkan'],['Rata-rata layanan','-','Standar Permenkes']],
+      nav: [['dashboard', 'Dashboard'], ['pasien', 'Pasien saya'], ['jadwal', 'Jadwal praktik'], ['rekam-medis', 'Rekam medis'], ['resep', 'Resep']],
+      stats: [['Pasien hari ini', '0', 'Pasien terdaftar'], ['Jadwal selesai', '0', 'Jadwal praktik'], ['Resep aktif', '0', 'Resep diterbitkan'], ['Rata-rata layanan', '-', 'Standar Permenkes']],
       dashboard: { title: 'Jadwal konsultasi hari ini', rows: [] }
     },
     petugas: {
       label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP',
       get greeting() { return `${getTimeGreeting()}, Nadia`; },
       copy: 'Pantau antrean pasien, registrasi walk-in, verifikasi jadwal, dan kasir pembayaran.',
-      nav: [['dashboard','Dashboard'],['pasien','Data pasien'],['antrean','Antrean layanan'],['dokter','Jadwal dokter'],['pembayaran','Pembayaran']],
-      stats: [['Antrean aktif','0','Pasien antrean'],['Terdaftar hari ini','0','Pasien klinik'],['Jadwal dokter','10','Dokter tersedia'],['Pembayaran','Rp 0','Kasir klinik']],
+      nav: [['dashboard', 'Dashboard'], ['pasien', 'Data pasien'], ['antrean', 'Antrean layanan'], ['dokter', 'Jadwal dokter'], ['pembayaran', 'Pembayaran']],
+      stats: [['Antrean aktif', '0', 'Pasien antrean'], ['Terdaftar hari ini', '0', 'Pasien klinik'], ['Jadwal dokter', '10', 'Dokter tersedia'], ['Pembayaran', 'Rp 0', 'Kasir klinik']],
       dashboard: { title: 'Antrean poli hari ini', rows: [] }
     },
     pasien: {
       label: 'Pasien', name: 'Pasien', initials: 'PS',
       get greeting() { return `${getTimeGreeting()}, Pasien`; },
       copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
-      nav: [['dashboard','Dashboard'],['janji','Janji saya'],['rekam-medis','Rekam medis'],['resep','Resep saya'],['profil','Profil kesehatan']],
-      stats: [['Janji mendatang','0','Belum ada janji'],['Resep aktif','0','Belum ada resep'],['Hasil RME','0','Belum ada berkas'],['Poin kesehatan','0','Pasien aktif']],
+      nav: [['dashboard', 'Dashboard'], ['janji', 'Janji saya'], ['rekam-medis', 'Rekam medis'], ['resep', 'Resep saya'], ['profil', 'Profil kesehatan']],
+      stats: [['Janji mendatang', '0', 'Belum ada janji'], ['Resep aktif', '0', 'Belum ada resep'], ['Hasil RME', '0', 'Belum ada berkas'], ['Poin kesehatan', '0', 'Pasien aktif']],
       dashboard: { title: 'Agenda kunjungan saya', rows: [] }
     }
   }[role];
@@ -96,7 +96,7 @@
   let initialCachedName = null;
   try {
     initialCachedName = localStorage.getItem('simklinik_user_name');
-  } catch (_) {}
+  } catch (_) { }
 
   if (headerName) headerName.textContent = initialCachedName || defaultRoleMeta.name;
   if (headerRole) headerRole.textContent = defaultRoleMeta.label;
@@ -165,7 +165,7 @@
       try {
         const cached = localStorage.getItem('simklinik_user_name');
         if (cached && cached.trim()) return cached.trim();
-      } catch (_) {}
+      } catch (_) { }
       // 6. Header name if already populated and not generic default
       if (headerName && headerName.textContent && headerName.textContent.trim()) {
         const hName = headerName.textContent.trim();
@@ -187,7 +187,7 @@
       try {
         const cached = localStorage.getItem('simklinik_user_name');
         if (cached && cached.trim()) return cached.trim();
-      } catch (_) {}
+      } catch (_) { }
       if (headerName && headerName.textContent && headerName.textContent.trim()) {
         return headerName.textContent.trim();
       }
@@ -238,7 +238,7 @@
         if (headerAvatar) headerAvatar.textContent = initials;
         try {
           if (displayName) localStorage.setItem('simklinik_user_name', displayName);
-        } catch (_) {}
+        } catch (_) { }
         updateDashboardGreeting();
 
         // Verify correct dashboard URL
@@ -256,7 +256,7 @@
           currentPatientRecord = patientRes.data;
           const ptName = currentPatientRecord.profile?.full_name || currentPatientRecord.full_name;
           if (ptName) {
-            try { localStorage.setItem('simklinik_user_name', ptName); } catch (_) {}
+            try { localStorage.setItem('simklinik_user_name', ptName); } catch (_) { }
             if (headerName) headerName.textContent = ptName;
           }
           updateDashboardGreeting();
@@ -319,8 +319,10 @@
 
     // Setup Modals references
     const formBooking = document.getElementById('formBooking');
+    const bookingClinicSelect = document.getElementById('bookingClinicSelect');
     const bookingServiceSelect = document.getElementById('bookingServiceSelect');
     const bookingDoctorSelect = document.getElementById('bookingDoctorSelect');
+    const clinicsCardsGrid = document.getElementById('clinicsCardsGrid');
     const bookingDateInput = document.getElementById('bookingDateInput');
     const bookingTimeSelect = document.getElementById('bookingTimeSelect');
     const bookingComplaint = document.getElementById('bookingComplaint');
@@ -334,7 +336,7 @@
     const healthEmergencyPhone = document.getElementById('healthEmergencyPhone');
     const btnSubmitHealthProfile = document.getElementById('btnSubmitHealthProfile');
 
-    // Setup Onboarding References (Mandatory & Static Backdrop)
+    // Setup Onboarding References (Skippable on first login, required for booking)
     const modalPatientOnboarding = document.getElementById('modalPatientOnboarding');
     const formPatientOnboarding = document.getElementById('formPatientOnboarding');
     const onboardingFullName = document.getElementById('onboardingFullName');
@@ -345,14 +347,234 @@
     const onboardingAddress = document.getElementById('onboardingAddress');
     const onboardingNotice = document.getElementById('onboardingNotice');
     const btnSubmitOnboarding = document.getElementById('btnSubmitOnboarding');
+    const btnSkipOnboarding = document.getElementById('btnSkipOnboarding');
+
+    // Requirement Popup References & Booking Interceptor State
+    let pendingBookingIntent = false;
+    let pendingBookingServiceName = null;
+
+    const modalRequireProfilePopup = document.getElementById('modalRequireProfilePopup');
+    const btnGoCompleteProfile = document.getElementById('btnGoCompleteProfile');
+    const btnCancelRequireProfile = document.getElementById('btnCancelRequireProfile');
+    const btnCancelHealthProfile = document.getElementById('btnCancelHealthProfile');
+    const primaryAction = document.getElementById('primaryAction');
+    const btnFullAgendaNewBooking = document.getElementById('btnFullAgendaNewBooking');
+
+    function checkPatientBookingEligibility() {
+      const profileName = (currentPatientRecord && currentPatientRecord.profile && currentPatientRecord.profile.full_name) ||
+        (currentAuthUser && currentAuthUser.user_metadata && (currentAuthUser.user_metadata.full_name || currentAuthUser.user_metadata.name)) || '';
+      const hasValidFullName = Boolean(profileName && !profileName.includes('@') && profileName.trim().length >= 3);
+      const hasNik = Boolean(currentPatientRecord && currentPatientRecord.nik && /^\d{16}$/.test(currentPatientRecord.nik.trim()));
+      const hasBirthDate = Boolean(currentPatientRecord && currentPatientRecord.birth_date);
+      const hasGender = Boolean(currentPatientRecord && currentPatientRecord.gender);
+      const hasPhone = Boolean(currentPatientRecord && currentPatientRecord.phone && currentPatientRecord.phone.trim().length >= 9);
+      const hasAddress = Boolean(currentPatientRecord && currentPatientRecord.address && currentPatientRecord.address.trim().length >= 3);
+
+      const isIdentityComplete = Boolean(hasValidFullName && hasNik && hasBirthDate && hasGender && hasPhone && hasAddress);
+
+      // Profil kesehatan mandiri: Golongan darah & riwayat alergi
+      const hasBloodType = Boolean(currentPatientRecord && currentPatientRecord.blood_type && currentPatientRecord.blood_type.trim().length > 0);
+      const hasAllergies = Boolean(currentPatientRecord && currentPatientRecord.allergies && currentPatientRecord.allergies.trim().length > 0);
+
+      const isHealthComplete = Boolean(hasBloodType && hasAllergies);
+      const isEligible = Boolean(isIdentityComplete && isHealthComplete);
+
+      return {
+        isEligible,
+        isIdentityComplete,
+        isHealthComplete,
+        details: {
+          hasValidFullName,
+          hasNik,
+          hasBirthDate,
+          hasGender,
+          hasPhone,
+          hasAddress,
+          hasBloodType,
+          hasAllergies
+        }
+      };
+    }
+
+    function showRequireProfilePopup(eligibility, preferredServiceName = null) {
+      pendingBookingIntent = true;
+      pendingBookingServiceName = preferredServiceName;
+
+      const reqCardIdentity = document.getElementById('reqCardIdentity');
+      const reqIconIdentity = document.getElementById('reqIconIdentity');
+      const reqBadgeIdentity = document.getElementById('reqBadgeIdentity');
+      const reqDescIdentity = document.getElementById('reqDescIdentity');
+
+      const reqCardHealth = document.getElementById('reqCardHealth');
+      const reqIconHealth = document.getElementById('reqIconHealth');
+      const reqBadgeHealth = document.getElementById('reqBadgeHealth');
+      const reqDescHealth = document.getElementById('reqDescHealth');
+
+      const checkSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      const warnSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+
+      if (reqCardIdentity) {
+        if (eligibility.isIdentityComplete) {
+          reqCardIdentity.className = 'req-card is-complete';
+          if (reqIconIdentity) reqIconIdentity.innerHTML = checkSvg;
+          if (reqBadgeIdentity) {
+            reqBadgeIdentity.textContent = 'Sudah Lengkap';
+            reqBadgeIdentity.className = 'req-status-badge req-badge-complete';
+          }
+          if (reqDescIdentity) {
+            reqDescIdentity.textContent = 'Data kependudukan (NIK 16 digit, nama KK, domisili) telah terverifikasi resmi.';
+          }
+        } else {
+          reqCardIdentity.className = 'req-card is-incomplete';
+          if (reqIconIdentity) reqIconIdentity.innerHTML = warnSvg;
+          if (reqBadgeIdentity) {
+            reqBadgeIdentity.textContent = 'Wajib Dilengkapi';
+            reqBadgeIdentity.className = 'req-status-badge req-badge-incomplete';
+          }
+          if (reqDescIdentity) {
+            reqDescIdentity.textContent = 'Mohon lengkapi nama resmi KK, NIK 16 digit, tanggal lahir, jenis kelamin, nomor HP, dan domisili.';
+          }
+        }
+      }
+
+      if (reqCardHealth) {
+        if (eligibility.isHealthComplete) {
+          reqCardHealth.className = 'req-card is-complete';
+          if (reqIconHealth) reqIconHealth.innerHTML = checkSvg;
+          if (reqBadgeHealth) {
+            reqBadgeHealth.textContent = 'Sudah Lengkap';
+            reqBadgeHealth.className = 'req-status-badge req-badge-complete';
+          }
+          if (reqDescHealth) {
+            reqDescHealth.textContent = 'Golongan darah dan riwayat alergi telah terdaftar di rekam medis klinik.';
+          }
+        } else {
+          reqCardHealth.className = 'req-card is-incomplete';
+          if (reqIconHealth) reqIconHealth.innerHTML = warnSvg;
+          if (reqBadgeHealth) {
+            reqBadgeHealth.textContent = 'Wajib Dilengkapi';
+            reqBadgeHealth.className = 'req-status-badge req-badge-incomplete';
+          }
+          if (reqDescHealth) {
+            reqDescHealth.textContent = 'Golongan darah dan riwayat alergi obat/makanan wajib diisi untuk keamanan resep dokter.';
+          }
+        }
+      }
+
+      if (window.Toast) {
+        window.Toast.warning('Wajib melengkapi data diri dan profil kesehatan (golongan darah & alergi) terlebih dahulu sebelum membuat janji.');
+      }
+      if (window.Modal) {
+        window.Modal.open('modalRequireProfilePopup');
+      }
+    }
+
+    function handleInitiateBooking(preferredServiceName = null) {
+      const eligibility = checkPatientBookingEligibility();
+      if (!eligibility.isEligible) {
+        showRequireProfilePopup(eligibility, preferredServiceName);
+        return false;
+      }
+
+      if (window.Modal) {
+        window.Modal.open('modalBooking');
+      }
+      if (preferredServiceName) {
+        const serviceSelect = document.getElementById('bookingServiceSelect');
+        if (serviceSelect) {
+          for (let i = 0; i < serviceSelect.options.length; i++) {
+            if (serviceSelect.options[i].text.toLowerCase().includes(preferredServiceName.toLowerCase()) ||
+              preferredServiceName.toLowerCase().includes(serviceSelect.options[i].text.toLowerCase())) {
+              serviceSelect.selectedIndex = i;
+              serviceSelect.dispatchEvent(new Event('change'));
+              break;
+            }
+          }
+        }
+      }
+      return true;
+    }
+    window.handleInitiateBooking = handleInitiateBooking;
+
+    // Attach click handlers to booking initiation triggers
+    if (primaryAction) {
+      primaryAction.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleInitiateBooking();
+      });
+    }
+
+    if (btnFullAgendaNewBooking) {
+      btnFullAgendaNewBooking.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleInitiateBooking();
+      });
+    }
+
+    if (btnGoCompleteProfile) {
+      btnGoCompleteProfile.addEventListener('click', () => {
+        if (window.Modal) {
+          window.Modal.close('modalRequireProfilePopup');
+        }
+        const eligibility = checkPatientBookingEligibility();
+        if (!eligibility.isIdentityComplete) {
+          prefillOnboardingForm();
+          setTimeout(() => {
+            if (window.Modal) window.Modal.open('modalPatientOnboarding');
+          }, 200);
+        } else if (!eligibility.isHealthComplete) {
+          populateHealthProfileForm();
+          setTimeout(() => {
+            if (window.Modal) window.Modal.open('modalHealthProfile');
+          }, 200);
+        }
+      });
+    }
+
+    if (btnCancelRequireProfile) {
+      btnCancelRequireProfile.addEventListener('click', () => {
+        pendingBookingIntent = false;
+        pendingBookingServiceName = null;
+      });
+    }
+
+    if (btnSkipOnboarding) {
+      btnSkipOnboarding.addEventListener('click', () => {
+        if (pendingBookingIntent) {
+          pendingBookingIntent = false;
+          pendingBookingServiceName = null;
+          if (window.Toast) window.Toast.info('Pembuatan janji temu ditunda karena data diri belum lengkap.');
+        }
+      });
+    }
+
+    if (btnCancelHealthProfile) {
+      btnCancelHealthProfile.addEventListener('click', () => {
+        if (pendingBookingIntent) {
+          pendingBookingIntent = false;
+          pendingBookingServiceName = null;
+          if (window.Toast) window.Toast.info('Pembuatan janji temu ditunda karena profil kesehatan belum lengkap.');
+        }
+      });
+    }
 
     // 1. Populate Booking Form Options
     async function loadBookingFormData() {
-      if (!bookingServiceSelect) return;
-      const res = await window.appointmentService.getServicesList();
-      if (res.success && res.data) {
-        bookingServiceSelect.innerHTML = '<option value="">-- Pilih Poliklinik --</option>' +
-          res.data.map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+      if (bookingClinicSelect && window.clinicService) {
+        const clinics = await window.clinicService.getClinics();
+        bookingClinicSelect.innerHTML = '<option value="">-- Pilih Klinik Purworejo --</option>' +
+          clinics.map(c => `<option value="${c.id}">${c.name} (Kec. ${c.district})</option>`).join('');
+        if (clinics.length > 0 && !bookingClinicSelect.value) {
+          bookingClinicSelect.value = clinics[0].id;
+        }
+      }
+
+      if (bookingServiceSelect) {
+        const res = await window.appointmentService.getServicesList();
+        if (res.success && res.data) {
+          bookingServiceSelect.innerHTML = '<option value="">-- Pilih Poliklinik --</option>' +
+            res.data.map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+        }
       }
 
       // Min date is today
@@ -364,6 +586,14 @@
     }
 
     loadBookingFormData();
+
+    if (bookingClinicSelect) {
+      bookingClinicSelect.addEventListener('change', () => {
+        if (bookingServiceSelect && bookingServiceSelect.value) {
+          bookingServiceSelect.dispatchEvent(new Event('change'));
+        }
+      });
+    }
 
     // 2. Service change handler -> populate doctors
     if (bookingServiceSelect) {
@@ -381,8 +611,17 @@
 
         const docRes = await window.appointmentService.getDoctorsByService(serviceId);
         if (docRes.success && docRes.data && docRes.data.length > 0) {
+          const selectedClinic = bookingClinicSelect ? bookingClinicSelect.value : null;
+          let doctorsList = docRes.data;
+          if (selectedClinic && window.appointmentService.getAllDoctorsWithSchedules) {
+            const clinicDocs = window.appointmentService.getAllDoctorsWithSchedules(selectedClinic);
+            const clinicDocIds = new Set(clinicDocs.map(cd => cd.id));
+            const filtered = doctorsList.filter(d => clinicDocIds.has(d.id));
+            if (filtered.length > 0) doctorsList = filtered;
+          }
+
           bookingDoctorSelect.innerHTML = '<option value="">-- Pilih Dokter --</option>' +
-            docRes.data.map(d => `<option value="${d.id}">${d.profile?.full_name || 'Dokter'} - ${d.specialization || 'Spesialis'}</option>`).join('');
+            doctorsList.map(d => `<option value="${d.id}">${d.profile?.full_name || 'Dokter'} - ${d.specialization || 'Spesialis'}</option>`).join('');
           bookingDoctorSelect.disabled = false;
         } else {
           bookingDoctorSelect.innerHTML = '<option value="">Belum ada dokter di poli ini</option>';
@@ -439,8 +678,8 @@
         const patientId = (currentPatientRecord && isValidUuid(currentPatientRecord.id))
           ? currentPatientRecord.id
           : ((currentAuthUser && isValidUuid(currentAuthUser.id))
-              ? currentAuthUser.id
-              : 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
+            ? currentAuthUser.id
+            : 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d');
 
         const result = await window.appointmentService.createAppointment({
           patientId,
@@ -448,7 +687,8 @@
           serviceId,
           appointmentDate,
           appointmentTime,
-          chiefComplaint
+          chiefComplaint,
+          clinicId: bookingClinicSelect ? bookingClinicSelect.value : 'clinic-pwr-01'
         });
 
         setButtonLoading(btnSubmitBooking, false);
@@ -479,14 +719,34 @@
     }
     populateHealthProfileForm();
 
-    // 5. Health Profile Submit (Optional / Dismissable)
+    // 5. Health Profile Submit (Required for booking, optional otherwise)
     if (formHealthProfile) {
       formHealthProfile.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const blood_type = healthBloodType.value;
-        const allergies = healthAllergies.value.trim();
-        const emergency_contact = healthEmergencyContact.value.trim();
-        const emergency_phone = healthEmergencyPhone.value.trim();
+        const blood_type = healthBloodType ? healthBloodType.value : '';
+        const allergies = healthAllergies ? healthAllergies.value.trim() : '';
+        const emergency_contact = healthEmergencyContact ? healthEmergencyContact.value.trim() : '';
+        const emergency_phone = healthEmergencyPhone ? healthEmergencyPhone.value.trim() : '';
+        const healthProfileNotice = document.getElementById('healthProfileNotice');
+
+        if (healthProfileNotice) healthProfileNotice.textContent = '';
+
+        if (pendingBookingIntent) {
+          if (!blood_type) {
+            const err = 'Golongan darah wajib dipilih sebelum membuat janji temu.';
+            if (healthProfileNotice) healthProfileNotice.textContent = err;
+            if (healthBloodType) healthBloodType.focus();
+            window.Toast.error(err);
+            return;
+          }
+          if (!allergies) {
+            const err = 'Riwayat alergi obat/makanan wajib diisi sebelum membuat janji temu. (Ketik "Tidak Ada" jika tidak ada riwayat alergi).';
+            if (healthProfileNotice) healthProfileNotice.textContent = err;
+            if (healthAllergies) healthAllergies.focus();
+            window.Toast.error(err);
+            return;
+          }
+        }
 
         setButtonLoading(btnSubmitHealthProfile, true);
         const patientId = currentPatientRecord ? currentPatientRecord.id : 'demo-patient-uuid';
@@ -500,18 +760,29 @@
 
         setButtonLoading(btnSubmitHealthProfile, false);
 
-        if (res.success) {
-          if (currentPatientRecord) {
-            currentPatientRecord.blood_type = blood_type;
-            currentPatientRecord.allergies = allergies;
-            currentPatientRecord.emergency_contact = emergency_contact;
-            currentPatientRecord.emergency_phone = emergency_phone;
+        if (currentPatientRecord) {
+          currentPatientRecord.blood_type = blood_type;
+          currentPatientRecord.allergies = allergies;
+          currentPatientRecord.emergency_contact = emergency_contact;
+          currentPatientRecord.emergency_phone = emergency_phone;
+        }
+
+        window.Toast.success('Profil kesehatan mandiri berhasil disimpan.');
+        window.Modal.close('modalHealthProfile');
+
+        if (pendingBookingIntent) {
+          const checkAgain = checkPatientBookingEligibility();
+          if (checkAgain.isEligible) {
+            setTimeout(() => {
+              window.Toast.success('Data lengkap! Silakan lanjutkan pembuatan janji temu dokter Anda.');
+              handleInitiateBooking(pendingBookingServiceName);
+              pendingBookingIntent = false;
+              pendingBookingServiceName = null;
+            }, 350);
+          } else {
+            pendingBookingIntent = false;
+            pendingBookingServiceName = null;
           }
-          window.Toast.success('Profil kesehatan mandiri berhasil disimpan.');
-          window.Modal.close('modalHealthProfile');
-        } else {
-          window.Toast.info('Pembaruan profil tersimpan.');
-          window.Modal.close('modalHealthProfile');
         }
       });
     }
@@ -586,7 +857,7 @@
           if (headerAvatar) headerAvatar.textContent = inits;
           try {
             localStorage.setItem('simklinik_user_name', fullName);
-          } catch (_) {}
+          } catch (_) { }
           updateDashboardGreeting();
 
           window.Toast.success('Data identitas sesuai Kartu Keluarga berhasil diverifikasi dan disimpan.');
@@ -595,11 +866,28 @@
           // Pre-populate health profile form
           populateHealthProfileForm();
 
-          // Auto open Modal 2: Health Profile (Optional / Dismissable)
-          setTimeout(() => {
-            window.Toast.info('Silakan lengkapi riwayat alergi dan golongan darah Anda (dapat dilewati).');
-            window.Modal.open('modalHealthProfile');
-          }, 450);
+          if (pendingBookingIntent) {
+            const currentElig = checkPatientBookingEligibility();
+            if (!currentElig.isHealthComplete) {
+              setTimeout(() => {
+                window.Toast.info('Data identitas tersimpan. Lanjutkan mengisi golongan darah & riwayat alergi.');
+                window.Modal.open('modalHealthProfile');
+              }, 400);
+            } else {
+              setTimeout(() => {
+                window.Toast.success('Data lengkap! Silakan buat janji temu dokter Anda.');
+                handleInitiateBooking(pendingBookingServiceName);
+                pendingBookingIntent = false;
+                pendingBookingServiceName = null;
+              }, 400);
+            }
+          } else {
+            // Auto open Modal 2: Health Profile (Optional / Dismissable)
+            setTimeout(() => {
+              window.Toast.info('Silakan lengkapi riwayat alergi dan golongan darah Anda (dapat dilewati).');
+              window.Modal.open('modalHealthProfile');
+            }, 450);
+          }
         } else {
           const friendlyErr = (window.translateError ? window.translateError(res.error) : res.error) || 'Gagal menyimpan data kependudukan. Coba lagi.';
           if (onboardingNotice) onboardingNotice.textContent = friendlyErr;
@@ -684,44 +972,44 @@
       });
     }
 
-    // 5e. Check if onboarding is needed
+    // 5e. Prefill and Check Onboarding Requirement
+    function prefillOnboardingForm() {
+      const profileName = (currentPatientRecord && currentPatientRecord.profile && currentPatientRecord.profile.full_name) ||
+        (currentAuthUser && currentAuthUser.user_metadata && (currentAuthUser.user_metadata.full_name || currentAuthUser.user_metadata.name)) || '';
+
+      if (onboardingFullName && !onboardingFullName.value) {
+        onboardingFullName.value = profileName && !profileName.includes('@') ? profileName : '';
+      }
+      if (onboardingPhone && !onboardingPhone.value && currentPatientRecord?.phone) {
+        onboardingPhone.value = currentPatientRecord.phone;
+      }
+      if (onboardingNik && !onboardingNik.value && currentPatientRecord?.nik) {
+        onboardingNik.value = currentPatientRecord.nik;
+      }
+      if (onboardingBirthDate && !onboardingBirthDate.value && currentPatientRecord?.birth_date) {
+        onboardingBirthDate.value = currentPatientRecord.birth_date;
+      }
+      if (onboardingGender && !onboardingGender.value && currentPatientRecord?.gender) {
+        onboardingGender.value = currentPatientRecord.gender;
+      }
+      if (onboardingAddress && !onboardingAddress.value && currentPatientRecord?.address) {
+        onboardingAddress.value = currentPatientRecord.address;
+      }
+    }
+
     function checkPatientOnboardingRequirement() {
       if (!modalPatientOnboarding) return;
 
-      const hasNik = currentPatientRecord && currentPatientRecord.nik && currentPatientRecord.nik.trim().length === 16;
-      const hasBirthDate = currentPatientRecord && currentPatientRecord.birth_date;
-      const hasGender = currentPatientRecord && currentPatientRecord.gender;
-      const hasPhone = currentPatientRecord && currentPatientRecord.phone && currentPatientRecord.phone.trim().length >= 9;
-      const profileName = (currentPatientRecord && currentPatientRecord.profile && currentPatientRecord.profile.full_name) ||
-        (currentAuthUser && currentAuthUser.user_metadata && (currentAuthUser.user_metadata.full_name || currentAuthUser.user_metadata.name)) || '';
-      const hasValidFullName = profileName && !profileName.includes('@') && profileName.trim().length >= 3;
+      const eligibility = checkPatientBookingEligibility();
+      if (!eligibility.isIdentityComplete) {
+        prefillOnboardingForm();
 
-      const isComplete = hasNik && hasBirthDate && hasGender && hasPhone && hasValidFullName;
-
-      if (!isComplete) {
-        // Pre-fill existing data from Google / Auth user
-        if (onboardingFullName && !onboardingFullName.value) {
-          onboardingFullName.value = profileName && !profileName.includes('@') ? profileName : '';
-        }
-        if (onboardingPhone && !onboardingPhone.value && currentPatientRecord?.phone) {
-          onboardingPhone.value = currentPatientRecord.phone;
-        }
-        if (onboardingNik && !onboardingNik.value && currentPatientRecord?.nik) {
-          onboardingNik.value = currentPatientRecord.nik;
-        }
-        if (onboardingBirthDate && !onboardingBirthDate.value && currentPatientRecord?.birth_date) {
-          onboardingBirthDate.value = currentPatientRecord.birth_date;
-        }
-        if (onboardingGender && !onboardingGender.value && currentPatientRecord?.gender) {
-          onboardingGender.value = currentPatientRecord.gender;
-        }
-        if (onboardingAddress && !onboardingAddress.value && currentPatientRecord?.address) {
-          onboardingAddress.value = currentPatientRecord.address;
-        }
-
-        // Open mandatory modal (backdrop static, non-closable)
+        // Open modal onboarding (now skippable and dismissable!)
         setTimeout(() => {
-          window.Modal.open('modalPatientOnboarding');
+          if (window.Toast) {
+            window.Toast.info('Selamat datang! Anda dapat melengkapi data diri sekarang atau melewatinya terlebih dahulu.');
+          }
+          if (window.Modal) window.Modal.open('modalPatientOnboarding');
         }, 350);
       }
     }
@@ -858,9 +1146,9 @@
           const rxItems = (latest.prescription?.items && latest.prescription.items.length > 0)
             ? latest.prescription.items
             : [
-                { medicine_name: 'Paracetamol 500mg', dosage: '500mg', frequency: '3x sehari 1 tablet sesudah makan', quantity: 10 },
-                { medicine_name: 'Vitamin B Kompleks', dosage: '1 tablet', frequency: '1x sehari 1 tablet pagi hari', quantity: 10 }
-              ];
+              { medicine_name: 'Paracetamol 500mg', dosage: '500mg', frequency: '3x sehari 1 tablet sesudah makan', quantity: 10 },
+              { medicine_name: 'Vitamin B Kompleks', dosage: '1 tablet', frequency: '1x sehari 1 tablet pagi hari', quantity: 10 }
+            ];
 
           latestRmeContainer.innerHTML = `
             <div class="latest-rme-card">
@@ -943,7 +1231,7 @@
         if (agendaTitle) agendaTitle.textContent = 'Daftar Reservasi';
 
         if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Jam</th><th>Dokter / Layanan</th><th>Keluhan</th><th>Status</th><th>Aksi</th>';
-        
+
         let appointments = [];
         if (patientId) {
           const apptRes = await window.appointmentService.getPatientAppointments(patientId);
@@ -1027,7 +1315,7 @@
         if (agendaTitle) agendaTitle.textContent = 'Riwayat Catatan Medis';
 
         if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Dokter Pemeriksa</th><th>Diagnosa</th><th>Status</th><th>Aksi</th>';
-        
+
         let records = [];
         if (patientId) {
           const recRes = await window.medicalRecordService.getPatientHistory(patientId);
@@ -1073,7 +1361,7 @@
         if (agendaTitle) agendaTitle.textContent = 'Resep & Aturan Minum';
 
         if (tableHead) tableHead.innerHTML = '<th>No. Resep</th><th>Tanggal</th><th>Dokter</th><th>Obat &amp; Aturan Pakai</th><th>Status</th>';
-        
+
         let rxList = [];
         if (patientId) {
           const rxRes = await window.prescriptionService.getPatientActivePrescriptions(patientId);
@@ -1321,7 +1609,6 @@
       });
     }
 
-    const btnViewAllLower = document.getElementById('btnViewAllLower');
     if (btnViewAllLower) {
       btnViewAllLower.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1329,7 +1616,7 @@
       });
     }
 
-    window.handleCancelAppointment = async function(apptId, apptDate, apptTime) {
+    window.handleCancelAppointment = async function (apptId, apptDate, apptTime) {
       if (!confirm('Apakah Anda yakin ingin membatalkan jadwal janji temu ini?')) {
         return;
       }
@@ -1354,12 +1641,86 @@
       }
     };
 
+    // ══════════════════════════════════════════════════════════
+    // DIREKTORI KLINIK REGIONAL KABUPATEN PURWOREJO
+    // ══════════════════════════════════════════════════════════
+    async function renderClinicsExplorer(district = 'all') {
+      if (!clinicsCardsGrid || !window.clinicService) return;
+      clinicsCardsGrid.innerHTML = '<div style="padding: 1.5rem; color: var(--muted);"><span class="btn-spinner"></span> Memuat daftar klinik di Purworejo...</div>';
+
+      const clinics = await window.clinicService.getClinicsByDistrict(district);
+      if (!clinics || clinics.length === 0) {
+        clinicsCardsGrid.innerHTML = '<div style="padding: 1.5rem; color: var(--muted);">Tidak ada fasilitas kesehatan ditemukan di wilayah ini.</div>';
+        return;
+      }
+
+      const cardsHtml = await Promise.all(clinics.map(async (c) => {
+        const queueCount = await window.clinicService.getClinicQueueCount(c.id);
+        const tags = (c.facilities || ['Poli Umum', 'Farmasi']).map(f => `<span class="clinic-tag">${f}</span>`).join('');
+        return `
+          <div class="clinic-card" data-clinic-id="${c.id}" data-district="${c.district}">
+            <div>
+              <div class="clinic-card-header">
+                <span class="clinic-badge-district">Kec. ${c.district}</span>
+                <span class="clinic-queue-indicator">
+                  <span class="clinic-queue-dot"></span>
+                  Antrean: ${queueCount} Pasien
+                </span>
+              </div>
+              <h3 class="clinic-card-title">${c.name}</h3>
+              <p class="clinic-card-address">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                ${c.address}
+              </p>
+              <div class="clinic-card-hours">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                ${c.operating_hours}
+              </div>
+              <div class="clinic-facilities-tags">
+                ${tags}
+              </div>
+            </div>
+            <button type="button" class="btn-clinic-book" onclick="window.openBookingWithClinic('${c.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Daftar di Klinik Ini
+            </button>
+          </div>
+        `;
+      }));
+
+      clinicsCardsGrid.innerHTML = cardsHtml.join('');
+    }
+
+    const clinicPills = document.querySelectorAll('.clinic-pill');
+    clinicPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        clinicPills.forEach(p => p.classList.remove('is-active'));
+        pill.classList.add('is-active');
+        const district = pill.dataset.district || 'all';
+        renderClinicsExplorer(district);
+      });
+    });
+
+    window.openBookingWithClinic = (clinicId) => {
+      if (typeof window.handleInitiateBooking === 'function') {
+        const allowed = window.handleInitiateBooking();
+        if (!allowed) return;
+      } else if (window.Modal) {
+        window.Modal.open('modalBooking');
+      }
+      if (bookingClinicSelect && clinicId) {
+        bookingClinicSelect.value = clinicId;
+        bookingClinicSelect.dispatchEvent(new Event('change'));
+      }
+    };
+
+    renderClinicsExplorer('all');
     refreshPasienDashboard();
     checkPatientOnboardingRequirement();
   }
 
   // Global helper: Popup singkat pemberitahuan batas pembatalan 12 jam
-  window.showCancelLockedNotice = function(reason) {
+  window.showCancelLockedNotice = function (reason) {
     const msg = reason || 'Janji temu hanya dapat dibatalkan maksimal 12 jam sebelum jadwal konsultasi yang ditentukan.';
     if (window.Toast) {
       window.Toast.warning(msg);
@@ -1369,7 +1730,7 @@
   };
 
   // Global helper: Tebus / Beli Obat dari RME Terakhir
-  window.handleBuyMedicationFromRme = function(rxNum, itemsCount, medsSummary) {
+  window.handleBuyMedicationFromRme = function (rxNum, itemsCount, medsSummary) {
     const detail = rxNum ? `No. Resep ${rxNum}` : (medsSummary || 'Resep Obat');
     if (window.Toast) {
       window.Toast.success(`Pesanan tebus obat (${detail}) berhasil diteruskan ke Instalasi Farmasi Klinik! Tim Apoteker kami sedang menyiapkan obat Anda.`);
@@ -1379,7 +1740,7 @@
   };
 
   // Global helper to view Medical Record Detail in Modal
-  window.viewMedicalDetailDemo = function(date, doc, subj, obj, assess, plan, status) {
+  window.viewMedicalDetailDemo = function (date, doc, subj, obj, assess, plan, status) {
     const detailBody = document.getElementById('modalMedicalDetailBody');
     if (!detailBody) return;
     detailBody.innerHTML = `
@@ -2194,9 +2555,9 @@
                 <td>${statusBadge(p.status)}</td>
                 <td>
                   ${p.status === 'Lunas'
-                    ? '<span class="status-badge status-done">Lunas</span>'
-                    : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${escapeJsStr(p.invoice_number)}', '${escapeJsStr(p.patient?.profile?.full_name || 'Pasien')}', ${Number(p.total_amount) || 0}, '${escapeJsStr(p.id)}')">Proses Bayar</button>`
-                  }
+                ? '<span class="status-badge status-done">Lunas</span>'
+                : `<button class="action-btn-sm action-btn-success" onclick="window.openPaymentModal('${escapeJsStr(p.invoice_number)}', '${escapeJsStr(p.patient?.profile?.full_name || 'Pasien')}', ${Number(p.total_amount) || 0}, '${escapeJsStr(p.id)}')">Proses Bayar</button>`
+              }
                 </td>
               </tr>
             `).join('');
@@ -2397,7 +2758,7 @@
               doctor: q.doctor
             }));
           }
-        } catch (_) {}
+        } catch (_) { }
       }
 
       function renderContent() {
@@ -2441,13 +2802,13 @@
               </thead>
               <tbody>
                 ${filteredDocs.map(d => {
-                  const docName = d.profile?.full_name || d.full_name || 'Dokter';
-                  const srvName = d.service?.name || d.service_name || 'Poliklinik';
-                  const daysStr = d.schedule?.days || 'Senin - Jumat';
-                  const hoursStr = d.schedule?.hours || (d.schedule?.start_time ? `${d.schedule.start_time} - ${d.schedule.end_time} WIB` : '08:00 - 14:00 WIB');
-                  const roomStr = d.schedule?.room || 'Ruang Poli';
-                  const quotaVal = d.schedule?.quota || 20;
-                  return `
+            const docName = d.profile?.full_name || d.full_name || 'Dokter';
+            const srvName = d.service?.name || d.service_name || 'Poliklinik';
+            const daysStr = d.schedule?.days || 'Senin - Jumat';
+            const hoursStr = d.schedule?.hours || (d.schedule?.start_time ? `${d.schedule.start_time} - ${d.schedule.end_time} WIB` : '08:00 - 14:00 WIB');
+            const roomStr = d.schedule?.room || 'Ruang Poli';
+            const quotaVal = d.schedule?.quota || 20;
+            return `
                   <tr>
                     <td class="table-primary"><strong>${escapeJsStr(docName)}</strong></td>
                     <td><strong>${escapeJsStr(srvName)}</strong></td>
@@ -2458,7 +2819,7 @@
                     <td>${statusBadge(d.is_active ? 'Aktif' : 'Cuti')}</td>
                   </tr>
                   `;
-                }).join('')}
+          }).join('')}
               </tbody>
             </table>
           `;
@@ -2628,21 +2989,21 @@
     renderPetugasDashboard();
   }
 
-  window.panggilAntrean = async function(queueId, queueNumber) {
+  window.panggilAntrean = async function (queueId, queueNumber) {
     if (window.queueService && queueId && !queueId.startsWith('demo-')) {
       await window.queueService.updateQueueStatus(queueId, 'CALLED');
     }
     window.Toast.success(`Nomor Antrean ${queueNumber} dipanggil ke loket poli!`);
   };
 
-  window.layaniAntrean = async function(queueId, queueNumber) {
+  window.layaniAntrean = async function (queueId, queueNumber) {
     if (window.queueService && queueId && !queueId.startsWith('demo-')) {
       await window.queueService.updateQueueStatus(queueId, 'SERVING');
     }
     window.Toast.info(`Pasien dengan nomor antrean ${queueNumber} sedang dilayani dokter.`);
   };
 
-  window.openPaymentModal = function(inv, name, amount, paymentId = '') {
+  window.openPaymentModal = function (inv, name, amount, paymentId = '') {
     const invEl = document.getElementById('paymentInvoiceDisplay');
     const nameEl = document.getElementById('paymentPatientDisplay');
     const amtEl = document.getElementById('paymentAmountDisplay');
@@ -3473,7 +3834,7 @@
     renderDokterDashboard();
   }
 
-  window.openDoctorSoapModal = function(rm, name, complaint, patientId = '', apptId = '', recordId = '') {
+  window.openDoctorSoapModal = function (rm, name, complaint, patientId = '', apptId = '', recordId = '') {
     const banner = document.getElementById('soapPatientBanner');
     if (banner) banner.textContent = `Pasien: ${name || 'Pasien'} (${rm || '-'}) — Keluhan: ${complaint || '-'}`;
 
@@ -3543,7 +3904,7 @@
     logoutBtn.addEventListener('click', async () => {
       try {
         localStorage.removeItem('simklinik_user_name');
-      } catch (_) {}
+      } catch (_) { }
       if (window.supabaseClient) {
         try {
           await window.supabaseClient.auth.signOut();
