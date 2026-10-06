@@ -31,9 +31,28 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null,
   username text not null unique,
-  role text not null default 'Pasien' check (role in ('Pasien', 'Dokter', 'Petugas', 'Perawat', 'Admin', 'Kasir/Resepsionis')),
+  role text not null default 'Pasien' check (role in ('Pasien', 'Dokter', 'Admin')),
   created_at timestamptz not null default now()
 );
+
+-- 1.5 CLINICS (Platform Multi-Klinik Regional Kabupaten Purworejo)
+create table if not exists public.clinics (
+  id uuid primary key default gen_random_uuid(),
+  code text unique not null,
+  name text not null,
+  district text not null,
+  address text not null,
+  phone text,
+  operating_hours text not null,
+  facilities text[] not null default array['Poli Umum', 'Farmasi'],
+  latitude double precision default -7.7144,
+  longitude double precision default 110.0125,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+-- Migration: Relasi clinic_id untuk multi-tenancy
+alter table public.profiles add column if not exists clinic_id uuid references public.clinics(id) on delete set null;
 
 -- Helper to fetch active user role
 create or replace function public.get_current_user_role()
@@ -73,25 +92,30 @@ end $$;
 create table if not exists public.doctors (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references public.profiles(id) on delete cascade,
+  clinic_id uuid references public.clinics(id) on delete set null,
   sip_number text unique not null,
   specialization text not null,
   is_active boolean not null default true,
   created_at timestamptz not null default now()
 );
+alter table public.doctors add column if not exists clinic_id uuid references public.clinics(id) on delete set null;
 
 -- 4. SERVICES (Master Data Poli & Fasilitas)
 create table if not exists public.services (
   id uuid primary key default gen_random_uuid(),
+  clinic_id uuid references public.clinics(id) on delete set null,
   code text unique not null,
   name text not null,
   base_price numeric not null default 50000 check (base_price >= 0),
   is_active boolean not null default true,
   created_at timestamptz not null default now()
 );
+alter table public.services add column if not exists clinic_id uuid references public.clinics(id) on delete set null;
 
 -- 5. DOCTOR SCHEDULES
 create table if not exists public.doctor_schedules (
   id uuid primary key default gen_random_uuid(),
+  clinic_id uuid references public.clinics(id) on delete set null,
   doctor_id uuid not null references public.doctors(id) on delete cascade,
   service_id uuid not null references public.services(id) on delete cascade,
   day_of_week int not null check (day_of_week between 1 and 7), -- 1: Senin, 7: Minggu
@@ -100,10 +124,12 @@ create table if not exists public.doctor_schedules (
   quota int not null default 20 check (quota > 0),
   created_at timestamptz not null default now()
 );
+alter table public.doctor_schedules add column if not exists clinic_id uuid references public.clinics(id) on delete set null;
 
 -- 6. APPOINTMENTS
 create table if not exists public.appointments (
   id uuid primary key default gen_random_uuid(),
+  clinic_id uuid references public.clinics(id) on delete set null,
   patient_id uuid not null references public.patients(id) on delete restrict,
   doctor_id uuid not null references public.doctors(id) on delete restrict,
   service_id uuid not null references public.services(id) on delete restrict,
@@ -114,10 +140,12 @@ create table if not exists public.appointments (
   created_at timestamptz not null default now(),
   constraint unique_doctor_timeslot unique (doctor_id, appointment_date, appointment_time)
 );
+alter table public.appointments add column if not exists clinic_id uuid references public.clinics(id) on delete set null;
 
 -- 7. QUEUE ENTRIES
 create table if not exists public.queue_entries (
   id uuid primary key default gen_random_uuid(),
+  clinic_id uuid references public.clinics(id) on delete set null,
   appointment_id uuid not null references public.appointments(id) on delete cascade,
   queue_number text not null,
   sequence_num int not null,
@@ -125,6 +153,7 @@ create table if not exists public.queue_entries (
   called_at timestamptz,
   created_at timestamptz not null default now()
 );
+alter table public.queue_entries add column if not exists clinic_id uuid references public.clinics(id) on delete set null;
 
 -- 8. MEDICAL RECORDS (RME Format SOAP Permenkes No. 24/2022)
 create table if not exists public.medical_records (
