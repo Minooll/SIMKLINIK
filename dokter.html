@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Dokter | SIMKLINIK Purworejo</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/role-pages.css">
+  <link rel="stylesheet" href="assets/css/modal.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">PWR</div>
+        <div>
+          <div class="brand-title">SIMKLINIK</div>
+          <div class="brand-subtitle">Ruang Praktik Dokter</div>
+        </div>
+      </div>
+      <nav class="nav-menu">
+        <a class="nav-item active" href="dokter.html">📋 Antrean & Formulir RME</a>
+        <a class="nav-item" href="index.html">🌐 Portal Publik</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="window.logout()">
+          🚪 Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Pemeriksaan Pasien & Rekam Medis (RME SOAP)</h1>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="doctor-clinic-indicator">
+            Klinik Pratama Sehat Mandiri Purworejo (Kec. Purworejo Kota)
+          </span>
+        </div>
+        <div class="topbar-actions">
+          <div class="user-badge">
+            <span>👨‍⚕️</span>
+            <span id="doctor-name-display">dr. Budi Santoso</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div style="display: grid; grid-template-columns: 360px 1fr; gap: 2rem;">
+          <!-- Kolom Kiri: Antrean Pasien Hari Ini -->
+          <div>
+            <div class="card" style="margin-bottom: 1.5rem;">
+              <div class="card-header">
+                <h2 style="font-size: 1.125rem; font-weight: 700;">Antrean Pasien Hari Ini</h2>
+                <span class="queue-badge lengang" id="doctor-crowd-badge">LENGANG</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Tanggal: <strong id="current-date-text">Hari Ini</strong>
+              </p>
+              
+              <div id="today-queue-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Dinamis diisi queue items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Kolom Kanan: Lembar Formulir SOAP RME Sekuensial -->
+          <div>
+            <div class="card" style="border-top: 4px solid var(--primary);">
+              <div class="card-header">
+                <div>
+                  <span class="queue-badge lengang" style="margin-bottom: 0.25rem;">PASIEN AKTIF DIPERIKSA</span>
+                  <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--primary-dark);" id="current-patient-header">
+                    No. Antrean: A-01 — Tn. Santoso (NIK: 330601xxxxxxxxxx)
+                  </h2>
+                </div>
+              </div>
+
+              <!-- SOAP Form -->
+              <form id="soap-form">
+                <div class="soap-grid" style="margin-bottom: 1.5rem;">
+                  <!-- Subjective -->
+                  <div class="soap-field">
+                    <label class="soap-label" for="soap-subjective">
+                      S (Subjective) — Anamnesis & Keluhan Utama
+                    </label>
+                    <textarea id="soap-subjective" class="soap-textarea" placeholder="Pasien mengeluhkan demam sejak 3 hari, pusing, batuk kering..." required></textarea>
+                  </div>
+
+                  <!-- Objective -->
+                  <div class="soap-field">
+                    <label class="soap-label" for="soap-objective">
+                      O (Objective) — Tanda Vital & Pemeriksaan Fisik
+                    </label>
+                    <textarea id="soap-objective" class="soap-textarea" placeholder="TD: 120/80 mmHg, Nadi: 82x/m, Suhu: 38.2°C, RR: 18x/m. Faring hiperemis..." required></textarea>
+                  </div>
+
+                  <!-- Assessment -->
+                  <div class="soap-field">
+                    <label class="soap-label" for="soap-assessment">
+                      A (Assessment) — Diagnosa Klinis & ICD-10
+                    </label>
+                    <textarea id="soap-assessment" class="soap-textarea" placeholder="Febris Akut ec Suspect Viral Infection (ICD-10: A09)..." required></textarea>
+                  </div>
+
+                  <!-- Plan -->
+                  <div class="soap-field">
+                    <label class="soap-label" for="soap-plan">
+                      P (Plan) — Terapi Medis, Edukasi & Resep Obat
+                    </label>
+                    <textarea id="soap-plan" class="soap-textarea" placeholder="Paracetamol 500mg 3x1 tablet, Vitamin C 500mg 1x1. Istirahat cukup..." required></textarea>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                  <label class="soap-label" for="soap-prescription">Catatan Resep Tambahan / Instruksi Farmasi</label>
+                  <input type="text" id="soap-prescription" class="form-input" placeholder="Diminum sesudah makan, habiskan antibiotik jika ada.">
+                </div>
+
+                <!-- Action Button -->
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border);">
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">
+                    Menyimpan lembar SOAP akan secara otomatis memanggil antrean pasien berikutnya.
+                  </span>
+                  <button type="submit" id="btn-finalize-rme" class="btn btn-primary" style="padding: 0.875rem 1.5rem; font-size: 1rem;">
+                    💾 Selesai & Simpan RME ➔
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="config/supabase.js"></script>
+  <script src="assets/js/components/toast.js"></script>
+  <script src="assets/js/auth/multiRoleAuth.js"></script>
+  <script src="assets/js/services/appointmentService.js"></script>
+  <script src="assets/js/services/queueService.js"></script>
+  <script src="assets/js/services/rmeService.js"></script>
+  <script>
+    const currentDoctorId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+    const currentClinicId = '11111111-1111-1111-1111-111111111111';
+
+    // Mock initial queue for today
+    let activeQueue = [
+      {
+        id: 'appt-doc-001',
+        clinic_id: currentClinicId,
+        doctor_id: currentDoctorId,
+        patient_id: 'pat-001',
+        patient_name: 'Bpk. Ahmad Santoso',
+        appointment_date: new Date().toISOString().split('T')[0],
+        appointment_time: '08:30:00',
+        queue_number: 'A-01',
+        queue_order: 1,
+        status: 'sedang_diperiksa'
+      },
+      {
+        id: 'appt-doc-002',
+        clinic_id: currentClinicId,
+        doctor_id: currentDoctorId,
+        patient_id: 'pat-002',
+        patient_name: 'Ibu Siti Munawaroh',
+        appointment_date: new Date().toISOString().split('T')[0],
+        appointment_time: '09:00:00',
+        queue_number: 'A-02',
+        queue_order: 2,
+        status: 'menunggu'
+      },
+      {
+        id: 'appt-doc-003',
+        clinic_id: currentClinicId,
+        doctor_id: currentDoctorId,
+        patient_id: 'pat-003',
+        patient_name: 'Sdr. Dimas Kurniawan',
+        appointment_date: new Date().toISOString().split('T')[0],
+        appointment_time: '09:30:00',
+        queue_number: 'A-03',
+        queue_order: 3,
+        status: 'menunggu'
+      }
+    ];
+
+    let currentActiveAppt = activeQueue[0];
+
+    function renderQueue() {
+      const container = document.getElementById('today-queue-list');
+      container.innerHTML = '';
+
+      activeQueue.forEach(item => {
+        const div = document.createElement('div');
+        div.style.padding = '0.875rem';
+        div.style.borderRadius = 'var(--radius-md)';
+        div.style.border = '1px solid var(--border)';
+        div.style.background = item.status === 'sedang_diperiksa' ? '#f0fdfa' : 'white';
+        if (item.status === 'sedang_diperiksa') {
+          div.style.borderColor = 'var(--primary)';
+        }
+
+        const isAllowedCancel = window.isCancellationAllowed(item.appointment_date, item.appointment_time);
+
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <strong style="color: var(--primary-dark); font-size: 1.1rem;">${item.queue_number}</strong>
+            <span class="queue-badge ${item.status === 'sedang_diperiksa' ? 'lengang' : (item.status === 'selesai' ? 'sedang' : 'padat')}">
+              ${item.status.toUpperCase()}
+            </span>
+          </div>
+          <div style="font-weight: 600; font-size: 0.95rem;">${item.patient_name || 'Pasien Purworejo'}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Jam Janji: ${item.appointment_time}</div>
+          <div>
+            <button type="button" class="btn ${isAllowedCancel ? 'btn-danger' : 'btn-disabled'}" 
+              style="padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+              ${!isAllowedCancel ? 'disabled' : ''}
+              onclick="handleDoctorCancel('${item.id}', '${item.appointment_date}', '${item.appointment_time}')">
+              ${isAllowedCancel ? 'Batalkan Janji' : 'Terkunci (<12 Jam)'}
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      // Update Header
+      if (currentActiveAppt && currentActiveAppt.status === 'sedang_diperiksa') {
+        document.getElementById('current-patient-header').textContent = 
+          `No. Antrean: ${currentActiveAppt.queue_number} — ${currentActiveAppt.patient_name || 'Pasien Purworejo'}`;
+      } else {
+        document.getElementById('current-patient-header').textContent = 
+          'Seluruh Pasien Hari Ini Selesai Diperiksa.';
+        document.getElementById('btn-finalize-rme').disabled = true;
+      }
+    }
+
+    async function handleDoctorCancel(id, date, time) {
+      const allowed = window.isCancellationAllowed(date, time);
+      if (!allowed) {
+        window.showToast('Janji tidak dapat dibatalkan karena waktu pemeriksaan kurang dari 12 jam.', 'error');
+        return;
+      }
+      const item = activeQueue.find(a => a.id === id);
+      if (item) {
+        item.status = 'dibatalkan';
+        window.showToast('Janji temu berhasil dibatalkan.', 'success');
+        renderQueue();
+      }
+    }
+
+    // Submit SOAP RME
+    document.getElementById('soap-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentActiveAppt) return;
+
+      const payload = {
+        appointment_id: currentActiveAppt.id,
+        patient_id: currentActiveAppt.patient_id,
+        doctor_id: currentDoctorId,
+        clinic_id: currentClinicId,
+        soap_subjective: document.getElementById('soap-subjective').value.trim(),
+        soap_objective: document.getElementById('soap-objective').value.trim(),
+        soap_assessment: document.getElementById('soap-assessment').value.trim(),
+        soap_plan: document.getElementById('soap-plan').value.trim(),
+        prescription_notes: document.getElementById('soap-prescription').value.trim()
+      };
+
+      const result = await window.finalizeRmeAndAdvanceQueue(payload, activeQueue);
+      if (result.success) {
+        window.showToast('Lembar RME berhasil disimpan! Antrean berikutnya dibuka.', 'success');
+        document.getElementById('soap-form').reset();
+
+        if (result.has_next) {
+          currentActiveAppt = activeQueue.find(a => a.id === result.next_appointment_id);
+        } else {
+          currentActiveAppt = null;
+        }
+
+        renderQueue();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderQueue();
+      document.getElementById('current-date-text').textContent = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    });
+  </script>
+</body>
+</html>
