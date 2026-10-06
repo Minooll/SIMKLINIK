@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMKLINIK Purworejo | Agregator Layanan Faskes Regional Jawa Tengah</title>
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/role-pages.css">
+  <link rel="stylesheet" href="assets/css/modal.css">
+  <link rel="stylesheet" href="assets/css/ai-chat.css">
+  <style>
+    /* Public Landing Specific Styles */
+    .hero-section {
+      background: linear-gradient(135deg, #042f2e 0%, #0d9488 60%, #0284c7 100%);
+      color: white;
+      padding: 5rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      max-width: 900px;
+      margin: 0 auto 1.25rem;
+      letter-spacing: -1px;
+    }
+    .hero-subtitle {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin: 4rem 0;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: var(--transition);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    .feature-icon {
+      font-size: 2.25rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+    .landing-nav {
+      height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2rem; }
+      .hero-section { padding: 3rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Navigasi Publik -->
+  <header class="landing-nav">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div class="brand-badge">PWR</div>
+      <div>
+        <strong style="font-size: 1.1rem; color: var(--text-main);">SIMKLINIK Purworejo</strong>
+        <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Platform Agregator Faskes Mandiri</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <a href="#public-clinic-explorer" class="btn btn-secondary">Jelajahi Klinik</a>
+      <a href="login.html" class="btn btn-primary">Masuk ke Sistem ➔</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-badge">KABUPATEN PURWOREJO, JAWA TENGAH</div>
+    <h1 class="hero-title">Akses Fasilitas Kesehatan Pratama & Mandiri Dalam Satu Platform</h1>
+    <p class="hero-subtitle">
+      Jelajahi jadwal dokter praktik, pantau ketersediaan kuota harian secara live, dan konsultasikan keluhan Anda dengan Asisten AI Nayla sebelum menuju fasilitas kesehatan.
+    </p>
+    <div class="hero-actions">
+      <a href="login.html" class="btn btn-primary" style="padding: 0.875rem 2rem; font-size: 1rem; background: white; color: var(--primary-dark);">
+        🏥 Mulai Konsultasi & Janji Temu
+      </a>
+      <a href="#public-clinic-explorer" class="btn btn-secondary" style="padding: 0.875rem 2rem; font-size: 1rem; background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.3);">
+        🔍 Cari Klinik Terdekat
+      </a>
+    </div>
+  </section>
+
+  <!-- Container Konten Utama -->
+  <div style="max-width: 1280px; margin: 0 auto; padding: 3rem 2rem;">
+    <!-- 4 Fitur Unggulan Arsitektur -->
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🛡️</span>
+        <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Strict Referral Binding</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted);">
+          Kode unik kriptografis menjamin dokter hanya dapat mengakses klinik tempatnya bertugas tanpa risiko salah masuk.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">⏱️</span>
+        <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Aturan Pembatalan 12 Jam</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted);">
+          Proteksi pembatalan otomatis mengunci tombol janji jika waktu pemeriksaan kurang dari 12 jam untuk menjaga kepastian kuota dokter.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Otomasi Sekuensial RME</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted);">
+          Dokter memfinalisasi rekam medis SOAP secara instan memajukan antrean ke pasien berikutnya tanpa navigasi manual.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🤖</span>
+        <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Nayla AI Copilot Purworejo</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted);">
+          Ditenagai Gemini 2.0 Flash dengan injeksi konteks live kuota dokter, antrean, dan rekomendasi faskes di seluruh Purworejo.
+        </p>
+      </div>
+    </div>
+
+    <!-- Explorer Section -->
+    <section id="public-clinic-explorer" style="margin-top: 2rem;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="queue-badge lengang" style="margin-bottom: 0.5rem;">KATALOG FASKES REGIONAL</span>
+        <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">Klinik Pratama di Kabupaten Purworejo</h2>
+        <p style="color: var(--text-muted);">Pilih wilayah kecamatan untuk menyaring ketersediaan dokter dan kuota hari ini.</p>
+      </div>
+
+      <!-- District Filter -->
+      <div style="display: flex; justify-content: center; margin-bottom: 2rem;">
+        <div class="district-bar" id="district-filter-public">
+          <button type="button" class="district-chip active" data-district="semua">Semua Wilayah</button>
+          <button type="button" class="district-chip" data-district="Purworejo Kota">Purworejo Kota</button>
+          <button type="button" class="district-chip" data-district="Kutoarjo">Kutoarjo</button>
+          <button type="button" class="district-chip" data-district="Banyuurip">Banyuurip</button>
+        </div>
+      </div>
+
+      <!-- Clinic Cards Grid -->
+      <div class="grid-3" id="public-clinic-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: #0f172a; color: white; padding: 3rem 2rem; text-align: center; margin-top: 5rem;">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <div class="brand-badge" style="display: inline-block; margin-bottom: 1rem;">SIMKLINIK PURWOREJO</div>
+      <p style="opacity: 0.8; font-size: 0.9rem; line-height: 1.6;">
+        Sistem Informasi Manajemen Fasilitas Kesehatan Tingkat Pertama (Klinik Pratama & Mandiri) Wilayah Kabupaten Purworejo, Jawa Tengah. Standar Kepatuhan Permenkes No. 24 Tahun 2022 & UU No. 27 Tahun 2022.
+      </p>
+      <div style="margin-top: 1.5rem; opacity: 0.5; font-size: 0.8rem;">
+        &copy; 2026 SIMKLINIK Purworejo. Seluruh Hak Cipta Dilindungi.
+      </div>
+    </div>
+  </footer>
+
+  <script src="config/supabase.js"></script>
+  <script src="config/gemini.js"></script>
+  <script src="assets/js/components/toast.js"></script>
+  <script src="assets/js/services/clinicService.js"></script>
+  <script src="assets/js/services/aiPurworejoService.js"></script>
+  <script src="assets/js/components/aiChatWidget.js"></script>
+  <script>
+    async function loadPublicClinics(district = 'semua') {
+      const clinics = await window.getClinicsByDistrict(district);
+      const grid = document.getElementById('public-clinic-grid');
+      grid.innerHTML = '';
+
+      for (const clinic of clinics) {
+        const doctors = await window.getDoctorsByClinic(clinic.id);
+        const card = document.createElement('div');
+        card.className = 'clinic-card';
+        card.innerHTML = `
+          <div class="clinic-card-header">
+            <h3 class="clinic-name">${clinic.name}</h3>
+            <span class="clinic-district">📍 Kec. ${clinic.district}</span>
+          </div>
+          <div class="clinic-card-body">
+            <p style="color: var(--text-muted); font-size: 0.9rem;">${clinic.address}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+              <span style="font-size: 0.8rem; font-weight: 600;">Status Antrean:</span>
+              <span class="queue-badge lengang">Antrean Lengang</span>
+            </div>
+            <div>
+              <span style="font-size: 0.8rem; font-weight: 600;">Dokter Praktik Hari Ini:</span>
+              <ul style="padding-left: 1.25rem; font-size: 0.825rem; color: var(--text-muted); margin-top: 0.25rem;">
+                ${doctors.map(d => `<li>${d.full_name} (${d.specialty}) — Kuota: ${d.daily_quota}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+          <div class="clinic-card-footer">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Kode: ${clinic.referral_code}</span>
+            <a href="login.html" class="btn btn-primary" style="font-size: 0.8rem;">
+              📅 Ambil Antrean
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    document.querySelectorAll('#district-filter-public .district-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#district-filter-public .district-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        loadPublicClinics(chip.dataset.district);
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPublicClinics();
+    });
+  </script>
+</body>
+</html>
