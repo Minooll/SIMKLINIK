@@ -16,7 +16,8 @@ test('aiPurworejoService builds dynamic prompt injecting clinics, quotas, and qu
   };
 
   const prompt = buildPurworejoSystemPrompt(mockContext);
-  assert.match(prompt, /Nayla/i, 'Must introduce persona Nayla');
+  assert.match(prompt, /Sasa/i, 'Must introduce persona Sasa');
+  assert.match(prompt, /Sahabat Asisten Sehat Anda/i, 'Must contain full acronym meaning');
   assert.match(prompt, /Purworejo/i, 'Must contain regional Purworejo context');
   assert.match(prompt, /Klinik Pratama Sehat Mandiri/i, 'Must inject clinic data');
   assert.match(prompt, /dr\. Budi Santoso/i, 'Must inject doctor data');

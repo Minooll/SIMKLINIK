@@ -371,7 +371,7 @@ Service `aiPurworejoService.js` melakukan:
    * Daftar dokter yang praktik hari ini beserta **sisa kuota** harian.
    * Jumlah antrean aktif per dokter (tingkat keramaian antrean).
 2. Konstruksi Dynamic System Prompt:
-   * Persona: "Nayla - Asisten Medis Virtual SIMKLINIK Purworejo".
+   * Persona: "Sasa (Sahabat Asisten Sehat Anda) - Asisten Medis Virtual SIMKLINIK Purworejo".
    * Panduan: Triage medis awal ramah awam, rekomendasi dokter/klinik sesuai keluhan, serta menginformasikan beban antrean dan kuota.
    * Tombol Aksi: Mengeluarkan token `[ACTION:BOOK, CLINIC_ID: "...", DOCTOR_ID: "..."]` yang dirender oleh UI menjadi tombol interaktif.
 

@@ -10,7 +10,7 @@ function initAiChatWidget() {
   const launcher = document.createElement('button');
   launcher.id = 'ai-chat-launcher';
   launcher.className = 'ai-chat-launcher';
-  launcher.setAttribute('aria-label', 'Buka Konsultasi Nayla AI Purworejo');
+  launcher.setAttribute('aria-label', 'Buka Konsultasi Sasa AI Purworejo');
   launcher.innerHTML = '🤖';
 
   // 2. Buat container drawer
@@ -22,7 +22,7 @@ function initAiChatWidget() {
       <div class="ai-header-info">
         <div class="ai-avatar">👩‍⚕️</div>
         <div>
-          <div class="ai-title">Nayla — Asisten Virtual</div>
+          <div class="ai-title">Sasa — Sahabat Asisten Sehat Anda</div>
           <div class="ai-status">🟢 Online (Gemini 2.0 Flash)</div>
         </div>
       </div>
@@ -30,7 +30,7 @@ function initAiChatWidget() {
     </div>
     <div class="ai-chat-body" id="ai-chat-messages">
       <div class="ai-bubble ai-bubble-bot">
-        Halo! Saya <strong>Nayla</strong>, asisten virtual SIMKLINIK Purworejo. 
+        Halo! Saya <strong>Sasa (Sahabat Asisten Sehat Anda)</strong>, asisten virtual SIMKLINIK Purworejo. 
         Ceritakan keluhan Anda, saya dapat merekomendasikan klinik dan dokter terdekat di Purworejo dengan memantau antrean dan kuota secara langsung.
       </div>
     </div>
@@ -75,12 +75,13 @@ function initAiChatWidget() {
     // Loading indicator
     const botLoading = document.createElement('div');
     botLoading.className = 'ai-bubble ai-bubble-bot';
-    botLoading.innerHTML = '<em>Nayla sedang menganalisis data faskes Purworejo...</em>';
+    botLoading.innerHTML = '<em>Sasa sedang menganalisis data faskes Purworejo...</em>';
     msgBox.appendChild(botLoading);
     msgBox.scrollTop = msgBox.scrollHeight;
 
     // Panggil Service AI
-    const result = await window.askNaylaAi(msg);
+    const askFn = window.askSasaAi || window.askNaylaAi;
+    const result = await askFn(msg);
     botLoading.remove();
 
     const botBubble = document.createElement('div');

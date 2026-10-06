@@ -1,5 +1,5 @@
 // ====================================================================
-// Service AI Copilot Gemini 2.0 Flash - Nayla Purworejo
+// Service AI Copilot Gemini 2.0 Flash - Sasa (Sahabat Asisten Sehat Anda)
 // ====================================================================
 
 /**
@@ -21,7 +21,7 @@ function buildPurworejoSystemPrompt(context = {}) {
   const clinicListText = clinics.map(c => `- ${c.name} (Kecamatan ${c.district})`).join('\n');
   const doctorListText = doctors.map(d => `- ${d.name} di ${d.clinic_name} (${d.specialty || 'Umum'}): sisa kuota: ${d.remaining_quota}, antrean aktif: ${d.active_queue_count}`).join('\n');
 
-  return `Anda adalah Nayla, Asisten Medis Virtual resmi untuk platform SIMKLINIK Purworejo, Kabupaten Purworejo, Jawa Tengah.
+  return `Anda adalah Sasa, singkatan dari "Sahabat Asisten Sehat Anda", Asisten Medis Virtual resmi untuk platform SIMKLINIK Purworejo, Kabupaten Purworejo, Jawa Tengah.
 Tugas utama Anda:
 1. Memberikan saran triage awal yang ramah dan menenangkan bagi warga Purworejo yang mengalami keluhan sakit.
 2. Merekomendasikan fasilitas klinik dan dokter yang tepat di wilayah Kabupaten Purworejo (Purworejo Kota, Kutoarjo, Banyuurip, dsb).
@@ -68,9 +68,9 @@ function parseAiActionTokens(message) {
 }
 
 /**
- * Mengirim pesan konsultasi ke Nayla AI Copilot
+ * Mengirim pesan konsultasi ke Sasa AI Copilot
  */
-async function askNaylaAi(userMessage, context = {}) {
+async function askSasaAi(userMessage, context = {}) {
   const promptSystem = buildPurworejoSystemPrompt(context);
   let rawResponse = '';
 
@@ -80,18 +80,22 @@ async function askNaylaAi(userMessage, context = {}) {
     // Fallback response for Node / offline testing
     const lower = userMessage.toLowerCase();
     if (lower.includes('kutoarjo') || lower.includes('demam') || lower.includes('anak')) {
-      rawResponse = 'Halo! Untuk keluhan demam pada anak di area Kutoarjo, dr. Hendra Wijaya, Sp.A di Klinik Kutoarjo Medika siap melayani Anda dengan sisa kuota 10 pasien. [ACTION:BOOK, CLINIC_ID: "22222222-2222-2222-2222-222222222222", DOCTOR_ID: "cccccccc-cccc-cccc-cccc-cccccccccccc"]';
+      rawResponse = 'Halo! Saya Sasa "Sahabat Asisten Sehat Anda". Untuk keluhan demam pada anak di area Kutoarjo, dr. Hendra Wijaya, Sp.A di Klinik Kutoarjo Medika siap melayani Anda dengan sisa kuota 10 pasien. [ACTION:BOOK, CLINIC_ID: "22222222-2222-2222-2222-222222222222", DOCTOR_ID: "cccccccc-cccc-cccc-cccc-cccccccccccc"]';
     } else {
-      rawResponse = 'Halo! Saya Nayla dari SIMKLINIK Purworejo. Ada keluhan kesehatan apa yang sedang Anda rasakan? Kami siap membantu merekomendasikan klinik terbaik.';
+      rawResponse = 'Halo! Saya Sasa "Sahabat Asisten Sehat Anda" dari SIMKLINIK Purworejo. Ada keluhan kesehatan apa yang sedang Anda rasakan? Kami siap membantu merekomendasikan klinik terbaik.';
     }
   }
 
   return parseAiActionTokens(rawResponse);
 }
 
+// Alias for backwards compatibility
+const askNaylaAi = askSasaAi;
+
 if (typeof window !== 'undefined') {
   window.buildPurworejoSystemPrompt = buildPurworejoSystemPrompt;
   window.parseAiActionTokens = parseAiActionTokens;
+  window.askSasaAi = askSasaAi;
   window.askNaylaAi = askNaylaAi;
 }
 
@@ -99,6 +103,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     buildPurworejoSystemPrompt,
     parseAiActionTokens,
+    askSasaAi,
     askNaylaAi
   };
 }
