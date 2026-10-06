@@ -310,6 +310,10 @@
     const insightTitle = document.getElementById('insightTitle');
     const insightContent = document.getElementById('insightContent');
     const lowerTitle = document.getElementById('lowerTitle');
+    const lowerEyebrow = document.getElementById('lowerEyebrow');
+    const lowerTableWrap = document.getElementById('lowerTableWrap');
+    const latestRmeContainer = document.getElementById('latestRmeContainer');
+    const btnViewAllLower = document.getElementById('btnViewAllLower');
     const tableHead = document.getElementById('tableHead');
     const tableBody = document.getElementById('tableBody');
 
@@ -604,7 +608,83 @@
       });
     }
 
-    // 5c. Check if onboarding is needed
+    // 5c. Setup Change Password Handler for Pasien
+    const formChangePasswordPasien = document.getElementById('formChangePasswordPasien');
+    const changePasswordNew = document.getElementById('changePasswordNew');
+    const changePasswordConfirm = document.getElementById('changePasswordConfirm');
+    const changePasswordNotice = document.getElementById('changePasswordNotice');
+    const btnSubmitChangePassword = document.getElementById('btnSubmitChangePassword');
+
+    if (formChangePasswordPasien) {
+      formChangePasswordPasien.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const p1 = changePasswordNew?.value || '';
+        const p2 = changePasswordConfirm?.value || '';
+
+        const validation = window.authHelper
+          ? window.authHelper.validatePasswordInput(p1, p2)
+          : { valid: p1.length >= 6 && p1 === p2, error: p1.length < 6 ? 'Password minimal 6 karakter.' : (p1 !== p2 ? 'Konfirmasi password tidak cocok.' : null) };
+
+        if (!validation.valid) {
+          if (changePasswordNotice) {
+            changePasswordNotice.textContent = validation.error;
+            changePasswordNotice.style.color = '#b91c1c';
+          }
+          (p1.length < 6 ? changePasswordNew : changePasswordConfirm)?.focus();
+          return;
+        }
+
+        setButtonLoading(btnSubmitChangePassword, true);
+        if (changePasswordNotice) {
+          changePasswordNotice.textContent = 'Memperbarui kata sandi...';
+          changePasswordNotice.style.color = '#0284c7';
+        }
+
+        try {
+          if (window.supabaseClient) {
+            const { error } = await window.supabaseClient.auth.updateUser({
+              password: p1,
+              data: { has_password: true }
+            });
+            if (error) throw error;
+          }
+
+          setButtonLoading(btnSubmitChangePassword, false);
+          if (changePasswordNotice) {
+            changePasswordNotice.textContent = 'Kata sandi berhasil diperbarui!';
+            changePasswordNotice.style.color = '#15803d';
+          }
+          window.Toast.success('Kata sandi akun Anda berhasil diperbarui.');
+          formChangePasswordPasien.reset();
+          setTimeout(() => {
+            if (window.Modal) window.Modal.close('modalChangePasswordPasien');
+            if (changePasswordNotice) changePasswordNotice.textContent = '';
+          }, 1200);
+        } catch (err) {
+          setButtonLoading(btnSubmitChangePassword, false);
+          const friendlyErr = (window.translateError ? window.translateError(err.message) : err.message) || 'Gagal mengubah kata sandi.';
+          if (changePasswordNotice) {
+            changePasswordNotice.textContent = friendlyErr;
+            changePasswordNotice.style.color = '#b91c1c';
+          }
+          window.Toast.error(friendlyErr);
+        }
+      });
+    }
+
+    // 5d. Hook Topbar Profile Menu for Pasien
+    const profileMenu = document.querySelector('.profile-menu');
+    if (profileMenu) {
+      profileMenu.style.cursor = 'pointer';
+      profileMenu.setAttribute('title', 'Klik untuk ubah kata sandi / pengaturan akun');
+      profileMenu.addEventListener('click', () => {
+        if (window.Modal) {
+          window.Modal.open('modalChangePasswordPasien');
+        }
+      });
+    }
+
+    // 5e. Check if onboarding is needed
     function checkPatientOnboardingRequirement() {
       if (!modalPatientOnboarding) return;
 
@@ -713,23 +793,156 @@
           `;
         }
 
-        // Lower Table: Medical Records preview
-        if (lowerTitle) lowerTitle.textContent = 'Riwayat Kunjungan Medis';
-        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Dokter / Poli</th><th>Keluhan</th><th>Status</th>';
-        if (tableBody) {
-          tableBody.innerHTML = `
-            <tr><td class="table-primary">18 Sep 2026</td><td>dr. Dimas · Poli Umum</td><td>Sakit kepala migrain</td><td>${statusBadge('Selesai')}</td></tr>
-            <tr><td class="table-primary">07 Agu 2026</td><td>dr. Ayu · Poli Umum</td><td>Kontrol tensi rutin</td><td>${statusBadge('Selesai')}</td></tr>
-            <tr><td class="table-primary">15 Mei 2026</td><td>dr. Rani · Poli Gigi</td><td>Pembersihan karang gigi</td><td>${statusBadge('Selesai')}</td></tr>
+        // Lower: Prioritas Riwayat Pemeriksaan Medis Paling Terakhir (Latest RME & Resep Obat)
+        if (lowerEyebrow) lowerEyebrow.textContent = 'REKAM MEDIS TERAKHIR';
+        if (lowerTitle) lowerTitle.textContent = 'Pemeriksaan Medis Terakhir & Resep';
+        if (btnViewAllLower) btnViewAllLower.innerHTML = 'Lihat semua riwayat pemeriksaan <span>&rarr;</span>';
+
+        if (latestRmeContainer) latestRmeContainer.style.display = 'block';
+        if (lowerTableWrap) lowerTableWrap.style.display = 'none';
+
+        let records = [];
+        if (patientId && window.medicalRecordService) {
+          const recRes = await window.medicalRecordService.getPatientHistory(patientId);
+          if (recRes.success && recRes.data && recRes.data.length > 0) {
+            records = recRes.data;
+          }
+        }
+
+        if (records.length === 0) {
+          records = [
+            {
+              id: 'sample-rec-1',
+              record_date: '18 Sep 2026',
+              doctor: { profile: { full_name: 'dr. Dimas Putra' } },
+              service: { name: 'Poli Umum' },
+              subjective: 'Pusing berdenyut di bagian pelipis sejak semalam setelah lembur',
+              objective: 'TD: 120/80 mmHg, Nadi: 78x/m, Suhu: 36.6 C, RR: 18x/m',
+              assessment: 'Tension-Type Headache (ICD-10 G44.2)',
+              treatment_plan: 'Paracetamol 500mg 3x1 tablet sesudah makan, Vitamin B Kompleks 1x1 tablet',
+              finalized_at: '2026-09-18T10:00:00Z',
+              prescription: {
+                prescription_number: 'RX-2609-0012',
+                items: [
+                  { medicine_name: 'Paracetamol 500mg', dosage: '500mg', frequency: '3x sehari 1 tablet sesudah makan', quantity: 10 },
+                  { medicine_name: 'Vitamin B Kompleks', dosage: '1 tablet', frequency: '1x sehari 1 tablet pagi hari', quantity: 10 }
+                ]
+              }
+            },
+            {
+              id: 'sample-rec-2',
+              record_date: '07 Agu 2026',
+              doctor: { profile: { full_name: 'dr. Ayu Rahma, Sp.PD' } },
+              service: { name: 'Poli Umum' },
+              subjective: 'Kontrol tekanan darah rutin bulanan, leher agak kaku',
+              objective: 'TD: 135/85 mmHg, Nadi: 82x/m, Suhu: 36.5 C',
+              assessment: 'Hipertensi Primer (ICD-10 I10)',
+              treatment_plan: 'Amlodipine 5mg 1x1 tablet malam hari, diet rendah garam',
+              finalized_at: '2026-08-07T14:30:00Z'
+            }
+          ];
+        }
+
+        const latest = window.medicalRecordService ? window.medicalRecordService.extractLatestRecord(records) : records[0];
+        if (latest && latestRmeContainer) {
+          const dateStr = latest.record_date ? (latest.record_date.length <= 11 ? latest.record_date : new Date(latest.record_date).toLocaleDateString('id-ID')) : 'Pemeriksaan Terbaru';
+          const docName = latest.doctor?.profile?.full_name || 'dr. Dimas Putra';
+          const svcName = latest.service?.name || 'Poli Umum';
+          const diagStr = latest.assessment || latest.diagnosis_icd10 || latest.diagnosis || 'Pemeriksaan Klinis Umum';
+          const subjStr = latest.subjective || 'Keluhan umum saat kunjungan dokter';
+          const objStr = latest.objective || 'Tanda vital dalam batas normal';
+          const planStr = latest.treatment_plan || 'Terapi dan resep obat terlampir';
+          const statusStr = latest.finalized_at ? 'FINAL (Permenkes No. 24/2022)' : 'DRAFT';
+
+          const rxNumber = latest.prescription?.prescription_number || 'RX-2609-0012';
+          const rxItems = (latest.prescription?.items && latest.prescription.items.length > 0)
+            ? latest.prescription.items
+            : [
+                { medicine_name: 'Paracetamol 500mg', dosage: '500mg', frequency: '3x sehari 1 tablet sesudah makan', quantity: 10 },
+                { medicine_name: 'Vitamin B Kompleks', dosage: '1 tablet', frequency: '1x sehari 1 tablet pagi hari', quantity: 10 }
+              ];
+
+          latestRmeContainer.innerHTML = `
+            <div class="latest-rme-card">
+              <div class="latest-rme-top">
+                <div>
+                  <div class="latest-rme-badge-group">
+                    <span class="badge-rme-highlight">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      Pemeriksaan Terakhir
+                    </span>
+                    <span class="status-badge status-done">${statusStr}</span>
+                  </div>
+                  <div class="latest-rme-doctor-info" style="margin-top: 8px;">
+                    <strong>${docName}</strong>
+                    <small>${svcName} · Tanggal Kunjungan: ${dateStr}</small>
+                  </div>
+                </div>
+                <button type="button" class="btn-detail-rme-outline" onclick="window.viewMedicalDetailDemo('${escapeJsStr(dateStr)}', '${escapeJsStr(docName)}', '${escapeJsStr(subjStr)}', '${escapeJsStr(objStr)}', '${escapeJsStr(diagStr)}', '${escapeJsStr(planStr)}', '${escapeJsStr(latest.finalized_at ? 'FINAL' : 'DRAFT')}')">
+                  📋 Berkas RME Lengkap
+                </button>
+              </div>
+
+              <div class="latest-rme-clinical-grid">
+                <div class="clinical-prop">
+                  <label>Diagnosa Medis (ICD-10)</label>
+                  <strong>${diagStr}</strong>
+                </div>
+                <div class="clinical-prop">
+                  <label>Keluhan Pasien (S)</label>
+                  <p>${subjStr}</p>
+                </div>
+                <div class="clinical-prop">
+                  <label>Pemeriksaan Fisik &amp; Tanda Vital (O)</label>
+                  <p>${objStr}</p>
+                </div>
+              </div>
+
+              <div class="latest-rme-rx-box">
+                <div class="rx-box-header">
+                  <div class="rx-box-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                    <span>Resep Obat Elektronik Siap Ditebus (RME)</span>
+                  </div>
+                  <span class="rx-box-num">${rxNumber}</span>
+                </div>
+                <div class="rx-items-list">
+                  ${rxItems.map(item => `
+                    <div class="rx-item-chip">
+                      <div class="rx-item-main">
+                        <strong>${item.medicine_name || item.name}</strong>
+                        <small>${item.frequency || item.dosage || 'Aturan pakai sesuai resep dokter'}</small>
+                      </div>
+                      <span class="rx-item-qty">${item.quantity || 10} unit</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="latest-rme-actions">
+                <button type="button" class="btn-buy-medication" onclick="window.handleBuyMedicationFromRme('${escapeJsStr(rxNumber)}', ${rxItems.length}, '${escapeJsStr(rxItems.map(i => i.medicine_name || i.name).join(', '))}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+                  <span>Tebus / Beli Obat di Apotek</span>
+                </button>
+                <button type="button" class="btn-ai-explain-med-outline" onclick="window.openMedicationExplainer('${escapeJsStr(planStr)}', '${escapeJsStr(diagStr)}')">
+                  ✨ Jelaskan Aturan Obat (AI Apoteker)
+                </button>
+              </div>
+            </div>
           `;
         }
       } else if (currentView === 'janji') {
+        if (latestRmeContainer) latestRmeContainer.style.display = 'none';
+        if (lowerTableWrap) lowerTableWrap.style.display = 'block';
+        if (lowerEyebrow) lowerEyebrow.textContent = 'DATA';
+        if (btnViewAllLower) btnViewAllLower.innerHTML = 'Lihat selengkapnya <span>&rarr;</span>';
+
         if (welcomeTitle) welcomeTitle.textContent = 'Janji Temu Saya';
         if (welcomeCopy) welcomeCopy.textContent = 'Daftar riwayat dan jadwal konsultasi mendatang Anda.';
         if (statsGrid) statsGrid.innerHTML = '';
         if (agendaTitle) agendaTitle.textContent = 'Daftar Reservasi';
 
-        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Jam</th><th>Dokter / Layanan</th><th>Keluhan</th><th>Status</th>';
+        if (tableHead) tableHead.innerHTML = '<th>Tanggal</th><th>Jam</th><th>Dokter / Layanan</th><th>Keluhan</th><th>Status</th><th>Aksi</th>';
         
         let appointments = [];
         if (patientId) {
@@ -741,21 +954,70 @@
 
         if (tableBody) {
           if (appointments.length > 0) {
-            tableBody.innerHTML = appointments.map(a => `
-              <tr>
-                <td class="table-primary">${a.appointment_date}</td>
-                <td>${a.appointment_time ? a.appointment_time.slice(0, 5) : '09:00'}</td>
-                <td>${a.doctor?.profile?.full_name || 'Dokter Spesialis'} (${a.service?.name || 'Poli'})</td>
-                <td>${a.chief_complaint || '-'}</td>
-                <td>${statusBadge(a.status)}</td>
-              </tr>
-            `).join('');
+            tableBody.innerHTML = appointments.map(a => {
+              const normStatus = (a.status || '').toLowerCase();
+              const isDone = normStatus === 'selesai' || normStatus === 'final';
+              const isCancelled = normStatus === 'dibatalkan' || normStatus === 'batal';
+              let actionBtn = '';
+              if (isDone) {
+                actionBtn = `<button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(a.appointment_date)}', '${escapeJsStr(a.doctor?.profile?.full_name || 'Dokter')}', '${escapeJsStr(a.chief_complaint || '-')}', 'TD: 120/80 mmHg, N: 78x/m', 'Pemeriksaan ${escapeJsStr(a.service?.name || 'Poli')}', 'Edukasi dan terapi terlampir', 'FINAL')">Lihat RME</button>`;
+              } else if (isCancelled) {
+                actionBtn = `<span class="status-badge status-default">Dibatalkan</span>`;
+              } else {
+                const cancelCheck = window.appointmentService
+                  ? window.appointmentService.canCancelAppointment(a.appointment_date, a.appointment_time, new Date())
+                  : { allowed: true };
+                if (cancelCheck.allowed) {
+                  actionBtn = `<button type="button" class="action-btn-sm action-btn-danger" onclick="window.handleCancelAppointment('${escapeJsStr(a.id || '')}', '${escapeJsStr(a.appointment_date)}', '${escapeJsStr(a.appointment_time || '')}')">Batalkan</button>`;
+                } else {
+                  actionBtn = `<button type="button" class="action-btn-sm action-btn-locked" onclick="window.showCancelLockedNotice('${escapeJsStr(cancelCheck.reason)}')">Batalkan</button>`;
+                }
+              }
+
+              return `
+                <tr>
+                  <td class="table-primary">${a.appointment_date}</td>
+                  <td>${a.appointment_time ? a.appointment_time.slice(0, 5) : '09:00'}</td>
+                  <td>${a.doctor?.profile?.full_name || 'Dokter Spesialis'} (${a.service?.name || 'Poli'})</td>
+                  <td>${a.chief_complaint || '-'}</td>
+                  <td>${statusBadge(a.status)}</td>
+                  <td>${actionBtn}</td>
+                </tr>
+              `;
+            }).join('');
           } else {
-            tableBody.innerHTML = `
-              <tr><td class="table-primary">Hari ini</td><td>09:30</td><td>dr. Ayu Rahma · Poli Umum</td><td>Demam &amp; batuk</td><td>${statusBadge('Terjadwal')}</td></tr>
-              <tr><td class="table-primary">02 Okt 2026</td><td>10:00</td><td>Laboratorium Klinik</td><td>Tes darah lengkap</td><td>${statusBadge('Terjadwal')}</td></tr>
-              <tr><td class="table-primary">18 Sep 2026</td><td>08:30</td><td>dr. Dimas · Poli Umum</td><td>Pemeriksaan tensi</td><td>${statusBadge('Selesai')}</td></tr>
-            `;
+            const sampleAppts = [
+              { appointment_date: 'Hari ini', appointment_time: '09:30:00', doctor: { profile: { full_name: 'dr. Ayu Rahma' } }, service: { name: 'Poli Umum' }, chief_complaint: 'Demam & batuk', status: 'Terjadwal' },
+              { appointment_date: '02 Okt 2026', appointment_time: '10:00:00', doctor: { profile: { full_name: 'dr. Budi Santoso' } }, service: { name: 'Laboratorium Klinik' }, chief_complaint: 'Tes darah lengkap', status: 'Terjadwal' },
+              { appointment_date: '18 Sep 2026', appointment_time: '08:30:00', doctor: { profile: { full_name: 'dr. Dimas' } }, service: { name: 'Poli Umum' }, chief_complaint: 'Pemeriksaan tensi', status: 'Selesai' }
+            ];
+            tableBody.innerHTML = sampleAppts.map(a => {
+              const normStatus = (a.status || '').toLowerCase();
+              const isDone = normStatus === 'selesai' || normStatus === 'final';
+              let actionBtn = '';
+              if (isDone) {
+                actionBtn = `<button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(a.appointment_date)}', '${escapeJsStr(a.doctor?.profile?.full_name || 'Dokter')}', '${escapeJsStr(a.chief_complaint || '-')}', 'TD: 120/80 mmHg, N: 78x/m', 'Pemeriksaan ${escapeJsStr(a.service?.name || 'Poli')}', 'Edukasi dan terapi terlampir', 'FINAL')">Lihat RME</button>`;
+              } else {
+                const cancelCheck = window.appointmentService
+                  ? window.appointmentService.canCancelAppointment(a.appointment_date, a.appointment_time, new Date())
+                  : { allowed: true };
+                if (cancelCheck.allowed) {
+                  actionBtn = `<button type="button" class="action-btn-sm action-btn-danger" onclick="window.handleCancelAppointment('${escapeJsStr(a.id || '')}', '${escapeJsStr(a.appointment_date)}', '${escapeJsStr(a.appointment_time || '')}')">Batalkan</button>`;
+                } else {
+                  actionBtn = `<button type="button" class="action-btn-sm action-btn-locked" onclick="window.showCancelLockedNotice('${escapeJsStr(cancelCheck.reason)}')">Batalkan</button>`;
+                }
+              }
+              return `
+                <tr>
+                  <td class="table-primary">${a.appointment_date}</td>
+                  <td>${a.appointment_time.slice(0, 5)}</td>
+                  <td>${a.doctor.profile.full_name} · ${a.service.name}</td>
+                  <td>${a.chief_complaint}</td>
+                  <td>${statusBadge(a.status)}</td>
+                  <td>${actionBtn}</td>
+                </tr>
+              `;
+            }).join('');
           }
         }
       } else if (currentView === 'rekam-medis') {
@@ -877,6 +1139,7 @@
             <tr><td class="table-primary">Golongan Darah</td><td>${bType}</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
             <tr><td class="table-primary">Riwayat Alergi</td><td>${alg}</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
             <tr><td class="table-primary">Kontak Darurat</td><td>${emContact}</td><td>${statusBadge('Tersimpan')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalHealthProfile">Ubah</button></td></tr>
+            <tr><td class="table-primary">Kata Sandi Akun</td><td>Tersimpan &amp; Terenkripsi</td><td>${statusBadge('Aktif')}</td><td><button class="action-btn-sm action-btn-primary" data-modal-target="modalChangePasswordPasien">Ubah Sandi</button></td></tr>
           `;
         }
       }
@@ -917,10 +1180,25 @@
         tableBody.innerHTML = filteredList.map(a => {
           const docName = a.doctor?.profile?.full_name || 'Dokter Spesialis';
           const svcName = a.service?.name || 'Poliklinik';
-          const isDone = (a.status || '').toLowerCase() === 'selesai';
-          const actionBtn = isDone
-            ? `<button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(a.appointment_date)}', '${escapeJsStr(docName)}', '${escapeJsStr(a.chief_complaint || '-')}', 'TD: 120/80 mmHg, N: 78x/m', 'Pemeriksaan ${escapeJsStr(svcName)}', 'Edukasi dan terapi terlampir', 'FINAL')">Lihat RME</button>`
-            : `<button type="button" class="action-btn-sm action-btn-danger" onclick="if(confirm('Batalkan janji temu ini?')){alert('Janji temu berhasil dibatalkan.');}">Batal</button>`;
+          const normStatus = (a.status || '').toLowerCase();
+          const isDone = normStatus === 'selesai' || normStatus === 'final';
+          const isCancelled = normStatus === 'dibatalkan' || normStatus === 'batal';
+
+          let actionBtn = '';
+          if (isDone) {
+            actionBtn = `<button type="button" class="action-btn-sm action-btn-primary" onclick="window.viewMedicalDetailDemo('${escapeJsStr(a.appointment_date)}', '${escapeJsStr(docName)}', '${escapeJsStr(a.chief_complaint || '-')}', 'TD: 120/80 mmHg, N: 78x/m', 'Pemeriksaan ${escapeJsStr(svcName)}', 'Edukasi dan terapi terlampir', 'FINAL')">Lihat RME</button>`;
+          } else if (isCancelled) {
+            actionBtn = `<span class="status-badge status-default">Dibatalkan</span>`;
+          } else {
+            const cancelCheck = window.appointmentService
+              ? window.appointmentService.canCancelAppointment(a.appointment_date, a.appointment_time, new Date())
+              : { allowed: true };
+            if (cancelCheck.allowed) {
+              actionBtn = `<button type="button" class="action-btn-sm action-btn-danger" onclick="window.handleCancelAppointment('${escapeJsStr(a.id || '')}', '${escapeJsStr(a.appointment_date)}', '${escapeJsStr(a.appointment_time || '')}')">Batalkan</button>`;
+            } else {
+              actionBtn = `<button type="button" class="action-btn-sm action-btn-locked" onclick="window.showCancelLockedNotice('${escapeJsStr(cancelCheck.reason)}')">Batalkan</button>`;
+            }
+          }
 
           return `
             <tr>
@@ -1051,9 +1329,54 @@
       });
     }
 
+    window.handleCancelAppointment = async function(apptId, apptDate, apptTime) {
+      if (!confirm('Apakah Anda yakin ingin membatalkan jadwal janji temu ini?')) {
+        return;
+      }
+      if (window.appointmentService) {
+        const res = await window.appointmentService.cancelAppointment(
+          apptId || { id: apptId, appointment_date: apptDate, appointment_time: apptTime },
+          'pasien',
+          new Date()
+        );
+        if (res.success) {
+          if (window.Toast) window.Toast.success('Janji temu berhasil dibatalkan.');
+          else alert('Janji temu berhasil dibatalkan.');
+          const modal = document.getElementById('modalFullAgendaPasien');
+          if (modal && modal.classList.contains('is-open')) {
+            openFullAgendaPasienModal();
+          }
+          refreshPasienDashboard();
+        } else {
+          if (window.Toast) window.Toast.error(res.error || 'Gagal membatalkan janji temu.');
+          else alert(res.error || 'Gagal membatalkan janji temu.');
+        }
+      }
+    };
+
     refreshPasienDashboard();
     checkPatientOnboardingRequirement();
   }
+
+  // Global helper: Popup singkat pemberitahuan batas pembatalan 12 jam
+  window.showCancelLockedNotice = function(reason) {
+    const msg = reason || 'Janji temu hanya dapat dibatalkan maksimal 12 jam sebelum jadwal konsultasi yang ditentukan.';
+    if (window.Toast) {
+      window.Toast.warning(msg);
+    } else {
+      alert(msg);
+    }
+  };
+
+  // Global helper: Tebus / Beli Obat dari RME Terakhir
+  window.handleBuyMedicationFromRme = function(rxNum, itemsCount, medsSummary) {
+    const detail = rxNum ? `No. Resep ${rxNum}` : (medsSummary || 'Resep Obat');
+    if (window.Toast) {
+      window.Toast.success(`Pesanan tebus obat (${detail}) berhasil diteruskan ke Instalasi Farmasi Klinik! Tim Apoteker kami sedang menyiapkan obat Anda.`);
+    } else {
+      alert(`Pesanan tebus obat (${detail}) berhasil dikirim ke Farmasi.`);
+    }
+  };
 
   // Global helper to view Medical Record Detail in Modal
   window.viewMedicalDetailDemo = function(date, doc, subj, obj, assess, plan, status) {

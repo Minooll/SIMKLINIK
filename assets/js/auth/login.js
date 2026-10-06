@@ -46,6 +46,23 @@
       const registerPassword    = document.getElementById('registerPassword');
       const registerPasswordConfirm = document.getElementById('registerPasswordConfirm');
       const btnRegisterSubmit   = document.getElementById('btnRegisterSubmit');
+      const firstTimePasswordForm   = document.getElementById('firstTimePasswordForm');
+      const firstTimeNameDisplay    = document.getElementById('firstTimeNameDisplay');
+      const firstTimeEmailDisplay   = document.getElementById('firstTimeEmailDisplay');
+      const firstTimeAvatar         = document.getElementById('firstTimeAvatar');
+      const firstTimePassword       = document.getElementById('firstTimePassword');
+      const firstTimePasswordConfirm= document.getElementById('firstTimePasswordConfirm');
+      const btnFirstTimeSubmit      = document.getElementById('btnFirstTimeSubmit');
+      const forgotLink              = document.getElementById('forgotLink');
+      const formForgotPassword      = document.getElementById('formForgotPassword');
+      const forgotEmailInput        = document.getElementById('forgotEmailInput');
+      const forgotNotice            = document.getElementById('forgotNotice');
+      const btnSubmitForgot         = document.getElementById('btnSubmitForgot');
+      const formRecoveryPassword    = document.getElementById('formRecoveryPassword');
+      const recoveryNewPassword     = document.getElementById('recoveryNewPassword');
+      const recoveryConfirmPassword = document.getElementById('recoveryConfirmPassword');
+      const recoveryNotice          = document.getElementById('recoveryNotice');
+      const btnSubmitRecovery       = document.getElementById('btnSubmitRecovery');
       const authSwitchLogin     = document.getElementById('authSwitchLogin');
       const authSwitchRegister  = document.getElementById('authSwitchRegister');
       const showRegisterButton  = document.getElementById('showRegisterButton');
@@ -224,19 +241,39 @@
 
       function setAuthMode(mode) {
         const isRegistering = mode === 'register';
-        form.classList.toggle('auth-form-hidden', isRegistering);
+        const isFirstTime = mode === 'first-time';
+
+        form.classList.toggle('auth-form-hidden', isRegistering || isFirstTime);
         registerForm.classList.toggle('auth-form-hidden', !isRegistering);
-        authSwitchLogin.classList.toggle('auth-form-hidden', isRegistering);
-        authSwitchRegister.classList.toggle('auth-form-hidden', !isRegistering);
-        googleSignInSection.classList.toggle('auth-form-hidden', isRegistering || selectedRole !== 'pasien');
-        authDivider.classList.toggle('auth-form-hidden', isRegistering);
-        authModeLabel.textContent = isRegistering ? 'Mulai perjalanan Anda bersama SIMKLINIK' : 'Akses aman untuk tim klinik';
-        authTitle.textContent = isRegistering ? 'Buat Akun Baru' : 'Masuk ke Akun Anda';
-        authSubtitle.textContent = isRegistering
-          ? 'Lengkapi data berikut untuk membuat akun layanan klinik Anda.'
-          : 'Pilih akses Anda, lalu masuk dengan akun yang terdaftar.';
-        hideError();
-        (isRegistering ? registerFullName : usernameInput).focus();
+        if (firstTimePasswordForm) {
+          firstTimePasswordForm.classList.toggle('auth-form-hidden', !isFirstTime);
+        }
+        authSwitchLogin.classList.toggle('auth-form-hidden', isRegistering || isFirstTime);
+        authSwitchRegister.classList.toggle('auth-form-hidden', !isRegistering || isFirstTime);
+        googleSignInSection.classList.toggle('auth-form-hidden', isRegistering || isFirstTime || selectedRole !== 'pasien');
+        authDivider.classList.toggle('auth-form-hidden', isRegistering || isFirstTime);
+
+        if (isFirstTime) {
+          authModeLabel.textContent = 'Registrasi Sandi Pasien Baru';
+          authTitle.textContent = 'Buat Kata Sandi Akun';
+          authSubtitle.textContent = 'Akun Google Anda berhasil terhubung. Silakan buat kata sandi agar akun Anda dapat login menggunakan sandi maupun tombol Google.';
+          hideError();
+          firstTimePassword?.focus();
+        } else if (isRegistering) {
+          authModeLabel.textContent = 'Mulai perjalanan Anda bersama SIMKLINIK';
+          authTitle.textContent = 'Buat Akun Baru';
+          authSubtitle.textContent = 'Lengkapi data berikut untuk membuat akun layanan klinik Anda.';
+          hideError();
+          registerFullName.focus();
+        } else {
+          authModeLabel.textContent = 'Akses aman untuk tim klinik & pasien';
+          authTitle.textContent = 'Masuk ke Akun Anda';
+          authSubtitle.textContent = selectedRole === 'pasien'
+            ? 'Akses portal pasien menggunakan email terdaftar.'
+            : `Akses khusus ${demoAccounts[selectedRole]?.label?.toLowerCase() || 'pengguna'} menggunakan username.`;
+          hideError();
+          usernameInput.focus();
+        }
       }
 
       async function loginWithSupabase(email, password, selectedRole) {
@@ -422,65 +459,228 @@
 
       initGoogleSignIn();
 
+      function showFirstTimePasswordSetup(user, userName) {
+        updateRole('pasien');
+        setAuthMode('first-time');
+        if (firstTimeNameDisplay) firstTimeNameDisplay.textContent = userName || 'Pasien SIMKLINIK';
+        if (firstTimeEmailDisplay) firstTimeEmailDisplay.textContent = user.email || '';
+        if (firstTimeAvatar) {
+          const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+          if (avatarUrl) {
+            firstTimeAvatar.innerHTML = `<img src="${avatarUrl}" alt="Avatar" />`;
+          } else {
+            firstTimeAvatar.textContent = (userName || 'P').charAt(0).toUpperCase();
+          }
+        }
+        if (window.Toast) {
+          window.Toast.info('Akun Google berhasil terhubung! Silakan buat kata sandi untuk akun Anda.');
+        }
+      }
+
+      if (firstTimePasswordForm) {
+        firstTimePasswordForm.addEventListener('submit', async e => {
+          e.preventDefault();
+          const p1 = firstTimePassword.value;
+          const p2 = firstTimePasswordConfirm.value;
+
+          const validation = window.authHelper ? window.authHelper.validatePasswordInput(p1, p2) : { valid: p1.length >= 6 && p1 === p2 };
+          if (!validation.valid) {
+            showError('Aktivasi Sandi Gagal', validation.error || 'Password minimal 6 karakter dan harus cocok.');
+            (p1.length < 6 ? firstTimePassword : firstTimePasswordConfirm).focus();
+            return;
+          }
+
+          btnFirstTimeSubmit.classList.add('is-loading');
+          btnFirstTimeSubmit.disabled = true;
+          hideError();
+
+          try {
+            const res = window.authHelper
+              ? await window.authHelper.setupNewUserPassword(supabaseClient, p1)
+              : await supabaseClient.auth.updateUser({ password: p1, data: { has_password: true } });
+
+            btnFirstTimeSubmit.classList.remove('is-loading');
+            btnFirstTimeSubmit.disabled = false;
+
+            if (res.success || !res.error) {
+              if (window.Toast) {
+                window.Toast.success('Kata sandi berhasil disimpan! Mengarahkan ke dashboard...');
+              }
+              setTimeout(() => {
+                window.location.href = 'pasien.html';
+              }, 700);
+            } else {
+              showError('Gagal Menyimpan Sandi', res.error);
+            }
+          } catch (err) {
+            btnFirstTimeSubmit.classList.remove('is-loading');
+            btnFirstTimeSubmit.disabled = false;
+            showError('Gagal Menyimpan Sandi', err.message);
+          }
+        });
+      }
+
       async function resumeSupabaseSession() {
         const { data, error } = await supabaseClient.auth.getSession();
         if (error || !data.session) return;
+        const user = data.session.user;
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('full_name, username, role')
-          .eq('id', data.session.user.id)
-          .single();
-        const userName = profile?.full_name || profile?.username || data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
+          .eq('id', user.id)
+          .maybeSingle();
+
+        const userName = profile?.full_name || profile?.username || user.user_metadata?.full_name || user.user_metadata?.name || user.email;
         if (userName) {
           try { localStorage.setItem('simklinik_user_name', userName); } catch (_) {}
         }
         const roleKey = profile?.role === 'Dokter' ? 'dokter' : profile?.role === 'Pasien' ? 'pasien' : 'petugas';
+
+        // Check if this is a first-time Google patient without password
+        if (roleKey === 'pasien' && window.authHelper && window.authHelper.isFirstTimeGoogleUser(user, profile)) {
+          showFirstTimePasswordSetup(user, userName);
+          return;
+        }
+
         window.location.href = roleKey + '.html';
       }
 
       resumeSupabaseSession();
 
-      /* Tombol Google jika CLIENT_ID belum dikonfigurasi → tampilkan panduan */
-      function showGoogleConfigModal() {
-        const msg = [
-          '🔧 Konfigurasi Google Sign-In',
-          '',
-          'Untuk mengaktifkan login Google, Anda perlu:',
-          '',
-          '1. Buka: https://console.cloud.google.com/',
-          '2. Buat project baru atau pilih yang sudah ada',
-          '3. Aktifkan "Google Identity Services"',
-          '4. Buat OAuth 2.0 Client ID:',
-          '   → APIs & Services → Credentials',
-          '   → Create Credentials → OAuth 2.0 Client ID',
-          '   → Application type: Web application',
-          '   → Authorized origins: http://localhost:8080',
-          '',
-          '5. Salin Client ID, lalu buka login.html',
-          '   dan ganti nilai GOOGLE_CLIENT_ID di baris konfigurasi.',
-          '',
-          'Format: xxxxxxxxxx.apps.googleusercontent.com',
-        ].join('\n');
-        alert(msg);
+      /* ── Recovery / Reset Password Handler ─────────────────── */
+      function checkRecoveryMode() {
+        const hash = window.location.hash || '';
+        const search = window.location.search || '';
+        if (hash.includes('type=recovery') || search.includes('type=recovery')) {
+          if (window.Modal) {
+            setTimeout(() => {
+              window.Modal.open('modalRecoveryPassword');
+              recoveryNewPassword?.focus();
+            }, 300);
+          }
+        }
       }
 
-      /* ── Remember me: restore on load ──────────────────────── */
-      try {
-        const saved = localStorage.getItem('simklinik_remember');
-        if (saved) {
-          usernameInput.value = saved;
-          document.getElementById('rememberMe').checked = true;
-          passwordInput.focus();
-        }
-      } catch {}
+      if (window.supabaseClient && window.supabaseClient.auth) {
+        supabaseClient.auth.onAuthStateChange(async (event) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            if (window.Modal) {
+              window.Modal.open('modalRecoveryPassword');
+              recoveryNewPassword?.focus();
+            }
+          }
+        });
+      }
 
-      /* ── Check lockout on page load ─────────────────────────── */
-      checkLockout();
+      if (formRecoveryPassword) {
+        formRecoveryPassword.addEventListener('submit', async e => {
+          e.preventDefault();
+          const p1 = recoveryNewPassword.value;
+          const p2 = recoveryConfirmPassword.value;
 
-      /* ── Forgot password ─────────────────────────────────────── */
-      document.getElementById('forgotLink').addEventListener('click', e => {
-        e.preventDefault();
-        alert('Silakan hubungi administrator sistem untuk reset password.\n\nEmail  : admin@simklinik.id\nTelp   : (021) 1234-5678\nJam kerja: 08.00–17.00 WIB');
-      });
+          const validation = window.authHelper ? window.authHelper.validatePasswordInput(p1, p2) : { valid: p1.length >= 6 && p1 === p2 };
+          if (!validation.valid) {
+            if (recoveryNotice) {
+              recoveryNotice.textContent = validation.error || 'Password tidak valid.';
+              recoveryNotice.style.color = '#b91c1c';
+            }
+            return;
+          }
+
+          btnSubmitRecovery.classList.add('is-loading');
+          btnSubmitRecovery.disabled = true;
+
+          const { error } = await supabaseClient.auth.updateUser({
+            password: p1,
+            data: { has_password: true }
+          });
+
+          btnSubmitRecovery.classList.remove('is-loading');
+          btnSubmitRecovery.disabled = false;
+
+          if (error) {
+            if (recoveryNotice) {
+              recoveryNotice.textContent = (window.translateError ? window.translateError(error.message) : error.message) || 'Gagal mengatur ulang kata sandi.';
+              recoveryNotice.style.color = '#b91c1c';
+            }
+          } else {
+            if (recoveryNotice) {
+              recoveryNotice.textContent = 'Kata sandi berhasil diperbarui! Mengarahkan ke dashboard...';
+              recoveryNotice.style.color = '#15803d';
+            }
+            if (window.Toast) {
+              window.Toast.success('Kata sandi baru berhasil disimpan.');
+            }
+            setTimeout(() => {
+              window.location.href = 'pasien.html';
+            }, 1000);
+          }
+        });
+      }
+
+      /* ── Forgot password modal ─────────────────────────────────── */
+      if (forgotLink) {
+        forgotLink.addEventListener('click', e => {
+          e.preventDefault();
+          if (window.Modal) {
+            if (forgotNotice) forgotNotice.textContent = '';
+            if (forgotEmailInput) {
+              forgotEmailInput.value = (selectedRole === 'pasien' && usernameInput.value.includes('@')) ? usernameInput.value : '';
+            }
+            window.Modal.open('modalForgotPassword');
+            setTimeout(() => forgotEmailInput?.focus(), 200);
+          }
+        });
+      }
+
+      if (formForgotPassword) {
+        formForgotPassword.addEventListener('submit', async e => {
+          e.preventDefault();
+          const email = forgotEmailInput.value.trim();
+          if (!email) {
+            if (forgotNotice) {
+              forgotNotice.textContent = 'Alamat email wajib diisi.';
+              forgotNotice.style.color = '#b91c1c';
+            }
+            forgotEmailInput.focus();
+            return;
+          }
+
+          btnSubmitForgot.classList.add('is-loading');
+          btnSubmitForgot.disabled = true;
+          if (forgotNotice) {
+            forgotNotice.textContent = 'Mengirim tautan reset...';
+            forgotNotice.style.color = '#0284c7';
+          }
+
+          const redirectUrl = window.location.origin + window.location.pathname;
+          const res = window.authHelper
+            ? await window.authHelper.requestPasswordReset(supabaseClient, email, redirectUrl)
+            : { success: false, error: 'Helper tidak tersedia.' };
+
+          btnSubmitForgot.classList.remove('is-loading');
+          btnSubmitForgot.disabled = false;
+
+          if (res.success) {
+            if (forgotNotice) {
+              forgotNotice.textContent = res.message;
+              forgotNotice.style.color = '#15803d';
+            }
+            if (window.Toast) {
+              window.Toast.success(res.message);
+            }
+            setTimeout(() => {
+              if (window.Modal) window.Modal.close('modalForgotPassword');
+            }, 3000);
+          } else {
+            if (forgotNotice) {
+              forgotNotice.textContent = res.error;
+              forgotNotice.style.color = '#b91c1c';
+            }
+          }
+        });
+      }
+
+      checkRecoveryMode();
 
     })();

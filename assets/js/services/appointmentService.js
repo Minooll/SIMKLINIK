@@ -586,6 +586,117 @@
       } catch (err) {
         return { success: true, data: localList };
       }
+    },
+
+    /**
+     * Evaluates whether an appointment can be cancelled according to the 12-hour rule
+     * @param {string} appointmentDate - YYYY-MM-DD
+     * @param {string} appointmentTime - HH:mm:ss
+     * @param {Date} [now=new Date()]
+     * @returns {{ allowed: boolean, hoursRemaining: number, reason: string|null }}
+     */
+    canCancelAppointment(appointmentDate, appointmentTime, now = new Date()) {
+      if (!appointmentDate) return { allowed: false, hoursRemaining: 0, reason: 'Tanggal janji tidak valid.' };
+      const timeStr = appointmentTime ? appointmentTime.slice(0, 8) : '09:00:00';
+      let targetDate = new Date(`${appointmentDate}T${timeStr}`);
+      if (isNaN(targetDate.getTime())) {
+        const months = {
+          jan: '01', feb: '02', mar: '03', apr: '04', mei: '05', may: '05', jun: '06',
+          jul: '07', agu: '08', aug: '08', sep: '09', okt: '10', oct: '10', nop: '11',
+          nov: '11', des: '12', dec: '12'
+        };
+        const parts = String(appointmentDate).trim().split(/[\s-]+/);
+        if (parts.length === 3) {
+          const day = parts[0].padStart(2, '0');
+          const mKey = parts[1].toLowerCase().slice(0, 3);
+          const month = months[mKey] || '01';
+          const year = parts[2];
+          targetDate = new Date(`${year}-${month}-${day}T${timeStr}`);
+        } else {
+          targetDate = new Date(appointmentDate);
+        }
+      }
+      if (isNaN(targetDate.getTime())) {
+        return { allowed: false, hoursRemaining: 0, reason: 'Format jadwal tidak valid.' };
+      }
+
+      const diffMs = targetDate.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+
+      if (diffHours < 0) {
+        return {
+          allowed: false,
+          hoursRemaining: 0,
+          reason: 'Jadwal konsultasi sudah lewat dan tidak dapat dibatalkan.'
+        };
+      }
+
+      if (diffHours < 12) {
+        return {
+          allowed: false,
+          hoursRemaining: Math.round(diffHours * 10) / 10,
+          reason: 'Janji temu hanya dapat dibatalkan paling lambat 12 jam sebelum jadwal konsultasi.'
+        };
+      }
+
+      return {
+        allowed: true,
+        hoursRemaining: Math.round(diffHours * 10) / 10,
+        reason: null
+      };
+    },
+
+    /**
+     * Cancels an appointment if 12-hour policy is met
+     * @param {object|string} appointmentOrId
+     * @param {string} [actorRole='pasien']
+     * @param {Date} [now=new Date()]
+     * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
+     */
+    async cancelAppointment(appointmentOrId, actorRole = 'pasien', now = new Date()) {
+      let appt = appointmentOrId;
+      const client = getClient();
+      const localList = getLocalAppointments();
+
+      if (typeof appointmentOrId === 'string') {
+        appt = localList.find(a => a.id === appointmentOrId);
+        if (!appt && client) {
+          try {
+            const { data } = await client.from('appointments').select('*').eq('id', appointmentOrId).maybeSingle();
+            if (data) appt = data;
+          } catch (_) {}
+        }
+      }
+
+      if (!appt) {
+        return { success: false, error: 'Data janji temu tidak ditemukan.' };
+      }
+
+      const check = this.canCancelAppointment(appt.appointment_date, appt.appointment_time, now);
+      if (!check.allowed) {
+        return { success: false, error: check.reason, hoursRemaining: check.hoursRemaining };
+      }
+
+      // Update local storage
+      const updatedLocal = localList.map(a => a.id === appt.id ? { ...a, status: 'Dibatalkan' } : a);
+      try {
+        localStorage.setItem(LOCAL_APPT_KEY, JSON.stringify(updatedLocal));
+      } catch (_) {}
+
+      // Update Supabase if client available and valid UUID
+      if (client && isUuid(appt.id)) {
+        try {
+          await client.from('appointments').update({ status: 'Dibatalkan' }).eq('id', appt.id);
+        } catch (dbErr) {
+          console.warn('[cancelAppointment DB notice]', dbErr.message);
+        }
+      }
+
+      return {
+        success: true,
+        data: { ...appt, status: 'Dibatalkan' },
+        message: 'Janji temu berhasil dibatalkan.'
+      };
     }
   };
 

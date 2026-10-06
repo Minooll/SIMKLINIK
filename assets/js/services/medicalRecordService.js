@@ -254,6 +254,19 @@
         console.warn('[medicalRecordService.saveMedicalRecord]', err.message);
         return { success: false, error: err.message };
       }
+    },
+
+    /**
+     * Extracts the latest medical record sorted by date
+     */
+    extractLatestRecord(records) {
+      if (!Array.isArray(records) || records.length === 0) return null;
+      const sorted = [...records].sort((a, b) => {
+        const dateA = new Date(a.created_at || a.record_date || a.visit_date || 0).getTime();
+        const dateB = new Date(b.created_at || b.record_date || b.visit_date || 0).getTime();
+        return dateB - dateA;
+      });
+      return sorted[0];
     }
   };
 

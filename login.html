@@ -20,6 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config/supabase.js"></script>
 
+    <link rel="stylesheet" href="assets/css/modal.css" />
     <link rel="stylesheet" href="assets/css/auth.css" />
   </head>
 
@@ -694,6 +695,63 @@
           </p>
         </form>
 
+        <!-- Form Aktivasi Sandi Akun Baru (Login Google Pertama Kali) -->
+        <form
+          id="firstTimePasswordForm"
+          class="auth-form-hidden"
+          method="post"
+          action="#"
+          novalidate
+          autocomplete="on"
+          aria-label="Form aktivasi kata sandi akun baru"
+        >
+          <div class="user-chip-summary" id="firstTimeUserChip">
+            <div class="user-chip-avatar" id="firstTimeAvatar">G</div>
+            <div class="user-chip-info">
+              <strong id="firstTimeNameDisplay">Pengguna Google</strong>
+              <small id="firstTimeEmailDisplay">email@gmail.com</small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="firstTimePassword">
+              Buat Kata Sandi Akun <span class="required-star" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="password"
+              id="firstTimePassword"
+              class="form-input form-input-plain"
+              placeholder="Minimal 6 karakter"
+              required
+              minlength="6"
+              maxlength="128"
+              autocomplete="new-password"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="firstTimePasswordConfirm">
+              Konfirmasi Kata Sandi <span class="required-star" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="password"
+              id="firstTimePasswordConfirm"
+              class="form-input form-input-plain"
+              placeholder="Ulangi kata sandi"
+              required
+              minlength="6"
+              maxlength="128"
+              autocomplete="new-password"
+            />
+          </div>
+          <button type="submit" class="btn-submit" id="btnFirstTimeSubmit">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn-text">Aktifkan Sandi &amp; Masuk Dashboard</span>
+          </button>
+          <p class="registration-note">
+            <span class="registration-note-icon" aria-hidden="true">i</span>
+            Kata sandi ini memungkinkan Anda masuk dengan email/kata sandi maupun tombol Google.
+          </p>
+        </form>
+
         <p class="auth-switch" id="authSwitchLogin">
           Belum punya akun?
           <button
@@ -728,7 +786,77 @@
       </section>
     </main>
 
+    <!-- Modal Lupa Kata Sandi -->
+    <div class="modal-backdrop" id="modalForgotPassword" role="dialog" aria-modal="true" aria-labelledby="modalForgotTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalForgotTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Lupa Kata Sandi
+          </h3>
+          <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="formForgotPassword" novalidate>
+          <div class="modal-body">
+            <div class="modal-info-box">
+              Masukkan alamat email yang terdaftar pada akun SIMKLINIK Anda. Kami akan mengirimkan tautan aman untuk mengatur ulang kata sandi Anda.
+            </div>
+            <div class="modal-form-group">
+              <label for="forgotEmailInput">Alamat Email Terdaftar <span class="required-star">*</span></label>
+              <input type="email" id="forgotEmailInput" class="form-input form-input-plain" placeholder="nama@email.com" required autocomplete="email" />
+            </div>
+            <p class="form-notice" id="forgotNotice"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-modal-close>Batal</button>
+            <button type="submit" class="btn-modal-submit" id="btnSubmitForgot">
+              <span class="btn-spinner"></span>
+              <span>Kirim Tautan Reset</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Atur Ulang Sandi (Recovery Token) -->
+    <div class="modal-backdrop" id="modalRecoveryPassword" role="dialog" aria-modal="true" aria-labelledby="modalRecoveryTitle" data-backdrop="static" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalRecoveryTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Atur Ulang Kata Sandi
+          </h3>
+        </div>
+        <form id="formRecoveryPassword" novalidate>
+          <div class="modal-body">
+            <div class="modal-info-box">
+              Silakan buat kata sandi baru untuk akun Anda (minimal 6 karakter).
+            </div>
+            <div class="modal-form-group">
+              <label for="recoveryNewPassword">Kata Sandi Baru <span class="required-star">*</span></label>
+              <input type="password" id="recoveryNewPassword" class="form-input form-input-plain" placeholder="Minimal 6 karakter" minlength="6" required />
+            </div>
+            <div class="modal-form-group">
+              <label for="recoveryConfirmPassword">Konfirmasi Kata Sandi Baru <span class="required-star">*</span></label>
+              <input type="password" id="recoveryConfirmPassword" class="form-input form-input-plain" placeholder="Ulangi kata sandi baru" minlength="6" required />
+            </div>
+            <p class="form-notice" id="recoveryNotice"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn-modal-submit" id="btnSubmitRecovery">
+              <span class="btn-spinner"></span>
+              <span>Simpan Kata Sandi Baru</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="assets/js/components/modal.js"></script>
     <script src="assets/js/components/toast.js"></script>
+    <script src="assets/js/auth/authHelper.js"></script>
     <script src="assets/js/auth/login.js"></script>
   </body>
 </html>

@@ -78,6 +78,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span>Profil Medis</span>
               </button>
+              <button class="secondary-button" id="btnOpenChangePassword" data-modal-target="modalChangePasswordPasien">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Ubah Sandi</span>
+              </button>
               <button class="primary-button" id="primaryAction" data-modal-target="modalBooking">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <span id="primaryActionText">Buat Janji</span>
@@ -109,12 +113,13 @@
           <section class="panel lower-panel">
             <div class="panel-heading">
               <div>
-                <p class="eyebrow">DATA</p>
+                <p class="eyebrow" id="lowerEyebrow">DATA</p>
                 <h2 id="lowerTitle">Ringkasan</h2>
               </div>
               <button class="text-button" id="btnViewAllLower">Lihat selengkapnya <span>&rarr;</span></button>
             </div>
-            <div class="table-wrap">
+            <div id="latestRmeContainer" class="latest-rme-container"></div>
+            <div class="table-wrap" id="lowerTableWrap">
               <table>
                 <thead>
                   <tr id="tableHead"></tr>
@@ -173,6 +178,13 @@
             </div>
             <div class="modal-info-box" id="bookingQuotaNotice">
               Silakan tentukan poli, dokter, dan tanggal untuk cek ketersediaan kuota.
+            </div>
+            <div class="modal-policy-notice" id="bookingCancellationNotice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="policy-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <div>
+                <strong>Ketentuan Pembatalan Janji Temu (Batas 12 Jam):</strong>
+                <p class="policy-desc">Janji temu hanya dapat dibatalkan paling lambat <strong>12 jam</strong> sebelum jadwal konsultasi. Jika sudah memasuki 12 jam sebelum jadwal, tombol pembatalan akan berwarna abu-abu (terkunci) dan janji tidak dapat dibatalkan oleh pasien maupun dokter.</p>
+              </div>
             </div>
             <div class="modal-form-group">
               <label for="bookingComplaint">Keluhan Utama / Alasan Kunjungan</label>
@@ -460,9 +472,53 @@
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════════
+         MODAL: UBAH KATA SANDI PASIEN
+         ══════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="modalChangePasswordPasien" role="dialog" aria-modal="true" aria-labelledby="modalChangePasswordPasienTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalChangePasswordPasienTitle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Ubah Kata Sandi Akun
+          </h3>
+          <button class="modal-close-btn" data-modal-close aria-label="Tutup modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="formChangePasswordPasien" novalidate>
+          <div class="modal-body">
+            <div class="modal-info-box">
+              Pastikan kata sandi baru Anda minimal terdiri dari 6 karakter untuk menjaga keamanan akses Rekam Medis Elektronik (RME) dan akun Anda.
+            </div>
+
+            <div class="modal-form-group">
+              <label for="changePasswordNew">Kata Sandi Baru <span class="required-star">*</span></label>
+              <input type="password" id="changePasswordNew" class="form-input" placeholder="Minimal 6 karakter" minlength="6" required autocomplete="new-password" />
+            </div>
+
+            <div class="modal-form-group">
+              <label for="changePasswordConfirm">Konfirmasi Kata Sandi Baru <span class="required-star">*</span></label>
+              <input type="password" id="changePasswordConfirm" class="form-input" placeholder="Ulangi kata sandi baru" minlength="6" required autocomplete="new-password" />
+            </div>
+
+            <p class="form-notice" id="changePasswordNotice"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-modal-close>Batal</button>
+            <button type="submit" class="btn-modal-submit" id="btnSubmitChangePassword">
+              <span class="btn-spinner"></span>
+              <span>Simpan Kata Sandi</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- UI Components & Supabase Data Services -->
     <script src="assets/js/components/modal.js"></script>
     <script src="assets/js/components/toast.js"></script>
+    <script src="assets/js/auth/authHelper.js"></script>
     <script src="assets/js/services/patientService.js"></script>
     <script src="assets/js/services/appointmentService.js"></script>
     <script src="assets/js/services/queueService.js"></script>

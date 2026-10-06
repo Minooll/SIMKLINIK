@@ -160,6 +160,22 @@
   color: #b91c1c;
 }
 
+.action-btn-locked {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn-locked:hover {
+  background: #e2e8f0;
+  color: #475569;
+  border-color: #94a3b8;
+}
+
 /* ── Petugas Search Bar & Filter Pills ── */
 .petugas-search-bar-wrap {
   display: flex;
@@ -983,6 +999,248 @@ body[data-role="petugas"] .lower-panel .table-wrap table thead th {
   color: #475569;
   font-weight: 500;
   padding: 6px 0;
+}
+
+/* ── Pasien Dashboard: Latest Medical Record & e-Prescription Showcase ── */
+.latest-rme-container {
+  padding: 16px 20px 20px;
+}
+
+.latest-rme-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: box-shadow var(--transition-fast);
+}
+
+.latest-rme-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.latest-rme-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.latest-rme-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-rme-highlight {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.02em;
+}
+
+.latest-rme-doctor-info strong {
+  display: block;
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.latest-rme-doctor-info small {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.latest-rme-clinical-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.clinical-prop label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.clinical-prop strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.clinical-prop p {
+  margin: 0;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.45;
+}
+
+/* ── e-Prescription (Resep Obat Siap Tebus) Box ── */
+.latest-rme-rx-box {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%);
+  border: 1px solid #a7f3d0;
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.rx-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rx-box-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.rx-box-num {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  color: #047857;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+}
+
+.rx-items-list {
+  display: grid;
+  gap: 10px;
+}
+
+.rx-item-chip {
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.rx-item-main strong {
+  font-size: 13.5px;
+  color: #0f172a;
+  display: block;
+}
+
+.rx-item-main small {
+  font-size: 12px;
+  color: #059669;
+  font-weight: 500;
+}
+
+.rx-item-qty {
+  font-size: 12px;
+  font-weight: 700;
+  color: #047857;
+  background: #ecfdf5;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.latest-rme-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.btn-buy-medication {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.28);
+}
+
+.btn-buy-medication:hover {
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(13, 148, 136, 0.35);
+}
+
+.btn-ai-explain-med-outline {
+  background: #ffffff;
+  color: #0284c7;
+  border: 1px solid #7dd3fc;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-ai-explain-med-outline:hover {
+  background: #f0f9ff;
+  border-color: #38bdf8;
+  color: #0369a1;
+}
+
+.btn-detail-rme-outline {
+  background: #ffffff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.btn-detail-rme-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 
