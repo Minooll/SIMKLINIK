@@ -95,11 +95,11 @@
 <body>
   <!-- Header Navigasi Publik -->
   <header class="landing-nav">
-    <div style="display: flex; align-items: center; gap: 0.75rem;">
-      <div class="brand-badge">PWR</div>
+    <div style="display: flex; align-items: center; gap: 0.85rem;">
+      <img src="assets/images/logo-simklinik-icon.svg" alt="Logo SIMKlinik" class="brand-logo-img">
       <div>
-        <strong style="font-size: 1.1rem; color: var(--text-main);">SIMKLINIK Purworejo</strong>
-        <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Platform Agregator Faskes Mandiri</span>
+        <strong style="font-size: 1.15rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.3px;">SIMKLINIK Purworejo</strong>
+        <span style="display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Platform Agregator Faskes Mandiri Regional</span>
       </div>
     </div>
     <div style="display: flex; gap: 1rem; align-items: center;">
@@ -190,7 +190,10 @@
   <!-- Footer -->
   <footer style="background: #0f172a; color: white; padding: 3rem 2rem; text-align: center; margin-top: 5rem;">
     <div style="max-width: 800px; margin: 0 auto;">
-      <div class="brand-badge" style="display: inline-block; margin-bottom: 1rem;">SIMKLINIK PURWOREJO</div>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <img src="assets/images/logo-simklinik-icon.svg" style="width:36px; height:36px;" alt="">
+        <strong style="font-size: 1.25rem; letter-spacing: -0.5px;">SIMKLINIK PURWOREJO</strong>
+      </div>
       <p style="opacity: 0.8; font-size: 0.9rem; line-height: 1.6;">
         Sistem Informasi Manajemen Fasilitas Kesehatan Tingkat Pertama (Klinik Pratama & Mandiri) Wilayah Kabupaten Purworejo, Jawa Tengah. Standar Kepatuhan Permenkes No. 24 Tahun 2022 & UU No. 27 Tahun 2022.
       </p>
@@ -213,7 +216,7 @@
       grid.innerHTML = '';
 
       for (const clinic of clinics) {
-        const doctors = await window.getDoctorsByClinic(clinic.id);
+        const doctors = await window.getDoctorsByClinic(clinic.id, true);
         const card = document.createElement('div');
         card.className = 'clinic-card';
         card.innerHTML = `
@@ -222,22 +225,37 @@
             <span class="clinic-district">📍 Kec. ${clinic.district}</span>
           </div>
           <div class="clinic-card-body">
-            <p style="color: var(--text-muted); font-size: 0.9rem;">${clinic.address}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-              <span style="font-size: 0.8rem; font-weight: 600;">Status Antrean:</span>
-              <span class="queue-badge lengang">Antrean Lengang</span>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">${clinic.address}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Status Antrean:</span>
+              <span class="queue-badge lengang">🟢 Antrean Lengang</span>
             </div>
             <div>
-              <span style="font-size: 0.8rem; font-weight: 600;">Dokter Praktik Hari Ini:</span>
-              <ul style="padding-left: 1.25rem; font-size: 0.825rem; color: var(--text-muted); margin-top: 0.25rem;">
-                ${doctors.map(d => `<li>${d.full_name} (${d.specialty}) — Kuota: ${d.daily_quota}</li>`).join('')}
-              </ul>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Dokter Praktik:</span>
+              <div class="doctor-chip-list">
+                ${doctors.map(d => {
+                  const isCuti = d.status === 'cuti';
+                  const icon = d.specialty.includes('Gigi') ? '🦷' : (d.specialty.includes('Anak') ? '👶' : '🩺');
+                  return `
+                    <div class="doctor-chip-item">
+                      <div class="doctor-chip-name">
+                        <span>${icon}</span>
+                        <span>${d.full_name}</span>
+                        <span class="doctor-chip-spec">(${d.specialty})</span>
+                      </div>
+                      <div>
+                        ${isCuti ? '<span class="queue-badge cuti" style="font-size:0.675rem;">🏖️ Cuti</span>' : `<span class="queue-badge lengang" style="font-size:0.675rem;">Kuota: ${d.daily_quota}/hr</span>`}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
             </div>
           </div>
           <div class="clinic-card-footer">
             <span style="font-size: 0.8rem; color: var(--text-muted);">Kode: ${clinic.referral_code}</span>
-            <a href="login.html" class="btn btn-primary" style="font-size: 0.8rem;">
-              📅 Ambil Antrean
+            <a href="login.html" class="btn btn-primary" style="font-size: 0.825rem;">
+              📅 Ambil Antrean ➔
             </a>
           </div>
         `;

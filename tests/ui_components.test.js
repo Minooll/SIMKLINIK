@@ -25,3 +25,29 @@ test('Toast and Modal module exports are valid in Node/CommonJS', () => {
   assert.ok(typeof closeModal === 'function');
   assert.ok(typeof showToast === 'function');
 });
+
+test('SIMKlinik logo icon blends ramah, higienis, sistem and is integrated across all 5 pages', () => {
+  const logoPath = path.join(__dirname, '../assets/images/logo-simklinik-icon.svg');
+  assert.ok(fs.existsSync(logoPath), 'logo-simklinik-icon.svg must exist');
+  const logoSvg = fs.readFileSync(logoPath, 'utf8');
+  assert.match(logoSvg, /<svg/i, 'logo must be valid SVG');
+  assert.match(logoSvg, /gradient|path|circle/i, 'logo must contain vector elements');
+
+  const pages = ['index.html', 'login.html', 'pasien.html', 'dokter.html', 'pemilik.html'];
+  for (const page of pages) {
+    const html = fs.readFileSync(path.join(__dirname, '..', page), 'utf8');
+    assert.match(
+      html,
+      /logo-simklinik-icon\.svg/i,
+      `${page} must display logo-simklinik-icon.svg to the left of SIMKLINIK`
+    );
+  }
+
+  // Deep-layer booking UI elements in pasien.html
+  const pasienHtml = fs.readFileSync(path.join(__dirname, '../pasien.html'), 'utf8');
+  assert.match(pasienHtml, /doctor-preview-box/i, 'pasien.html must include rich doctor preview box');
+  assert.match(pasienHtml, /quick-chip-group/i, 'pasien.html must include quick date selection chips');
+  assert.match(pasienHtml, /time-slot-pill/i, 'pasien.html must include time slot pill buttons');
+  assert.match(pasienHtml, /booking-summary-card/i, 'pasien.html must include live booking summary card');
+});
+

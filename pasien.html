@@ -14,7 +14,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="brand-badge">PWR</div>
+        <img src="assets/images/logo-simklinik-icon.svg" alt="Logo SIMKlinik" class="brand-logo-img">
         <div>
           <div class="brand-title">SIMKLINIK</div>
           <div class="brand-subtitle">Portal Pasien Regional</div>
@@ -230,12 +230,15 @@
   <div class="modal-backdrop" id="modal-profile-onboarding">
     <div class="modal-container">
       <div class="modal-header">
-        <h3 class="modal-title">📋 Lengkapi Profil Rekam Medis Wajib</h3>
+        <h3 class="modal-title">
+          <img src="assets/images/logo-simklinik-icon.svg" style="width:26px; height:26px;" alt="">
+          Lengkapi Profil Rekam Medis Wajib
+        </h3>
         <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
       </div>
       <form id="profile-form">
         <div class="modal-body">
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.45;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.45;">
             Sesuai standar Permenkes No. 24/2022, data Kartu Keluarga dan NIK wajib dilengkapi sebelum membuat janji temu di klinik.
           </p>
           <div class="form-group" style="margin-bottom: 1rem;">
@@ -280,53 +283,111 @@
     </div>
   </div>
 
-  <!-- MODAL 2: Booking Kuota Dokter & Peringatan 12 Jam -->
+  <!-- MODAL 2: Booking Kuota Dokter & Peringatan 12 Jam (Didesain Elegan & Komprehensif) -->
   <div class="modal-backdrop" id="modal-booking">
-    <div class="modal-container">
+    <div class="modal-container" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 class="modal-title">📅 Reservasi Kuota Pemeriksaan Dokter</h3>
+        <h3 class="modal-title">
+          <img src="assets/images/logo-simklinik-icon.svg" style="width:26px; height:26px;" alt="">
+          Reservasi Kuota Pemeriksaan Dokter
+        </h3>
         <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
       </div>
       <form id="booking-form">
-        <div class="modal-body">
+        <div class="modal-body" style="padding: 1.5rem;">
           <input type="hidden" id="booking-clinic-id">
-          <div style="margin-bottom: 1rem; background: var(--primary-light); padding: 0.875rem; border-radius: var(--radius-md);">
-            <div style="font-weight: 700; color: var(--primary-dark);" id="booking-clinic-name">Klinik Purworejo</div>
-            <div style="font-size: 0.85rem; color: var(--primary-dark);" id="booking-clinic-district">Kecamatan</div>
+
+          <!-- Clinic Header Badge -->
+          <div class="booking-clinic-badge-box">
+            <div class="booking-clinic-icon-circle">🏥</div>
+            <div>
+              <div style="font-weight: 800; font-size: 1.05rem; color: var(--primary-dark);" id="booking-clinic-name">Klinik Purworejo</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);" id="booking-clinic-district">Kecamatan</div>
+            </div>
           </div>
 
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label">Pilih Dokter Praktik</label>
+          <!-- 1. Pilihan Dokter Praktik -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="booking-doctor-select">Pilih Dokter Praktik</label>
             <select id="booking-doctor-select" class="form-input" required>
               <!-- Filled dynamically -->
             </select>
+
+            <!-- Dynamic Doctor Preview Card -->
+            <div class="doctor-preview-box" id="booking-doctor-preview-box">
+              <div class="doctor-avatar-circle" id="preview-doctor-avatar">👨‍⚕️</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);" id="preview-doctor-name">Memuat Data Dokter...</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="preview-doctor-spec">Spesialisasi Medis</div>
+                <div style="font-size: 0.775rem; color: var(--primary-dark); font-weight: 700; margin-top: 0.2rem;" id="preview-doctor-quota">
+                  Kapasitas Kuota Harian: -
+                </div>
+              </div>
+              <div id="preview-doctor-badge-status">
+                <span class="queue-badge lengang">Siap Melayani</span>
+              </div>
+            </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-            <div class="form-group">
-              <label class="form-label">Tanggal Kunjungan</label>
-              <input type="date" id="booking-date-input" class="form-input" required>
+          <!-- 2. Tanggal Kunjungan dengan Pilihan Cepat -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" for="booking-date-input" style="margin-bottom: 0;">Tanggal Kunjungan</label>
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Pilih Cepat:</span>
             </div>
-            <div class="form-group">
-              <label class="form-label">Sesi Jam Periksa</label>
-              <select id="booking-time-select" class="form-input" required>
-                <option value="08:30:00">Pagi (08:30 WIB)</option>
-                <option value="10:00:00">Pagi (10:00 WIB)</option>
-                <option value="16:00:00">Sore (16:00 WIB)</option>
-                <option value="19:00:00">Malam (19:00 WIB)</option>
-              </select>
+            <div class="quick-chip-group" id="quick-date-chips" style="margin-bottom: 0.45rem;">
+              <button type="button" class="quick-chip" data-days="0">📅 Hari Ini</button>
+              <button type="button" class="quick-chip active" data-days="1">📅 Besok (Disarankan)</button>
+              <button type="button" class="quick-chip" data-days="2">📅 Lusa</button>
+            </div>
+            <input type="date" id="booking-date-input" class="form-input" required>
+          </div>
+
+          <!-- 3. Sesi Jam Periksa dengan Tombol Pill -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="booking-time-select">Sesi Jam Periksa</label>
+            <div class="time-slot-grid" id="time-slot-pills" style="margin-bottom: 0.45rem;">
+              <button type="button" class="time-slot-pill active" data-time="08:30:00">☀️ Pagi (08:30 WIB)</button>
+              <button type="button" class="time-slot-pill" data-time="10:00:00">🌤️ Siang (10:00 WIB)</button>
+              <button type="button" class="time-slot-pill" data-time="16:00:00">🌇 Sore (16:00 WIB)</button>
+              <button type="button" class="time-slot-pill" data-time="19:00:00">🌙 Malam (19:00 WIB)</button>
+            </div>
+            <select id="booking-time-select" class="form-input" required style="display: none;">
+              <option value="08:30:00" selected>Pagi (08:30 WIB)</option>
+              <option value="10:00:00">Pagi (10:00 WIB)</option>
+              <option value="16:00:00">Sore (16:00 WIB)</option>
+              <option value="19:00:00">Malam (19:00 WIB)</option>
+            </select>
+          </div>
+
+          <!-- 4. Ringkasan Tiket Realtime -->
+          <div class="booking-summary-card">
+            <div class="booking-summary-header">
+              <span>📋 Ringkasan Janji Temu Pasien</span>
+              <span style="color: var(--primary-dark); font-weight: 700;">🟢 Kuota Tersedia</span>
+            </div>
+            <div class="booking-summary-grid">
+              <div><strong>Pasien:</strong> <span id="summary-patient-name">Bpk. Ahmad Santoso</span></div>
+              <div><strong>Dokter:</strong> <span id="summary-doctor-name">dr. Dokter</span></div>
+              <div><strong>Jadwal:</strong> <span id="summary-schedule-text">Besok, 08:30 WIB</span></div>
+              <div><strong>Layanan:</strong> Pemeriksaan Faskes</div>
             </div>
           </div>
 
-          <!-- PERINGATAN KETAT 12 JAM -->
-          <div style="background: var(--warning-bg); border-left: 4px solid var(--warning); padding: 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; color: #92400e;">
-            <strong>⚠️ Perhatian Aturan Pembatalan:</strong><br>
-            Janji temu hanya dapat dibatalkan maksimal <strong>12 jam</strong> sebelum jadwal pemeriksaan. Pembatalan dengan sisa waktu kurang dari 12 jam akan otomatis dikunci oleh sistem.
+          <!-- 5. PERINGATAN KETAT 12 JAM -->
+          <div class="booking-caution-box">
+            <span style="font-size: 1.25rem; line-height: 1;">🔒</span>
+            <div>
+              <strong>Ketentuan Pembatalan Ketat (Batas 12 Jam):</strong><br>
+              Janji temu hanya dapat dibatalkan maksimal <strong>12 jam</strong> sebelum jadwal pemeriksaan. Pembatalan dengan sisa waktu kurang dari 12 jam akan otomatis dikunci oleh sistem faskes.
+            </div>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal>Batal</button>
-          <button type="submit" class="btn btn-primary">Konfirmasi & Ambil Nomor Antrean</button>
+          <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+            ✅ Konfirmasi & Ambil Nomor Antrean
+          </button>
         </div>
       </form>
     </div>
@@ -365,6 +426,7 @@
     };
 
     let countdownInterval = null;
+    let currentModalDoctors = [];
 
     // Tab Switching Logic
     const patientNavItems = document.querySelectorAll('#patient-nav-menu .nav-item[data-view]');
@@ -426,30 +488,94 @@
             <span class="clinic-district">📍 Kec. ${clinic.district}</span>
           </div>
           <div class="clinic-card-body">
-            <p style="color: var(--text-muted);">${clinic.address}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-              <span style="font-size: 0.8rem; font-weight: 600;">Status Antrean:</span>
-              <span class="queue-badge lengang">Lengang (< 5)</span>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">${clinic.address}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Status Antrean:</span>
+              <span class="queue-badge lengang">🟢 Lengang (&lt; 5 Pasien)</span>
             </div>
             <div>
-              <span style="font-size: 0.8rem; font-weight: 600;">Dokter Praktik:</span>
-              <ul style="padding-left: 1.25rem; font-size: 0.825rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Dokter Praktik:</span>
+              <div class="doctor-chip-list">
                 ${doctors.map(d => {
                   const isCuti = d.status === 'cuti';
-                  return `<li>${d.full_name} (${d.specialty}) ${isCuti ? '<span class="queue-badge cuti" style="font-size:0.65rem; padding: 0.1rem 0.4rem;">Cuti</span>' : `<span style="color:var(--primary-dark); font-weight:600;">Kuota: ${d.daily_quota}</span>`}</li>`;
+                  const icon = d.specialty.includes('Gigi') ? '🦷' : (d.specialty.includes('Anak') ? '👶' : '🩺');
+                  return `
+                    <div class="doctor-chip-item">
+                      <div class="doctor-chip-name">
+                        <span>${icon}</span>
+                        <span>${d.full_name}</span>
+                        <span class="doctor-chip-spec">(${d.specialty})</span>
+                      </div>
+                      <div>
+                        ${isCuti ? '<span class="queue-badge cuti" style="font-size:0.675rem;">🏖️ Cuti</span>' : `<span class="queue-badge lengang" style="font-size:0.675rem;">Kuota: ${d.daily_quota}/hr</span>`}
+                      </div>
+                    </div>
+                  `;
                 }).join('')}
-              </ul>
+              </div>
             </div>
           </div>
           <div class="clinic-card-footer">
             <span style="font-size: 0.8rem; color: var(--text-muted);">📞 ${clinic.phone}</span>
             <button type="button" class="btn btn-primary" onclick="openBookingModal('${clinic.id}')">
-              📅 Buat Janji
+              📅 Buat Janji ➔
             </button>
           </div>
         `;
         grid.appendChild(card);
       }
+    }
+
+    // Sinkronisasi Pratinjau Dokter di Modal Booking
+    function syncDoctorPreview() {
+      const docSelect = document.getElementById('booking-doctor-select');
+      const selectedId = docSelect.value;
+      const doc = currentModalDoctors.find(d => d.id === selectedId);
+
+      const nameEl = document.getElementById('preview-doctor-name');
+      const specEl = document.getElementById('preview-doctor-spec');
+      const quotaEl = document.getElementById('preview-doctor-quota');
+      const avatarEl = document.getElementById('preview-doctor-avatar');
+      const statusEl = document.getElementById('preview-doctor-badge-status');
+      const summaryDocEl = document.getElementById('summary-doctor-name');
+
+      if (!doc) {
+        nameEl.textContent = 'Pilih Dokter Praktik';
+        specEl.textContent = 'Spesialisasi Medis';
+        quotaEl.textContent = 'Kapasitas Kuota Harian: -';
+        return;
+      }
+
+      nameEl.textContent = doc.full_name;
+      specEl.textContent = `${doc.specialty} • ${doc.sip_number || 'SIP Aktif'}`;
+      quotaEl.textContent = `Kapasitas Kuota Harian: ${doc.daily_quota} Pasien/Hari`;
+      summaryDocEl.textContent = doc.full_name;
+
+      if (doc.specialty.includes('Gigi')) {
+        avatarEl.textContent = '🦷';
+      } else if (doc.specialty.includes('Anak')) {
+        avatarEl.textContent = '👶';
+      } else {
+        avatarEl.textContent = '👨‍⚕️';
+      }
+
+      if (doc.status === 'cuti') {
+        statusEl.innerHTML = '<span class="queue-badge cuti">🏖️ Sedang Cuti</span>';
+      } else {
+        statusEl.innerHTML = '<span class="queue-badge lengang">🟢 Siap Melayani</span>';
+      }
+    }
+
+    function syncScheduleSummary() {
+      const dateVal = document.getElementById('booking-date-input').value;
+      const timeVal = document.getElementById('booking-time-select').value;
+      const summaryEl = document.getElementById('summary-schedule-text');
+
+      if (!dateVal) return;
+      const dateObj = new Date(dateVal);
+      const options = { weekday: 'short', day: 'numeric', month: 'short' };
+      const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+      summaryEl.textContent = `${formattedDate}, ${timeVal.slice(0, 5)} WIB`;
     }
 
     async function openBookingModal(clinicId) {
@@ -464,13 +590,13 @@
 
       document.getElementById('booking-clinic-id').value = clinic.id;
       document.getElementById('booking-clinic-name').textContent = clinic.name;
-      document.getElementById('booking-clinic-district').textContent = 'Kecamatan ' + clinic.district;
+      document.getElementById('booking-clinic-district').textContent = 'Kecamatan ' + clinic.district + ' • ' + (clinic.address || '');
 
-      const doctors = await window.getDoctorsByClinic(clinic.id, true);
+      currentModalDoctors = await window.getDoctorsByClinic(clinic.id, true);
       const docSelect = document.getElementById('booking-doctor-select');
       docSelect.innerHTML = '';
 
-      doctors.forEach(d => {
+      currentModalDoctors.forEach(d => {
         const isCuti = d.status === 'cuti';
         const opt = document.createElement('option');
         opt.value = d.id;
@@ -487,6 +613,22 @@
       // Set default tomorrow date
       const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
       document.getElementById('booking-date-input').value = tomorrow.toISOString().split('T')[0];
+
+      // Highlight Besok chip
+      document.querySelectorAll('#quick-date-chips .quick-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.days === '1');
+      });
+
+      // Default slot
+      document.getElementById('booking-time-select').value = '08:30:00';
+      document.querySelectorAll('#time-slot-pills .time-slot-pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.time === '08:30:00');
+      });
+
+      document.getElementById('summary-patient-name').textContent = userProfile.full_name || 'Warga Purworejo';
+
+      syncDoctorPreview();
+      syncScheduleSummary();
 
       window.showModal('modal-booking');
     }
@@ -586,6 +728,7 @@
       document.getElementById('disp-phone').textContent = userProfile.phone || '-';
       document.getElementById('disp-allergies').textContent = userProfile.allergies || 'Tidak ada';
       document.getElementById('patient-name-display').textContent = userProfile.full_name || 'Warga Purworejo';
+      document.getElementById('summary-patient-name').textContent = userProfile.full_name || 'Warga Purworejo';
     }
 
     // Cancel Handler
@@ -607,6 +750,39 @@
         document.querySelectorAll('.district-chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         loadClinics(chip.dataset.district);
+      });
+    });
+
+    // Doctor Select Change Listener
+    document.getElementById('booking-doctor-select').addEventListener('change', () => {
+      syncDoctorPreview();
+    });
+
+    // Quick Date Chips Listener
+    document.querySelectorAll('#quick-date-chips .quick-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#quick-date-chips .quick-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const days = Number(chip.dataset.days);
+        const targetDate = new Date(Date.now() + days * 24 * 3600 * 1000);
+        document.getElementById('booking-date-input').value = targetDate.toISOString().split('T')[0];
+        syncScheduleSummary();
+      });
+    });
+
+    // Date Input Manual Change Listener
+    document.getElementById('booking-date-input').addEventListener('change', () => {
+      document.querySelectorAll('#quick-date-chips .quick-chip').forEach(c => c.classList.remove('active'));
+      syncScheduleSummary();
+    });
+
+    // Time Slot Pills Listener
+    document.querySelectorAll('#time-slot-pills .time-slot-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#time-slot-pills .time-slot-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        document.getElementById('booking-time-select').value = pill.dataset.time;
+        syncScheduleSummary();
       });
     });
 

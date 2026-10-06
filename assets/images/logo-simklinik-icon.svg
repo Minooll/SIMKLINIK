@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <!-- Gradien Utama: Teal ke Sky Blue (Higienis & Medis Modern) -->
+    <linearGradient id="simk-bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="60%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+
+    <!-- Gradien Aksen: Emerald ke Cyan (Ramah & Sistem Aktif) -->
+    <linearGradient id="simk-accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#5eead4" />
+    </linearGradient>
+
+    <!-- Filter Bayangan Halus -->
+    <filter id="simk-shadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.22" />
+    </filter>
+  </defs>
+
+  <!-- UNSUR 1 & 2: BENTUK PERISAI RAMAH & HIGIENIS (Caring Shield & Clean Contour) -->
+  <path d="M 32 3 C 20 3, 7 13, 7 28 C 7 43.5, 20.5 54.5, 32 61 C 43.5 54.5, 57 43.5, 57 28 C 57 13, 44 3, 32 3 Z"
+        fill="url(#simk-bg-grad)"
+        filter="url(#simk-shadow)" />
+
+  <!-- UNSUR 3: SISTEM KONEKTIVITAS DIGITAL (Network Nodes & Circuit Pulse Lines) -->
+  <!-- Jalur Sirkuit Sistem -->
+  <path d="M 12 28 Q 18 16 32 16 Q 46 16 52 28" stroke="url(#simk-accent-grad)" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.85" />
+  <path d="M 16 40 Q 24 50 32 53 Q 40 50 48 40" stroke="url(#simk-accent-grad)" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.85" />
+  
+  <!-- Titik Node Sistem (Interconnected Faskes Multi-Tenant) -->
+  <circle cx="12" cy="28" r="2.8" fill="#5eead4" />
+  <circle cx="52" cy="28" r="2.8" fill="#5eead4" />
+  <circle cx="32" cy="16" r="2.5" fill="#ffffff" />
+  <circle cx="32" cy="53" r="2.5" fill="#ffffff" />
+
+  <!-- UNSUR 2: SIMBOL HIGIENIS MEDIS (Medical Cross Bersih & Presisi) -->
+  <!-- Palang Vertikal -->
+  <rect x="27.5" y="21" width="9" height="24" rx="4.5" fill="#ffffff" />
+  <!-- Palang Horizontal -->
+  <rect x="20" y="28.5" width="24" height="9" rx="4.5" fill="#ffffff" />
+
+  <!-- Inti Cahaya Medis Bersih (Clean Core Dot) -->
+  <circle cx="32" cy="33" r="2.2" fill="#0d9488" />
+
+  <!-- UNSUR 1: SENTUHAN RAMAH (Friendly Warmth Sparkle & Care Curve) -->
+  <!-- Senyum Hangat Perawatan (Care Smile Arc di Dasar Palang) -->
+  <path d="M 26 42 Q 32 46.5 38 42" stroke="#5eead4" stroke-width="2.2" stroke-linecap="round" fill="none" />
+
+  <!-- Kilau Higienis (Hygienic Clean Sparkle di Kanan Atas) -->
+  <path d="M 45 10 L 46.5 13.5 L 50 15 L 46.5 16.5 L 45 20 L 43.5 16.5 L 40 15 L 43.5 13.5 Z" fill="#ffffff" opacity="0.95" />
+</svg>

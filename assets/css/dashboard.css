@@ -99,6 +99,19 @@ body {
   box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
 }
 
+.brand-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(13, 148, 136, 0.28));
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.brand-logo-img:hover {
+  transform: scale(1.06) rotate(3deg);
+}
+
 .brand-title {
   font-size: 1.15rem;
   font-weight: 800;
