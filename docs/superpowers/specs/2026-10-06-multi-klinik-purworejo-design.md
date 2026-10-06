@@ -1,20 +1,24 @@
-# Spesifikasi Desain: Platform Multi-Klinik Regional Kabupaten Purworejo
+# Spesifikasi Desain: Platform Multi-Klinik Regional Kabupaten Purworejo (2-Role: Pasien & Dokter)
 
 **Tanggal**: 2026-10-06  
-**Status**: Draf Disetujui  
+**Status**: Disetujui (Revisi: Eliminasi Role Petugas)  
 **Lingkup Wilayah**: Kabupaten Purworejo, Jawa Tengah (Kec. Purworejo Kota, Kec. Kutoarjo, Kec. Banyuurip)  
-**Tujuan**: Mengubah SIMklinik dari aplikasi internal faskes tunggal menjadi platform direktori & pendaftaran multi-klinik regional, serta menyiapkan data layer untuk AI Triage & Clinic Recommender.
+**Tujuan**: Mengubah SIMklinik menjadi platform multi-klinik regional dengan interaksi langsung 2-role (**Pasien $\leftrightarrow$ Dokter per Klinik**), menghapus role Petugas yang redundan, dan menyiapkan integrasi AI Recommendation Chatbot.
 
 ---
 
-## 1. Latar Belakang & Nilai Tambah
+## 1. Latar Belakang & Restrukturisasi Role (Direct Doctor-Patient Flow)
 
-Klinik-klinik mandiri di daerah Kabupaten Purworejo umumnya belum memiliki sistem reservasi digital mandiri. Pasien seringkali harus datang langsung untuk mengetahui apakah kuota dokter masih tersedia dan berapa antrean saat ini.
-
-Dengan konsep agregator multi-klinik regional:
-1. **User-Centric (Pasien)**: Pasien dapat mencari klinik terdekat di kecamatannya (Purworejo, Kutoarjo, Banyuurip), mengecek layanan yang tersedia, melihat beban antrean, dan mengambil nomor antrean secara online.
-2. **Multi-Tenancy Ringan (Petugas)**: Petugas masing-masing klinik mengelola antrean faskesnya sendiri dengan isolasi data berbasis `clinic_id`.
-3. **Kesiapan Ekosistem AI**: Data faskes (lokasi, poli, jam operasional, beban antrean) terstruktur sehingga AI Chatbot dapat memberikan rekomendasi klinik berbasis keluhan dan jarak.
+Sebelumnya sistem memiliki 3 role (Pasien, Petugas, Dokter). Dalam operasional klinik mandiri di daerah, alur antrean dan pemeriksaan jauh lebih efektif jika langsung menghubungkan **Pasien** dan **Dokter**:
+1. **Pasien**:
+   - Menjelajahi katalog klinik di Purworejo (Kec. Purworejo, Kutoarjo, Banyuurip).
+   - Memilih klinik $\rightarrow$ memilih jadwal dokter $\rightarrow$ mengambil tiket antrean / booking konsultasi.
+2. **Dokter**:
+   - Terikat pada klinik tertentu di Purworejo (`clinic_id`).
+   - Langsung memanggil nomor antrean pasien di kliniknya, melayani konsultasi, menginput RME SOAP digital, dan meresepkan obat.
+3. **Eliminasi Role Petugas**:
+   - Seluruh fungsionalitas operasional pemanggilan antrean dan verifikasi pasien langsung ditangani dalam panel Dokter atau otomatis oleh sistem.
+   - Halaman `petugas.html` dinonaktifkan/dihapus, dan opsi role 'Petugas' pada login/registrasi dieliminasi.
 
 ---
 
@@ -54,10 +58,7 @@ create table if not exists public.clinics (
 * `doctor_schedules`: Ditambahkan kolom `clinic_id uuid references public.clinics(id) on delete set null`
 * `appointments`: Ditambahkan kolom `clinic_id uuid references public.clinics(id) on delete set null`
 * `queue_entries`: Ditambahkan kolom `clinic_id uuid references public.clinics(id) on delete set null`
-* `profiles`: Ditambahkan kolom `clinic_id uuid references public.clinics(id) on delete set null`
-
-### 3.3 Kompatibilitas Mundur (Backward Compatibility)
-Jika baris data existing memiliki `clinic_id = null`, sistem service client-side dan SQL migrasi otomatis mengasosiasikannya ke klinik default (`KLN-PWR-01`).
+* `profiles`: Kolom role diperbarui menjadi: `check (role in ('Pasien', 'Dokter', 'Admin'))`.
 
 ---
 
@@ -66,64 +67,61 @@ Jika baris data existing memiliki `clinic_id = null`, sistem service client-side
 File baru: `assets/js/services/clinicService.js` (didaftarkan ke `window.clinicService`):
 * `getClinics()`: Mengembalikan daftar seluruh klinik aktif di Purworejo.
 * `getClinicsByDistrict(district)`: Memfilter klinik berdasarkan kecamatan (`'Purworejo'`, `'Kutoarjo'`, `'Banyuurip'`).
-* `getClinicById(clinicId)`: Mendapatkan data profil satu klinik tertentu.
-* `getActiveQueueCount(clinicId)`: Menghitung jumlah antrean berstatus `Menunggu` atau `Dipanggil` pada hari berjalan untuk klinik terkait.
-* `getClinicServices(clinicId)`: Mendapatkan daftar poli/layanan spesifik klinik tersebut.
+* `getClinicById(clinicId)`: Mendapatkan profil klinik beserta daftar dokter dan layanan.
+* `getActiveQueueCount(clinicId)`: Menghitung beban antrean aktif klinik hari ini.
+* `getDoctorsByClinic(clinicId)`: Mengambil daftar dokter yang berpraktek di klinik terpilih.
+
+Integrasi ke `appointmentService.js`:
+* `getDoctorsWithSchedules(clinicId)`: Menyaring dokter berdasarkan `clinic_id`.
+* `bookAppointment({ clinicId, patientId, doctorId, serviceId, ... })`: Menyimpan relasi `clinic_id` pada janji temu dan antrean.
 
 ---
 
-## 5. Spesifikasi Antarmuka & UX Pasien (`pasien.html`)
+## 5. Portal Pasien (`pasien.html`)
 
-### 5.1 Katalog Eksplorasi Klinik di Dashboard
-* **Container**: `<section class="clinics-explorer-section">` di atas riwayat janji temu.
-* **Filter Pills**: `[Semua (Purworejo)]`, `[Purworejo Kota]`, `[Kutoarjo]`, `[Banyuurip]`.
-* **Kartu Klinik**:
-  - Badge Status Operasional (Buka / Tutup).
-  - Nama Klinik, Alamat, dan No. Telepon.
-  - Tag Fasilitas & Poli (`Poli Umum`, `Poli Gigi`, dll).
-  - Indikator Beban Antrean Realtime (misal: `3 Pasien Menunggu`).
-  - Tombol Aksi: `Daftar Antrean / Booking` $\rightarrow$ membuka modal booking dengan klinik sudah otomatis terpilih.
-
-### 5.2 Modal Booking Janji Temu Terintegrasi
-* Dropdown input baru: `#bookingClinicSelect` sebagai langkah pertama.
-* Saat pengguna mengganti klinik, dropdown `#bookingServiceSelect` dan `#bookingDoctorSelect` otomatis menyaring dokter yang terdaftar di klinik tersebut.
+1. **Section Katalog Eksplorasi Klinik Purworejo**:
+   * Diletakkan di dashboard pasien.
+   * Filter Pills: `[Semua]`, `[Purworejo Kota]`, `[Kutoarjo]`, `[Banyuurip]`.
+   * Kartu Klinik: Nama, Alamat, Jam Operasional, Tag Fasilitas/Poli, Indikator Antrean Realtime, dan Tombol *"Daftar di Klinik Ini"*.
+2. **Formulir Booking Janji Temu**:
+   * Dropdown `#bookingClinicSelect` sebagai pemilih faskes.
+   * Pemilihan klinik secara reaktif memfilter daftar dokter dan poli yang tersedia.
+   * Tombol *"Daftar di Klinik Ini"* pada kartu klinik langsung membuka modal booking dengan klinik yang bersangkutan sudah otomatis terpilih.
 
 ---
 
-## 6. Spesifikasi Antarmuka Petugas (`petugas.html`)
+## 6. Portal Dokter (`dokter.html`)
 
-### 6.1 Multi-Tenant Header Switcher
-* Ditambahkan widget tenant di topbar petugas:
-  - Label: `Klinik Aktif: [Dropdown Switcher 3 Klinik Purworejo]`.
-  - Default terpilih sesuai profil login petugas (`localStorage` / Supabase auth).
-* Saat switcher diganti:
-  - Antrean hari ini dimuat ulang khusus untuk klinik yang aktif.
-  - Panggilan nomor antrean (`window.panggilAntrean`) memproses antrean klinik yang bersangkutan.
-
----
-
-## 7. Rencana Integrasi AI Chatbot (Tahap Berikutnya)
-
-Data klinik diekspos melalui helper `window.getClinicsContextForAi()` dengan format JSON ringkas:
-```json
-[
-  {
-    "id": "...",
-    "name": "Klinik Pratama & Bersalin Kutoarjo Medika",
-    "district": "Kutoarjo",
-    "services": ["Poli Umum", "Poli KIA / Kebidanan", "Farmasi"],
-    "operating_hours": "08:00 - 20:00",
-    "active_queue_count": 2
-  }
-]
-```
-Prompt AI Chatbot dapat langsung memanfaatkan data ini untuk menjawab pertanyaan seperti:
-*"Saya di Kutoarjo dan ingin periksa kandungan, klinik mana yang buka dan antreannya sedikit?"*
+1. **Afiliasi Klinik & Demo Switcher**:
+   * Header dokter menampilkan badge faskes: `🏥 [Klinik Pratama Sehat Mandiri Purworejo]`.
+   * Switcher klinik untuk mode pengujian/demo multi-klinik Purworejo.
+2. **Panggilan & Pelayanan Antrean Langsung**:
+   * Dokter melihat daftar antrean pasien kliniknya untuk hari ini.
+   * Dokter memanggil pasien (`Panggil Antrean`) $\rightarrow$ memeriksa pasien $\rightarrow$ mengisi RME SOAP & Resep obat.
 
 ---
 
-## 8. Rencana Pengujian (Testing & Verification)
-1. **Database & Service Test**: Menguji `clinicService.js` (filter kecamatan, detail klinik, dan fallback).
-2. **Patient Flow Test**: Menguji pendaftaran/booking antrean dengan pemilihan klinik Purworejo.
-3. **Staff Flow Test**: Menguji isolasi antrean per klinik pada dashboard petugas.
-4. **Regression Test**: Memastikan seluruh 15 suite pengujian unit dan E2E yang sudah ada tetap lolos 100%.
+## 7. Eliminasi Role Petugas & Pembersihan Kode
+
+1. **Halaman & Navigasi**:
+   * Hapus / alihkan `petugas.html` (redirect ke `dokter.html` atau `index.html`).
+   * Hapus tab/pilihan "Petugas" pada `login.html`.
+2. **Dashboard Script**:
+   * Bersihkan kode `initPetugasPortal` dan handler petugas yang tidak lagi dipakai dari `assets/js/dashboard/role-dashboard.js`.
+3. **Database Check Constraint**:
+   * Sederhanakan role di `profiles.role` menjadi `Pasien` dan `Dokter` (plus `Admin` sistem jika diperlukan).
+
+---
+
+## 8. Kesiapan Integrasi AI Chatbot (Follow-up Milestone)
+
+* Fungsi `window.getClinicsContextForAi()` mengekspor metadata klinik (nama, kecamatan, poli, jam buka, beban antrean) agar AI Chatbot dapat merekomendasikan faskes dan dokter yang paling tepat berdasarkan keluhan pasien dan lokasinya di Purworejo.
+
+---
+
+## 9. Rencana Pasca-Implementasi (Post-Implementation Requirement)
+
+> **MANDATORY POST-STABILIZATION TASK**:  
+> Setelah seluruh arsitektur 2-role multi-klinik ini selesai diubah, diverifikasi, dan berjalan tanpa error:
+> 1. Buat **PRD Baru** yang secara komprehensif mendokumentasikan sistem Multi-Klinik Regional Purworejo (2-Role: Pasien & Dokter, Direktori Faskes, Alur Booking, Integrasi RME SOAP, dan Kesiapan AI Chatbot).
+> 2. Hapus file-file PRD lama yang sudah usang (`docs/PRD.md`, `build_prd_pdf.js`, `prd_content.html`, `prd_presentation.html`, `prd.pdf`).
