@@ -196,7 +196,7 @@ Jika informasi spesifik tidak tercantum dalam data, berikan jawaban sopan, ceria
   const queryClinicalAnalytics = async (naturalQuery, clinicDatasetSummary = {}) => {
     const dataContext = JSON.stringify(clinicDatasetSummary || {});
     const systemPrompt = `Anda adalah Analis Data Klinis & Operasional SIMKLINIK.
-Pengguna adalah Manajer/Petugas Klinik yang bertanya seputar performa operasional klinik.
+Pengguna adalah Dokter atau Manajer Faskes yang bertanya seputar performa operasional klinik.
 Data Agregat Tersedia:
 ${dataContext}
 

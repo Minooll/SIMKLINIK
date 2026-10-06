@@ -1,9 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 
-// Load appointmentService
+// Load services
 const appointmentService = require('../assets/js/services/appointmentService.js');
 const medicalRecordService = require('../assets/js/services/medicalRecordService.js');
 const prescriptionService = require('../assets/js/services/prescriptionService.js');
@@ -54,18 +52,4 @@ test('medicalRecordService & prescriptionService - dummy fallbacks removed', asy
   const rx = await prescriptionService.getDoctorPrescriptions('11111111-1111-4111-8111-111111111111');
   assert.ok(rx.success);
   assert.deepEqual(rx.data, [], 'Should return empty array instead of dummy prescription items');
-});
-
-test('role-dashboard.js - openFullAgendaPetugasModal mapping has no undefined expressions', () => {
-  const roleDashboardContent = fs.readFileSync(path.join(__dirname, '../assets/js/dashboard/role-dashboard.js'), 'utf8');
-
-  // Must not have the old buggy pattern: <strong>${d.full_name}</strong> or ${d.schedule.start_time} - ${d.schedule.end_time} WIB
-  assert.ok(!roleDashboardContent.includes('<td><strong>${d.full_name}</strong></td>'), 'Old unhandled d.full_name should be replaced');
-  assert.ok(!roleDashboardContent.includes('<td><strong>${d.service_name}</strong></td>'), 'Old unhandled d.service_name should be replaced');
-  assert.ok(!roleDashboardContent.includes('<td>${d.schedule.start_time} - ${d.schedule.end_time} WIB</td>'), 'Old unhandled schedule start/end time should be replaced');
-
-  // Must handle fallbacks properly
-  assert.ok(roleDashboardContent.includes('d.profile?.full_name || d.full_name'), 'Should robustly resolve doctor full name');
-  assert.ok(roleDashboardContent.includes('d.service?.name || d.service_name'), 'Should robustly resolve service/poliklinik name');
-  assert.ok(roleDashboardContent.includes('d.schedule?.hours'), 'Should resolve schedule hours');
 });

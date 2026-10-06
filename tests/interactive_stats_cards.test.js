@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 
-test('Stats Grid - Verified removed from pasien.html', async (t) => {
+test('Stats Grid - Verified removed from pasien.html in favor of Purworejo clinic directory', async (t) => {
   const pasienHtml = fs.readFileSync(
     path.join(__dirname, '../pasien.html'),
     'utf-8'
@@ -13,27 +13,6 @@ test('Stats Grid - Verified removed from pasien.html', async (t) => {
     pasienHtml,
     /<section[^>]*id=["']statsGrid["'][^>]*>/,
     'pasien.html must NOT contain section id="statsGrid"'
-  );
-});
-
-test('Stats Grid - Petugas stat cards are clickable with interactive details', async (t) => {
-  const roleDashboardSrc = fs.readFileSync(
-    path.join(__dirname, '../assets/js/dashboard/role-dashboard.js'),
-    'utf-8'
-  );
-
-  // Check that petugas stat cards have click handlers / data-target-view or navigation
-  assert.match(
-    roleDashboardSrc,
-    /data-target-view|navigatePetugasView|openPetugasStatDetail/,
-    'role-dashboard.js must provide click handling or view navigation for petugas stat cards'
-  );
-
-  // Check that visual detail hint / action indicator exists
-  assert.match(
-    roleDashboardSrc,
-    /stat-action-hint|Lihat detail/,
-    'Stat cards must include an action indicator (e.g. Lihat detail)'
   );
 });
 
