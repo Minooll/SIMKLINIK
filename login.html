@@ -28,9 +28,24 @@
       </div>
 
       <div class="auth-body">
+        <!-- Tombol Masuk Cepat dengan Google (Pasien, Dokter, Pemilik) -->
+        <button type="button" id="btn-google-login" class="btn-google" title="Masuk Cepat dengan Google">
+          <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span id="google-btn-text">Masuk Cepat dengan Google</span>
+        </button>
+
+        <div class="auth-divider">
+          <span>atau gunakan email / username faskes</span>
+        </div>
+
         <form id="auth-form">
           <div class="form-group">
-            <label class="form-label" for="email-input">Email Akun / Google</label>
+            <label class="form-label" for="email-input">Email Akun / Faskes</label>
             <input type="email" id="email-input" class="form-input" placeholder="nama@email.com" required value="pasien@purworejo.id">
           </div>
 
@@ -76,6 +91,93 @@
     </div>
   </div>
 
+  <!-- MODAL: Penyiapan Kredensial Google Pertama Kali -->
+  <div class="modal-backdrop" id="modal-google-setup">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg class="google-icon" viewBox="0 0 24 24" width="22" height="22">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <h3 class="modal-title" style="margin: 0;">Tautkan Akun Google</h3>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="form-google-setup" class="modal-form">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <div style="background: #f0fdfa; border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem;">
+            <p style="font-size: 0.85rem; color: var(--primary-dark); margin: 0; line-height: 1.45;">
+              <strong>Pendaftaran Kredensial Pertama Kali:</strong><br>
+              Tentukan username dan kata sandi akun Anda untuk pertama kali. Login berikutnya bisa dilakukan langsung hanya dengan menekan tombol Google!
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="google-setup-role">Peran Akses Sistem <span style="color: var(--danger)">*</span></label>
+            <select id="google-setup-role" class="form-input" style="background: white;" required>
+              <option value="pasien">Pasien (Warga Purworejo)</option>
+              <option value="dokter">Dokter Faskes</option>
+              <option value="pemilik">Pemilik Klinik</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="google-setup-email">Email Google <span style="color: var(--danger)">*</span></label>
+            <input type="email" id="google-setup-email" class="form-input" placeholder="nama@gmail.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="google-setup-fullname">Nama Lengkap</label>
+            <input type="text" id="google-setup-fullname" class="form-input" placeholder="Nama Lengkap Anda">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="google-setup-username">Username Baru <span style="color: var(--danger)">*</span></label>
+            <input type="text" id="google-setup-username" class="form-input" placeholder="contoh: budi_santoso" required minlength="3">
+            <small style="color: var(--text-muted); font-size: 0.785rem;">Minimal 3 karakter alfanumerik.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="google-setup-password">Buat Kata Sandi <span style="color: var(--danger)">*</span></label>
+            <input type="password" id="google-setup-password" class="form-input" placeholder="Minimal 6 karakter" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="google-setup-confirm">Konfirmasi Kata Sandi <span style="color: var(--danger)">*</span></label>
+            <input type="password" id="google-setup-confirm" class="form-input" placeholder="Ketik ulang kata sandi" required minlength="6">
+          </div>
+
+          <!-- Dynamic Field Dokter pada Setup Google -->
+          <div id="google-doctor-fields" style="display: none; padding: 1rem; background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px dashed var(--border); margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="google-setup-code">
+                Kode Unik Klinik <span style="color: var(--danger)">*</span>
+              </label>
+              <input type="text" id="google-setup-code" class="form-input code-field" placeholder="Contoh: PWR-SEHAT-9X8K2M">
+              <small style="color: var(--text-muted); font-size: 0.785rem; display: block; margin-top: 0.25rem;">
+                Dapatkan kode registrasi unik dari Pemilik Klinik tempat Anda bertugas.
+              </small>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="google-setup-sip">Nomor SIP Dokter</label>
+              <input type="text" id="google-setup-sip" class="form-input" placeholder="Contoh: SIP-PWR-001/2024">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Batal</button>
+          <button type="submit" id="btn-submit-google-setup" class="btn btn-primary">
+            Tautkan & Masuk Sekarang
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: Lupa Kata Sandi -->
   <div class="modal-backdrop" id="modal-forgot-password">
     <div class="modal-container">
@@ -113,26 +215,33 @@
     const doctorFields = document.getElementById('doctor-fields');
     const btnSubmit = document.getElementById('btn-submit-auth');
     const emailInput = document.getElementById('email-input');
+    const googleBtnText = document.getElementById('google-btn-text');
+
+    function updateRoleUI(role) {
+      currentRole = role;
+      if (currentRole === 'dokter') {
+        doctorFields.style.display = 'block';
+        btnSubmit.textContent = 'Verifikasi Kode & Masuk Dokter';
+        emailInput.value = 'dokter@purworejo.id';
+        if (googleBtnText) googleBtnText.textContent = 'Masuk Cepat Dokter via Google';
+      } else if (currentRole === 'pemilik') {
+        doctorFields.style.display = 'none';
+        btnSubmit.textContent = 'Masuk sebagai Pemilik Klinik';
+        emailInput.value = 'owner@purworejo.id';
+        if (googleBtnText) googleBtnText.textContent = 'Masuk Cepat Pemilik via Google';
+      } else {
+        doctorFields.style.display = 'none';
+        btnSubmit.textContent = 'Masuk sebagai Pasien';
+        emailInput.value = 'pasien@purworejo.id';
+        if (googleBtnText) googleBtnText.textContent = 'Masuk Cepat Pasien via Google';
+      }
+    }
 
     roleTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         roleTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        currentRole = tab.dataset.role;
-
-        if (currentRole === 'dokter') {
-          doctorFields.style.display = 'block';
-          btnSubmit.textContent = 'Verifikasi Kode & Masuk Dokter';
-          emailInput.value = 'dokter@purworejo.id';
-        } else if (currentRole === 'pemilik') {
-          doctorFields.style.display = 'none';
-          btnSubmit.textContent = 'Masuk sebagai Pemilik Klinik';
-          emailInput.value = 'owner@purworejo.id';
-        } else {
-          doctorFields.style.display = 'none';
-          btnSubmit.textContent = 'Masuk sebagai Pasien';
-          emailInput.value = 'pasien@purworejo.id';
-        }
+        updateRoleUI(tab.dataset.role);
       });
     });
 
@@ -156,6 +265,74 @@
       }
     });
 
+    // Helper: Dynamic Doctor Fields di Modal Setup Google
+    function updateGoogleDoctorVisibility(role) {
+      const gDocFields = document.getElementById('google-doctor-fields');
+      const gCodeInput = document.getElementById('google-setup-code');
+      if (role === 'dokter') {
+        gDocFields.style.display = 'block';
+        if (gCodeInput) gCodeInput.required = true;
+      } else {
+        gDocFields.style.display = 'none';
+        if (gCodeInput) gCodeInput.required = false;
+      }
+    }
+
+    document.getElementById('google-setup-role').addEventListener('change', (e) => {
+      updateGoogleDoctorVisibility(e.target.value);
+    });
+
+    // Handle Single-Click Google Login Button
+    document.getElementById('btn-google-login').addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const res = await window.loginWithGoogle(email, currentRole);
+
+      if (!res.isFirstTime) {
+        // Akun Google sudah pernah di-setup: LANGSUNG MASUK TANPA TANYA APAPUN LAGI
+        window.showToast(res.message, 'success');
+        setTimeout(() => {
+          window.location.href = res.redirect;
+        }, 350);
+      } else {
+        // Pengguna Google pertama kali: Buka modal penyiapan username & password
+        document.getElementById('google-setup-email').value = email || 'user.google@gmail.com';
+        document.getElementById('google-setup-role').value = currentRole;
+        if (email && email.includes('@')) {
+          document.getElementById('google-setup-username').value = email.split('@')[0];
+        }
+        updateGoogleDoctorVisibility(currentRole);
+        window.showModal('modal-google-setup');
+      }
+    });
+
+    // Handle First-Time Google Setup Form Submission
+    document.getElementById('form-google-setup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const role = document.getElementById('google-setup-role').value;
+      const payload = {
+        email: document.getElementById('google-setup-email').value.trim(),
+        role: role,
+        username: document.getElementById('google-setup-username').value.trim(),
+        fullName: document.getElementById('google-setup-fullname').value.trim(),
+        password: document.getElementById('google-setup-password').value,
+        confirmPassword: document.getElementById('google-setup-confirm').value,
+        referralCode: document.getElementById('google-setup-code') ? document.getElementById('google-setup-code').value.trim() : null,
+        sipNumber: document.getElementById('google-setup-sip') ? document.getElementById('google-setup-sip').value.trim() : null
+      };
+
+      const res = await window.linkGoogleAccount(payload);
+      if (res.success) {
+        window.showToast(res.message, 'success');
+        window.closeModal('modal-google-setup');
+        setTimeout(() => {
+          window.location.href = res.redirect;
+        }, 350);
+      } else {
+        window.showToast(res.message, 'error');
+      }
+    });
+
+    // Standard Credential Form Submit
     document.getElementById('auth-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = emailInput.value.trim();
