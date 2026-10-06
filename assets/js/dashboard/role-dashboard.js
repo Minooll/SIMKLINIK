@@ -3033,6 +3033,8 @@
     // Doctor Perspective Switcher Elements
     const doctorSelectorWrap = document.getElementById('doctorSelectorWrap');
     const doctorSelectPerspective = document.getElementById('doctorSelectPerspective');
+    const doctorClinicSelector = document.getElementById('doctorClinicSelector');
+    let doctorActiveClinicId = 'clinic-pwr-01';
 
     // Dynamic Prescriptions item row adder in SOAP modal
     const btnAddMedicine = document.getElementById('btnAddMedicineRow');
@@ -3127,6 +3129,26 @@
           window.Toast.info(`Beralih ke jadwal & data pasien ${selDoc.profile?.full_name}`);
         }
         renderDokterDashboard();
+      });
+    }
+
+    if (doctorClinicSelector && window.clinicService) {
+      window.clinicService.getClinics().then(clinics => {
+        doctorClinicSelector.innerHTML = clinics.map(c =>
+          `<option value="${c.id}"${c.id === doctorActiveClinicId ? ' selected' : ''}>${c.name} (${c.district})</option>`
+        ).join('');
+      });
+
+      doctorClinicSelector.addEventListener('change', (e) => {
+        doctorActiveClinicId = e.target.value;
+        const clinicDocs = allDoctors.filter(d => d.clinic_id === doctorActiveClinicId || d.clinic_code === doctorActiveClinicId);
+        if (clinicDocs.length > 0 && doctorSelectPerspective) {
+          activeDoctorId = clinicDocs[0].id;
+          doctorSelectPerspective.value = activeDoctorId;
+          doctorSelectPerspective.dispatchEvent(new Event('change'));
+        } else {
+          renderDokterDashboard();
+        }
       });
     }
 

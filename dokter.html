@@ -73,6 +73,11 @@
               <p class="welcome-copy" id="welcomeCopy"></p>
             </div>
             <div class="welcome-actions">
+              <div class="doctor-selector-wrap" id="doctorClinicAffiliationBox">
+                <svg class="doctor-selector-icon" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M3 21h18M3 7v14M21 7v14M6 7V3h12v4M9 11h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"></path></svg>
+                <label for="doctorClinicSelector" class="doctor-select-label">Klinik:</label>
+                <select id="doctorClinicSelector" class="doctor-select-dropdown" aria-label="Pilih klinik praktik"></select>
+              </div>
               <div class="doctor-selector-wrap" id="doctorSelectorWrap">
                 <svg class="doctor-selector-icon" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
                 <label for="doctorSelectPerspective" class="doctor-select-label">Dokter Aktif:</label>
@@ -404,6 +409,7 @@
     <script src="assets/js/components/modal.js"></script>
     <script src="assets/js/components/toast.js"></script>
     <script src="assets/js/services/patientService.js"></script>
+    <script src="assets/js/services/clinicService.js"></script>
     <script src="assets/js/services/appointmentService.js"></script>
     <script src="assets/js/services/queueService.js"></script>
     <script src="assets/js/services/medicalRecordService.js"></script>
