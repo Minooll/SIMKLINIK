@@ -179,7 +179,7 @@
     },
 
     /**
-     * Fetch all payments for today (Petugas cashier view)
+     * Fetch all payments for today (cashier/billing view)
      */
     async getTodayPayments() {
       const client = getClient();

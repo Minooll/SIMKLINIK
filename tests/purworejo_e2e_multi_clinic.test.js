@@ -46,12 +46,12 @@ test('3. Doctor portal integrates clinic affiliation and eliminates Petugas requ
   assert.match(dokterHtml, /assets\/js\/services\/clinicService\.js/, 'Doctor portal must load clinicService');
 });
 
-test('4. Petugas role eliminated from login and redirects securely', () => {
+test('4. Petugas role and file eliminated completely', () => {
   const loginHtml = fs.readFileSync(path.join(__dirname, '../login.html'), 'utf-8');
   assert.doesNotMatch(loginHtml, /value="Petugas"/i, 'Login form must not offer Petugas role');
 
-  const petugasHtml = fs.readFileSync(path.join(__dirname, '../petugas.html'), 'utf-8');
-  assert.match(petugasHtml, /window\.location\.replace\(['"]dokter\.html['"]\)/, 'petugas.html must redirect to dokter.html');
+  const petugasPath = path.join(__dirname, '../petugas.html');
+  assert.strictEqual(fs.existsSync(petugasPath), false, 'petugas.html must be completely deleted');
 });
 
 test('5. Database schema has clinics table and clinic_id foreign keys', () => {

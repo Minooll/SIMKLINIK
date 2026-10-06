@@ -496,7 +496,7 @@
     },
 
     /**
-     * Get all active doctors and their practice schedules (for Petugas dashboard)
+     * Get all active doctors and their practice schedules
      */
     getAllDoctorsWithSchedules(clinicId = null) {
       const SCHEDULE_MAP = {
@@ -595,7 +595,7 @@
     },
 
     /**
-     * Fetch all clinic appointments across all doctors (for Petugas dashboard)
+     * Fetch all clinic appointments across all doctors
      */
     async getAllClinicAppointments() {
       const localList = getLocalAppointments();

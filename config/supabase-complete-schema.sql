@@ -326,21 +326,21 @@ drop policy if exists "Patients select policy" on public.patients;
 create policy "Patients select policy" on public.patients for select to authenticated
 using (
   profile_id = auth.uid() or 
-  public.get_current_user_role() in ('Petugas', 'Dokter', 'Admin', 'Kasir/Resepsionis')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 drop policy if exists "Patients insert policy" on public.patients;
 create policy "Patients insert policy" on public.patients for insert to authenticated
 with check (
   profile_id = auth.uid() or 
-  public.get_current_user_role() in ('Petugas', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 drop policy if exists "Patients update policy" on public.patients;
 create policy "Patients update policy" on public.patients for update to authenticated
 using (
   profile_id = auth.uid() or 
-  public.get_current_user_role() in ('Petugas', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 -- APPOINTMENTS
@@ -349,14 +349,14 @@ create policy "Appointments select policy" on public.appointments for select to 
 using (
   patient_id in (select id from public.patients where profile_id = auth.uid()) or
   doctor_id in (select id from public.doctors where profile_id = auth.uid()) or
-  public.get_current_user_role() in ('Petugas', 'Admin', 'Kasir/Resepsionis')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 drop policy if exists "Appointments insert policy" on public.appointments;
 create policy "Appointments insert policy" on public.appointments for insert to authenticated
 with check (
   patient_id in (select id from public.patients where profile_id = auth.uid()) or
-  public.get_current_user_role() in ('Petugas', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 drop policy if exists "Appointments update policy" on public.appointments;
@@ -364,7 +364,7 @@ create policy "Appointments update policy" on public.appointments for update to 
 using (
   patient_id in (select id from public.patients where profile_id = auth.uid()) or
   doctor_id in (select id from public.doctors where profile_id = auth.uid()) or
-  public.get_current_user_role() in ('Petugas', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 -- QUEUE ENTRIES
@@ -374,7 +374,7 @@ create policy "Queue select policy" on public.queue_entries for select using (tr
 drop policy if exists "Queue modify policy" on public.queue_entries;
 create policy "Queue modify policy" on public.queue_entries for all to authenticated
 using (
-  public.get_current_user_role() in ('Petugas', 'Dokter', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 -- MEDICAL RECORDS
@@ -401,7 +401,7 @@ using (
     select id from public.medical_records 
     where patient_id in (select id from public.patients where profile_id = auth.uid())
   ) or
-  public.get_current_user_role() in ('Dokter', 'Petugas', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 drop policy if exists "Prescriptions modify policy" on public.prescriptions;
@@ -427,13 +427,13 @@ using (
     select id from public.appointments 
     where patient_id in (select id from public.patients where profile_id = auth.uid())
   ) or
-  public.get_current_user_role() in ('Petugas', 'Kasir/Resepsionis', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 drop policy if exists "Payments modify policy" on public.payments;
 create policy "Payments modify policy" on public.payments for all to authenticated
 using (
-  public.get_current_user_role() in ('Petugas', 'Kasir/Resepsionis', 'Admin')
+  public.get_current_user_role() in ('Dokter', 'Admin')
 );
 
 -- AUDIT LOGS

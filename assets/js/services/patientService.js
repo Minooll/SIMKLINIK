@@ -146,7 +146,7 @@
     },
 
     /**
-     * Register a new walk-in patient (Petugas role)
+     * Register a new walk-in patient
      */
     async registerPatient(formData) {
       const client = getClient();
