@@ -3,39 +3,60 @@
 // ====================================================================
 
 /**
- * Menyusun Dynamic System Prompt dengan injeksi konteks live faskes Purworejo
+ * Menyusun Dynamic System Prompt dengan pelatihan terfokus pada:
+ * 1. Menjawab tepat sesuai pertanyaan pengguna
+ * 2. Membatasi lingkup pada topik klinis/kesehatan dan sistem SIMKLINIK Purworejo
+ * 3. Menjawab pertanyaan di luar topik secara singkat lalu menggiring kembali ke topik klinis / sistem
  */
 function buildPurworejoSystemPrompt(context = {}) {
   const clinics = context.clinics || [
-    { name: 'Klinik Pratama Sehat Mandiri Purworejo', district: 'Purworejo Kota' },
-    { name: 'Klinik Pratama & Bersalin Kutoarjo Medika', district: 'Kutoarjo' },
-    { name: 'Klinik Pratama Keluarga Banyuurip', district: 'Banyuurip' }
+    { name: 'Klinik Pratama Sehat Mandiri Purworejo', district: 'Purworejo Kota', address: 'Jl. Jenderal Sudirman No. 45' },
+    { name: 'Klinik Pratama & Bersalin Kutoarjo Medika', district: 'Kutoarjo', address: 'Jl. Pangeran Diponegoro No. 88' },
+    { name: 'Klinik Pratama Keluarga Banyuurip', district: 'Banyuurip', address: 'Jl. Banyuurip Raya KM 3' }
   ];
 
   const doctors = context.doctors || [
     { name: 'dr. Budi Santoso', clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo', specialty: 'Dokter Umum', remaining_quota: 5, active_queue_count: 2 },
     { name: 'drg. Siti Rahayu', clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo', specialty: 'Dokter Gigi', remaining_quota: 8, active_queue_count: 1 },
-    { name: 'dr. Hendra Wijaya, Sp.A', clinic_name: 'Klinik Pratama & Bersalin Kutoarjo Medika', specialty: 'Spesialis Anak', remaining_quota: 10, active_queue_count: 4 }
+    { name: 'dr. Hendra Wijaya, Sp.A', clinic_name: 'Klinik Pratama & Bersalin Kutoarjo Medika', specialty: 'Spesialis Anak', remaining_quota: 10, active_queue_count: 4 },
+    { name: 'dr. Ratna Dewi', clinic_name: 'Klinik Pratama Keluarga Banyuurip', specialty: 'Dokter Umum', remaining_quota: 12, active_queue_count: 3 }
   ];
 
-  const clinicListText = clinics.map(c => `- ${c.name} (Kecamatan ${c.district})`).join('\n');
-  const doctorListText = doctors.map(d => `- ${d.name} di ${d.clinic_name} (${d.specialty || 'Umum'}): sisa kuota: ${d.remaining_quota}, antrean aktif: ${d.active_queue_count}`).join('\n');
+  const clinicListText = clinics.map(c => `- ${c.name} (Kecamatan ${c.district}, ${c.address || ''})`).join('\n');
+  const doctorListText = doctors.map(d => `- ${d.name} di ${d.clinic_name} (${d.specialty || 'Dokter Umum'}): sisa kuota: ${d.remaining_quota}, antrean aktif: ${d.active_queue_count}`).join('\n');
 
   return `Anda adalah Sasa, singkatan dari "Sahabat Asisten Sehat Anda", Asisten Medis Virtual resmi untuk platform SIMKLINIK Purworejo, Kabupaten Purworejo, Jawa Tengah.
-Tugas utama Anda:
-1. Memberikan saran triage awal yang ramah dan menenangkan bagi warga Purworejo yang mengalami keluhan sakit.
-2. Merekomendasikan fasilitas klinik dan dokter yang tepat di wilayah Kabupaten Purworejo (Purworejo Kota, Kutoarjo, Banyuurip, dsb).
-3. Menginformasikan ketersediaan kuota dokter terkini dan tingkat kepadatan antrean.
-4. Jika pasien membutuhkan konsultasi langsung atau pemeriksaan faskes, sertakan token tindakan booking di akhir pesan:
-[ACTION:BOOK, CLINIC_ID: "<id_klinik>", DOCTOR_ID: "<id_dokter>"]
 
-Daftar Klinik Aktif di Purworejo:
+PERAN & TUGAS UTAMA ANDA:
+1. Menjawab pertanyaan pengguna secara TEPAT, SPESIFIK, dan SESUAI dengan apa yang ditanyakan. Jangan memberikan jawaban template yang kaku atau tidak nyambung dengan pertanyaan pengguna.
+2. BATASAN RUANG LINGKUP (KLINIS & SISTEM):
+   A. TOPIK KLINIS & KESEHATAN:
+      - Memberikan edukasi kesehatan, saran triase awal, tips penanganan pertama mandiri yang aman dan menenangkan.
+      - Merekomendasikan fasilitas klinik dan dokter yang tepat di Kabupaten Purworejo (Purworejo Kota, Kutoarjo, Banyuurip) sesuai spesialisasi keluhan (anak, gigi, umum).
+      - Jika pasien memerlukan konsultasi atau pemeriksaan dokter langsung di klinik, sertakan token tindakan booking di akhir pesan:
+        [ACTION:BOOK, CLINIC_ID: "<id_klinik>", DOCTOR_ID: "<id_dokter>"]
+      - Selalu ingatkan bahwa saran klinis ini bersifat panduan awal dan bukan pengganti diagnosa medis tatap muka langsung oleh dokter.
+   B. TOPIK SISTEM SIMKLINIK PURWOREJO:
+      - Menjelaskan cara penggunaan platform SIMKLINIK:
+        * Cara reservasi kuota dokter faskes.
+        * Fitur tiket antrean live dengan estimasi countdown panggilan giliran.
+        * Aturan ketat pembatalan janji temu: hanya dapat dibatalkan maksimal 12 jam sebelum jadwal; sisa waktu kurang dari 12 jam terkunci otomatis oleh sistem faskes.
+        * Profil rekam medis elektronik (RME): kewajiban melengkapi nomor Kartu Keluarga (KK) dan NIK KTP 16 digit sesuai standar Permenkes No. 24/2022.
+        * Alur rekam medis SOAP sekuensial bagi dokter dan kode unik faskes bagi pemilik klinik.
+3. ATURAN PERTANYAAN DI LUAR TOPIK (Out-of-Scope):
+   - Jika pengguna bertanya tentang hal di luar topik kesehatan atau sistem SIMKlinik (misalnya cuaca, coding/pemrograman, resep masakan, obrolan santai, politik, sains umum, dll.):
+     * TETAP JAWAB pertanyaan tersebut secara singkat, ramah, dan sopan (1-2 kalimat).
+     * SETELAH ITU, SECARA LUWES GANTIKAN ATAU GIRING PERCAKAPAN KEMBALI ke topik kesehatan, keluhan medis, atau fitur sistem SIMKLINIK Purworejo.
+     * Contoh penutup: "Ngomong-ngomong, sebagai Sahabat Asisten Sehat Anda di SIMKLINIK Purworejo, apakah ada keluhan kesehatan atau informasi faskes dan jadwal dokter di Purworejo yang bisa saya bantu hari ini?"
+
+DAFTAR KLINIK AKTIF DI PURWOREJO:
 ${clinicListText}
 
-Jadwal Dokter & Kuota Realtime:
+JADWAL DOKTER & KUOTA REALTIME:
 ${doctorListText}
 
-Gunakan Bahasa Indonesia yang santun, empatik, dan informatif. Ingatkan selalu bahwa saran ini adalah panduan awal dan bukan pengganti diagnosa medis tatap muka langsung oleh dokter.`;
+GAYA BAHASA:
+Santun, empatik, informatif, dan solutif. Gunakan Bahasa Indonesia yang ramah khas warga Purworejo.`;
 }
 
 /**
@@ -77,12 +98,12 @@ async function askSasaAi(userMessage, context = {}) {
   if (typeof window !== 'undefined' && typeof window.callGeminiApi === 'function') {
     rawResponse = await window.callGeminiApi(userMessage, promptSystem);
   } else {
-    // Fallback response for Node / offline testing
-    const lower = userMessage.toLowerCase();
-    if (lower.includes('kutoarjo') || lower.includes('demam') || lower.includes('anak')) {
-      rawResponse = 'Halo! Saya Sasa "Sahabat Asisten Sehat Anda". Untuk keluhan demam pada anak di area Kutoarjo, dr. Hendra Wijaya, Sp.A di Klinik Kutoarjo Medika siap melayani Anda dengan sisa kuota 10 pasien. [ACTION:BOOK, CLINIC_ID: "22222222-2222-2222-2222-222222222222", DOCTOR_ID: "cccccccc-cccc-cccc-cccc-cccccccccccc"]';
+    // Gunakan fungsi fallback cerdas jika running di Node atau tanpa API key
+    if (typeof generateLocalFallbackResponse === 'function') {
+      rawResponse = generateLocalFallbackResponse(userMessage, promptSystem);
     } else {
-      rawResponse = 'Halo! Saya Sasa "Sahabat Asisten Sehat Anda" dari SIMKLINIK Purworejo. Ada keluhan kesehatan apa yang sedang Anda rasakan? Kami siap membantu merekomendasikan klinik terbaik.';
+      const { generateLocalFallbackResponse: fallbackFn } = require('../../../config/gemini.js');
+      rawResponse = fallbackFn(userMessage, promptSystem);
     }
   }
 

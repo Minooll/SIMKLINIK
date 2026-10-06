@@ -84,7 +84,7 @@
           </div>
         </section>
 
-        <!-- VIEW 2: TIKET ANTREAN LIVE -->
+        <!-- VIEW 2: TIKET ANTREAN LIVE (DILENGKAPI LIVE COUNTDOWN) -->
         <section id="view-antrean" class="dashboard-view">
           <div id="section-ticket" style="margin-bottom: 2rem;">
             <div class="ticket-card" id="live-ticket-card">
@@ -95,10 +95,24 @@
               <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.25rem;" id="ticket-clinic-text">
                 Klinik Pratama & Bersalin Kutoarjo Medika
               </h2>
-              <p style="font-size: 0.95rem; opacity: 0.9; margin-bottom: 1.25rem;" id="ticket-doctor-text">
+              <p style="font-size: 0.95rem; opacity: 0.9; margin-bottom: 0.75rem;" id="ticket-doctor-text">
                 dr. Hendra Wijaya, Sp.A — Jam Periksa: 09:00 WIB
               </p>
-              <div style="display: flex; justify-content: center; gap: 1rem; align-items: center; flex-wrap: wrap;">
+
+              <!-- LIVE COUNTDOWN TIMER BOX -->
+              <div class="countdown-box" id="queue-countdown-box">
+                <div class="countdown-title">
+                  <span class="pulse-dot"></span> ESTIMASI HITUNG MUNDUR GILIRAN PERIKSA
+                </div>
+                <div class="countdown-timer-text" id="queue-countdown-timer">
+                  00j : 00m : 00d
+                </div>
+                <div class="countdown-label-text" id="queue-countdown-label">
+                  Menuju perkiraan waktu pemeriksaan dokter (Jadwal: 09:00 WIB)
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: center; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.25rem;">
                 <span id="ticket-cancellation-badge" class="queue-badge lengang">DAPAT DIBATALKAN</span>
                 <button type="button" id="btn-cancel-patient-appt" class="btn btn-danger" style="font-size: 0.85rem;">
                   Batalkan Janji Ini
@@ -350,6 +364,8 @@
       status: 'menunggu'
     };
 
+    let countdownInterval = null;
+
     // Tab Switching Logic
     const patientNavItems = document.querySelectorAll('#patient-nav-menu .nav-item[data-view]');
     const patientViews = document.querySelectorAll('.dashboard-view');
@@ -475,11 +491,61 @@
       window.showModal('modal-booking');
     }
 
+    // Hitung Mundur Live Queue Countdown Timer
+    function startLiveQueueCountdown() {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      function updateCountdown() {
+        if (!activePatientAppt || activePatientAppt.status === 'dibatalkan' || activePatientAppt.status === 'selesai') {
+          if (countdownInterval) clearInterval(countdownInterval);
+          return;
+        }
+
+        const timerEl = document.getElementById('queue-countdown-timer');
+        const labelEl = document.getElementById('queue-countdown-label');
+        if (!timerEl || !labelEl) return;
+
+        const dateStr = activePatientAppt.appointment_date || new Date().toISOString().split('T')[0];
+        const timeStr = activePatientAppt.appointment_time || '09:00:00';
+        const targetTime = new Date(`${dateStr}T${timeStr}`).getTime();
+        const now = Date.now();
+        const diff = targetTime - now;
+
+        if (activePatientAppt.status === 'sedang_diperiksa') {
+          timerEl.textContent = '🩺 SEDANG DIPERIKSA';
+          labelEl.textContent = 'Giliran Anda sedang berlangsung di Ruang Periksa Dokter';
+          timerEl.style.color = '#5eead4';
+          return;
+        }
+
+        if (diff <= 0) {
+          timerEl.textContent = '🔔 GILIRAN SEGERA TIBA';
+          labelEl.textContent = `Waktu janji temu (${timeStr.slice(0, 5)} WIB) telah tiba. Mohon bersiap di ruang tunggu klinik.`;
+          timerEl.style.color = '#fef08a';
+          return;
+        }
+
+        const totalSeconds = Math.floor(diff / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const pad = (n) => String(n).padStart(2, '0');
+        timerEl.textContent = `${pad(hours)}j : ${pad(minutes)}m : ${pad(seconds)}d`;
+        labelEl.textContent = `Estimasi menuju panggilan sesi dokter (${timeStr.slice(0, 5)} WIB)`;
+        timerEl.style.color = '#ffffff';
+      }
+
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
     function renderTicket() {
       const ticketCard = document.getElementById('live-ticket-card');
       const placeholder = document.getElementById('no-ticket-placeholder');
 
       if (!activePatientAppt || activePatientAppt.status === 'dibatalkan') {
+        if (countdownInterval) clearInterval(countdownInterval);
         ticketCard.style.display = 'none';
         placeholder.style.display = 'block';
         return;
@@ -508,6 +574,8 @@
         badge.className = 'queue-badge padat';
         badge.textContent = 'TERKUNCI (< 12 JAM)';
       }
+
+      startLiveQueueCountdown();
     }
 
     function updateProfileDisplay() {

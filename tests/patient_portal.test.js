@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 
-test('pasien.html has mandatory profile onboarding modal, clinic explorer, and queue ticket', () => {
+test('pasien.html has mandatory profile onboarding modal, clinic explorer, and queue ticket with live countdown', () => {
   const html = fs.readFileSync(path.join(__dirname, '../pasien.html'), 'utf8');
 
   // Mandatory profile onboarding elements
@@ -23,4 +23,9 @@ test('pasien.html has mandatory profile onboarding modal, clinic explorer, and q
   // Live queue & medical record tabs
   assert.match(html, /id=["']live-ticket-card["']/i);
   assert.match(html, /id=["']rme-history-list["']/i);
+
+  // Live countdown timer in queue ticket
+  assert.match(html, /id=["']queue-countdown-box["']/i);
+  assert.match(html, /id=["']queue-countdown-timer["']/i);
+  assert.match(html, /startLiveQueueCountdown/i);
 });
