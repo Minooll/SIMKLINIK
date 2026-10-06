@@ -77,16 +77,15 @@
       const roleOptions         = document.querySelectorAll('.role-option');
 
       const demoAccounts = {
-        dokter: { label: 'Dokter', username: 'dokter', authEmail: 'dokter@simklinik.id' },
-        petugas: { label: 'Petugas', username: 'petugas', authEmail: 'petugas@simklinik.id' },
-        pasien: { label: 'Pasien', username: '', authEmail: '' }
+        pasien: { label: 'Pasien', username: '', authEmail: '' },
+        dokter: { label: 'Dokter', username: 'dokter', authEmail: 'dokter@simklinik.id' }
       };
 
       const urlParams = new URLSearchParams(window.location.search);
       const initialRoleParam = urlParams.get('role');
       let selectedRole = (initialRoleParam && demoAccounts[initialRoleParam.toLowerCase()])
         ? initialRoleParam.toLowerCase()
-        : 'dokter';
+        : 'pasien';
 
       function updateRole(role) {
         selectedRole = role;
@@ -292,7 +291,7 @@
           throw profileSetupError;
         }
 
-        const profileRoleKey = profile.role === 'Dokter' ? 'dokter' : profile.role === 'Pasien' ? 'pasien' : 'petugas';
+        const profileRoleKey = profile.role === 'Dokter' ? 'dokter' : 'pasien';
         if (profileRoleKey !== selectedRole) {
           await supabaseClient.auth.signOut();
           throw new Error('Role akun tidak sesuai dengan akses yang dipilih.');
@@ -534,7 +533,7 @@
         if (userName) {
           try { localStorage.setItem('simklinik_user_name', userName); } catch (_) {}
         }
-        const roleKey = profile?.role === 'Dokter' ? 'dokter' : profile?.role === 'Pasien' ? 'pasien' : 'petugas';
+        const roleKey = profile?.role === 'Dokter' ? 'dokter' : 'pasien';
 
         // Check if this is a first-time Google patient without password
         if (roleKey === 'pasien' && window.authHelper && window.authHelper.isFirstTimeGoogleUser(user, profile)) {
