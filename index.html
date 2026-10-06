@@ -291,6 +291,9 @@
                 ${doctors.map(d => {
                   const isCuti = d.status === 'cuti';
                   const icon = d.specialty.includes('Gigi') ? '🦷' : (d.specialty.includes('Anak') ? '👶' : '🩺');
+                  const cutiBadge = isCuti ? 
+                    `<span class="queue-badge cuti" style="font-size:0.675rem;" title="${d.cuti_reason || 'Sedang Cuti'}">🏖️ Cuti${d.cuti_end ? ` s/d ${window.formatCutiDateIndo ? window.formatCutiDateIndo(d.cuti_end) : d.cuti_end}` : ''}</span>` : 
+                    `<span class="queue-badge lengang" style="font-size:0.675rem;">Kuota: ${d.daily_quota}/hr</span>`;
                   return `
                     <div class="doctor-chip-item">
                       <div class="doctor-chip-name">
@@ -299,7 +302,7 @@
                         <span class="doctor-chip-spec">(${d.specialty})</span>
                       </div>
                       <div>
-                        ${isCuti ? '<span class="queue-badge cuti" style="font-size:0.675rem;">🏖️ Cuti</span>' : `<span class="queue-badge lengang" style="font-size:0.675rem;">Kuota: ${d.daily_quota}/hr</span>`}
+                        ${cutiBadge}
                       </div>
                     </div>
                   `;

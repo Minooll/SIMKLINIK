@@ -115,20 +115,137 @@ function generateReferralCode(prefix = 'KLINIK') {
 }
 
 /**
- * Ambil daftar dokter yang berpraktik di klinik tertentu
+ * Format tanggal ke format string YYYY-MM-DD
  */
-async function getDoctorsByClinic(clinicId, includeCuti = true) {
-  return PURWOREJO_DOCTORS_DATA.filter(d => {
-    if (d.clinic_id !== clinicId || !d.is_active) return false;
-    if (!includeCuti && d.status === 'cuti') return false;
+function toDateString(d) {
+  if (!d) return '';
+  if (typeof d === 'string') return d.slice(0, 10);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Format tanggal ke tampilan bahasa Indonesia (e.g. 8 Okt 2026)
+ */
+function formatCutiDateIndo(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.slice(0, 10).split('-');
+  if (parts.length < 3) return dateStr;
+  const year = parts[0];
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  return `${day} ${months[monthIdx] || ''} ${year}`;
+}
+
+/**
+ * Simpan data dokter ke localStorage jika di browser
+ */
+function saveDoctorsData() {
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('simklinik_doctors_data', JSON.stringify(PURWOREJO_DOCTORS_DATA));
+    } catch (e) {
+      console.warn('LocalStorage save doctors failed:', e);
+    }
+  }
+}
+
+/**
+ * Muat data dokter dari localStorage jika tersedia
+ */
+function loadDoctorsData() {
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('simklinik_doctors_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          PURWOREJO_DOCTORS_DATA.length = 0;
+          PURWOREJO_DOCTORS_DATA.push(...parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('LocalStorage load doctors failed:', e);
+    }
+  }
+}
+
+// Inisialisasi awal sinkronisasi data
+loadDoctorsData();
+
+/**
+ * Cek apakah dokter sedang dalam masa cuti pada tanggal acuan tertentu.
+ * Jika tanggal acuan di dunia nyata sudah melewati batas akhir cuti (cuti_end),
+ * sistem secara otomatis mengembalikan status dokter menjadi 'aktif'.
+ *
+ * @param {Object} doctor Objek dokter
+ * @param {Date|string} checkDate Tanggal acuan (default: waktu sekarang)
+ * @returns {boolean} True jika dokter sedang cuti pada tanggal tersebut
+ */
+function isDoctorOnLeave(doctor, checkDate = new Date()) {
+  if (!doctor || !doctor.is_active) return false;
+
+  const targetDateStr = toDateString(checkDate);
+
+  // Jika ada batas rentang tanggal cuti
+  if (doctor.cuti_end) {
+    const endStr = toDateString(doctor.cuti_end);
+    const startStr = doctor.cuti_start ? toDateString(doctor.cuti_start) : targetDateStr;
+
+    // Jika tanggal sekarang di dunia nyata sudah melewati tanggal selesai cuti:
+    // SISTEM OTOMATIS MENGAKTIFKAN KEMBALI DOKTER
+    if (targetDateStr > endStr) {
+      doctor.status = 'aktif';
+      saveDoctorsData();
+      return false;
+    }
+
+    // Jika masih sebelum tanggal mulai cuti
+    if (targetDateStr < startStr) {
+      return false;
+    }
+
+    // Berada di dalam rentang cuti aktif [cuti_start, cuti_end]
+    doctor.status = 'cuti';
     return true;
-  });
+  }
+
+  // Fallback jika status 'cuti' tanpa tanggal eksplisit
+  return doctor.status === 'cuti';
+}
+
+/**
+ * Ambil daftar dokter yang berpraktik di klinik tertentu
+ * Secara otomatis mengevaluasi kedaluwarsa cuti berdasarkan tanggal acuan.
+ */
+async function getDoctorsByClinic(clinicId, includeCuti = true, checkDate = new Date()) {
+  loadDoctorsData();
+  return PURWOREJO_DOCTORS_DATA
+    .filter(d => d.clinic_id === clinicId && d.is_active)
+    .filter(d => {
+      const onLeave = isDoctorOnLeave(d, checkDate);
+      if (!includeCuti && onLeave) return false;
+      return true;
+    })
+    .map(d => {
+      const onLeave = isDoctorOnLeave(d, checkDate);
+      return {
+        ...d,
+        status: onLeave ? 'cuti' : 'aktif',
+        is_on_leave: onLeave,
+        cuti_label: onLeave && d.cuti_end ? `s/d ${formatCutiDateIndo(d.cuti_end)}` : ''
+      };
+    });
 }
 
 /**
  * Mendaftarkan dokter baru oleh Pemilik Klinik
  */
 async function createDoctor(doctorData) {
+  loadDoctorsData();
   const newDoctor = {
     id: 'doc-' + Date.now(),
     clinic_id: doctorData.clinic_id,
@@ -137,9 +254,13 @@ async function createDoctor(doctorData) {
     sip_number: doctorData.sip_number,
     daily_quota: Number(doctorData.daily_quota) || 20,
     is_active: true,
-    status: 'aktif'
+    status: 'aktif',
+    cuti_start: null,
+    cuti_end: null,
+    cuti_reason: null
   };
   PURWOREJO_DOCTORS_DATA.push(newDoctor);
+  saveDoctorsData();
   return newDoctor;
 }
 
@@ -147,6 +268,7 @@ async function createDoctor(doctorData) {
  * Mengedit data dokter oleh Pemilik Klinik
  */
 async function updateDoctor(doctorId, updatedFields) {
+  loadDoctorsData();
   const doc = PURWOREJO_DOCTORS_DATA.find(d => d.id === doctorId && d.is_active);
   if (!doc) {
     throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
@@ -158,32 +280,119 @@ async function updateDoctor(doctorId, updatedFields) {
   if (updatedFields.daily_quota !== undefined) doc.daily_quota = Number(updatedFields.daily_quota);
   if (updatedFields.status) doc.status = updatedFields.status;
 
+  saveDoctorsData();
   return { ...doc };
 }
 
 /**
- * Mengubah status cuti dokter (toggle 'aktif' <-> 'cuti')
+ * Mengatur masa cuti dokter secara detail (Durasi Hari atau Kalender Rentang Tanggal)
+ * @param {string} doctorId ID dokter
+ * @param {Object} options { startDate, endDate, durationDays, reason }
  */
-async function toggleDoctorCuti(doctorId) {
+async function setDoctorCuti(doctorId, options = {}) {
+  loadDoctorsData();
   const doc = PURWOREJO_DOCTORS_DATA.find(d => d.id === doctorId && d.is_active);
   if (!doc) {
     throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
   }
 
-  doc.status = (doc.status === 'cuti') ? 'aktif' : 'cuti';
-  return { success: true, doctor: { ...doc }, status: doc.status };
+  const now = new Date();
+  const todayStr = toDateString(now);
+  let startStr = options.startDate ? toDateString(options.startDate) : todayStr;
+  let endStr = options.endDate ? toDateString(options.endDate) : null;
+
+  // Jika durasi hari dipilih (misal 1 hari, 2 hari, 3 hari, 7 hari)
+  if (options.durationDays && !endStr) {
+    const days = Math.max(1, parseInt(options.durationDays, 10));
+    const startObj = new Date(startStr);
+    const endObj = new Date(startObj.getTime() + (days - 1) * 24 * 60 * 60 * 1000);
+    endStr = toDateString(endObj);
+  }
+
+  if (!endStr) {
+    endStr = startStr;
+  }
+
+  // Validasi urutan tanggal
+  if (endStr < startStr) {
+    endStr = startStr;
+  }
+
+  doc.status = 'cuti';
+  doc.cuti_start = startStr;
+  doc.cuti_end = endStr;
+  doc.cuti_reason = options.reason || 'Izin Cuti';
+  doc.cuti_set_at = new Date().toISOString();
+
+  saveDoctorsData();
+
+  return {
+    success: true,
+    doctor: { ...doc },
+    status: 'cuti',
+    cuti_start: startStr,
+    cuti_end: endStr,
+    cuti_reason: doc.cuti_reason,
+    message: `Cuti ${doc.full_name} berhasil diatur: ${formatCutiDateIndo(startStr)} s/d ${formatCutiDateIndo(endStr)} (${doc.cuti_reason}). Setelah tanggal ini terlewati, dokter otomatis kembali aktif.`
+  };
+}
+
+/**
+ * Mengakhiri masa cuti dokter lebih awal dan mengembalikannya ke status aktif
+ */
+async function endDoctorCuti(doctorId) {
+  loadDoctorsData();
+  const doc = PURWOREJO_DOCTORS_DATA.find(d => d.id === doctorId && d.is_active);
+  if (!doc) {
+    throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
+  }
+
+  doc.status = 'aktif';
+  doc.cuti_start = null;
+  doc.cuti_end = null;
+  doc.cuti_reason = null;
+
+  saveDoctorsData();
+
+  return {
+    success: true,
+    doctor: { ...doc },
+    status: 'aktif',
+    message: `Cuti dokter ${doc.full_name} telah diakhiri. Dokter kini kembali aktif dan dapat dipilih oleh pasien.`
+  };
+}
+
+/**
+ * Mengubah status cuti dokter (toggle atau quick switch)
+ */
+async function toggleDoctorCuti(doctorId) {
+  loadDoctorsData();
+  const doc = PURWOREJO_DOCTORS_DATA.find(d => d.id === doctorId && d.is_active);
+  if (!doc) {
+    throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
+  }
+
+  const currentlyOnLeave = isDoctorOnLeave(doc);
+  if (currentlyOnLeave) {
+    return endDoctorCuti(doctorId);
+  } else {
+    // Default cuti 3 hari
+    return setDoctorCuti(doctorId, { durationDays: 3, reason: 'Izin Cuti' });
+  }
 }
 
 /**
  * Menghapus dokter dari klinik oleh Pemilik Klinik
  */
 async function deleteDoctor(doctorId) {
+  loadDoctorsData();
   const docIndex = PURWOREJO_DOCTORS_DATA.findIndex(d => d.id === doctorId);
   if (docIndex === -1) {
     throw new Error(`Dokter dengan ID ${doctorId} tidak ditemukan.`);
   }
 
   PURWOREJO_DOCTORS_DATA[docIndex].is_active = false;
+  saveDoctorsData();
   return { success: true, doctorId };
 }
 
@@ -195,8 +404,13 @@ if (typeof window !== 'undefined') {
   window.getDoctorsByClinic = getDoctorsByClinic;
   window.createDoctor = createDoctor;
   window.updateDoctor = updateDoctor;
+  window.isDoctorOnLeave = isDoctorOnLeave;
+  window.setDoctorCuti = setDoctorCuti;
+  window.endDoctorCuti = endDoctorCuti;
   window.toggleDoctorCuti = toggleDoctorCuti;
   window.deleteDoctor = deleteDoctor;
+  window.toDateString = toDateString;
+  window.formatCutiDateIndo = formatCutiDateIndo;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -208,7 +422,12 @@ if (typeof module !== 'undefined' && module.exports) {
     getDoctorsByClinic,
     createDoctor,
     updateDoctor,
+    isDoctorOnLeave,
+    setDoctorCuti,
+    endDoctorCuti,
     toggleDoctorCuti,
-    deleteDoctor
+    deleteDoctor,
+    toDateString,
+    formatCutiDateIndo
   };
 }

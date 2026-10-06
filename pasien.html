@@ -502,6 +502,9 @@
                 ${doctors.map(d => {
                   const isCuti = d.status === 'cuti';
                   const icon = d.specialty.includes('Gigi') ? '🦷' : (d.specialty.includes('Anak') ? '👶' : '🩺');
+                  const cutiBadge = isCuti ? 
+                    `<span class="queue-badge cuti" style="font-size:0.675rem;" title="${d.cuti_reason || 'Sedang Cuti'}">🏖️ Cuti${d.cuti_end ? ` s/d ${window.formatCutiDateIndo(d.cuti_end)}` : ''}</span>` : 
+                    `<span class="queue-badge lengang" style="font-size:0.675rem;">Kuota: ${d.daily_quota}/hr</span>`;
                   return `
                     <div class="doctor-chip-item">
                       <div class="doctor-chip-name">
@@ -510,7 +513,7 @@
                         <span class="doctor-chip-spec">(${d.specialty})</span>
                       </div>
                       <div>
-                        ${isCuti ? '<span class="queue-badge cuti" style="font-size:0.675rem;">🏖️ Cuti</span>' : `<span class="queue-badge lengang" style="font-size:0.675rem;">Kuota: ${d.daily_quota}/hr</span>`}
+                        ${cutiBadge}
                       </div>
                     </div>
                   `;
@@ -563,7 +566,8 @@
       }
 
       if (doc.status === 'cuti') {
-        statusEl.innerHTML = '<span class="queue-badge cuti">🏖️ Sedang Cuti</span>';
+        const cutiEndText = doc.cuti_end ? ` (s/d ${window.formatCutiDateIndo(doc.cuti_end)})` : '';
+        statusEl.innerHTML = `<span class="queue-badge cuti">🏖️ Sedang Cuti${cutiEndText}</span>`;
       } else {
         statusEl.innerHTML = '<span class="queue-badge lengang">🟢 Siap Melayani</span>';
       }
@@ -605,7 +609,8 @@
         opt.value = d.id;
         if (isCuti) {
           opt.disabled = true;
-          opt.textContent = `${d.full_name} (${d.specialty}) — [SEDANG CUTI]`;
+          const endStr = d.cuti_end ? ` s/d ${window.formatCutiDateIndo(d.cuti_end)}` : '';
+          opt.textContent = `${d.full_name} (${d.specialty}) — [SEDANG CUTI]${endStr}`;
           opt.style.color = 'var(--text-light)';
         } else {
           opt.textContent = `${d.full_name} (${d.specialty}) — Kuota: ${d.daily_quota}/hari`;

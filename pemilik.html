@@ -275,6 +275,89 @@
     </div>
   </div>
 
+  <!-- MODAL: Atur Cuti Dokter (Detail Durasi & Kalender Rentang Tanggal) -->
+  <div class="modal-backdrop" id="modal-set-cuti">
+    <div class="modal-container" style="max-width: 530px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="cuti-modal-title">🏖️ Pengaturan Jadwal Cuti Dokter</h3>
+        <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
+      </div>
+      <form id="form-set-cuti" class="modal-form">
+        <input type="hidden" id="cuti-doctor-id">
+        <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
+          <div style="background: linear-gradient(135deg, #fef3c7, #fffbeb); border-left: 4px solid #f59e0b; padding: 0.85rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem;">
+            <div style="font-weight: 800; color: #92400e; font-size: 0.95rem;" id="cuti-doctor-name">
+              dr. Medika Purworejo
+            </div>
+            <div style="font-size: 0.825rem; color: #b45309;" id="cuti-doctor-spec">
+              Dokter Umum • SIP-PWR-001/2024
+            </div>
+            <div id="cuti-current-status-box" style="margin-top: 0.4rem; font-size: 0.8rem; font-weight: 600; color: #78350f;">
+              Status saat ini: Aktif
+            </div>
+          </div>
+
+          <!-- Pilihan Cepat (Quick Duration Chips) -->
+          <div class="form-group">
+            <label class="form-label">Pilihan Cepat Durasi Cuti:</label>
+            <div class="quick-chip-group" id="cuti-quick-chips">
+              <button type="button" class="quick-chip" data-days="1">1 Hari</button>
+              <button type="button" class="quick-chip active" data-days="2">2 Hari</button>
+              <button type="button" class="quick-chip" data-days="3">3 Hari</button>
+              <button type="button" class="quick-chip" data-days="7">7 Hari (1 Minggu)</button>
+              <button type="button" class="quick-chip" data-days="14">14 Hari (2 Minggu)</button>
+            </div>
+          </div>
+
+          <!-- Rentang Tanggal Kalender (Date Pickers) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="cuti-start-date">Tanggal Mulai Cuti <span style="color: var(--danger)">*</span></label>
+              <input type="date" id="cuti-start-date" class="form-input" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="cuti-end-date">Tanggal Selesai Cuti <span style="color: var(--danger)">*</span></label>
+              <input type="date" id="cuti-end-date" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cuti-reason-select">Alasan / Keterangan Cuti</label>
+            <select id="cuti-reason-select" class="form-input" style="background: white;">
+              <option value="Izin Pribadi / Keluarga">Izin Pribadi / Keluarga</option>
+              <option value="Cuti Tahunan">Cuti Tahunan</option>
+              <option value="Izin Sakit / Pemulihan Medis">Izin Sakit / Pemulihan Medis</option>
+              <option value="Seminar Medis / Pelatihan">Seminar Medis / Pelatihan</option>
+              <option value="Tugas Dinas Luar Daerah">Tugas Dinas Luar Daerah</option>
+            </select>
+          </div>
+
+          <!-- Info Otomatisasi Real-World Expiration -->
+          <div style="background: #f0fdfa; border: 1px dashed #5eead4; border-radius: var(--radius-sm); padding: 0.75rem 0.9rem; margin-top: 0.5rem;">
+            <p style="margin: 0; font-size: 0.8rem; color: #0f766e; line-height: 1.45;">
+              ℹ️ <strong>Otomatisasi Sistem SIMKLINIK:</strong><br>
+              Nama dokter akan otomatis dinonaktifkan dari jadwal reservasi pasien selama periode cuti berlangsung. <strong>Setelah tanggal selesai cuti terlewati di dunia nyata</strong>, sistem otomatis mengembalikan status dokter menjadi <strong>Aktif</strong> tanpa perlu diubah manual.
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <button type="button" id="btn-end-cuti-now" class="btn" style="display: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 0.85rem;">
+              🟢 Akhiri Cuti Sekarang
+            </button>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="button" class="btn btn-secondary" data-close-modal>Batal</button>
+            <button type="submit" id="btn-save-cuti" class="btn btn-primary">
+              💾 Simpan Jadwal Cuti
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="config/supabase.js"></script>
   <script src="assets/js/components/modal.js"></script>
   <script src="assets/js/components/toast.js"></script>
@@ -348,6 +431,19 @@
         tr.style.borderBottom = '1px solid var(--border)';
         const isCuti = doc.status === 'cuti';
 
+        let statusBadgeHtml = '';
+        if (isCuti) {
+          const cutiEndText = doc.cuti_end ? ` s/d ${window.formatCutiDateIndo(doc.cuti_end)}` : '';
+          statusBadgeHtml = `
+            <span class="queue-badge cuti" title="${doc.cuti_reason || 'Cuti'}">
+              🏖️ Cuti${cutiEndText}
+            </span>
+            ${doc.cuti_reason ? `<small style="display:block; color:var(--text-muted); font-size:0.75rem; margin-top:2px;">${doc.cuti_reason}</small>` : ''}
+          `;
+        } else {
+          statusBadgeHtml = `<span class="queue-badge aktif">🟢 Aktif</span>`;
+        }
+
         tr.innerHTML = `
           <td style="padding: 1rem; font-weight: 700; color: var(--text-main);">
             ${doc.full_name}
@@ -356,17 +452,15 @@
           <td style="padding: 1rem; font-family: monospace; font-size: 0.85rem;">${doc.sip_number}</td>
           <td style="padding: 1rem;"><strong style="color: var(--primary-dark);">${doc.daily_quota}</strong> pasien/hari</td>
           <td style="padding: 1rem;">
-            <span class="queue-badge ${isCuti ? 'cuti' : 'aktif'}">
-              ${isCuti ? '🏖️ Cuti' : '🟢 Aktif'}
-            </span>
+            ${statusBadgeHtml}
           </td>
           <td style="padding: 1rem; text-align: right;">
             <div class="action-btn-group">
               <button type="button" class="table-action-btn edit" onclick="openEditDoctorModal('${doc.id}')" title="Edit Data Dokter">
                 ✏️ Edit
               </button>
-              <button type="button" class="table-action-btn ${isCuti ? 'aktif' : 'cuti'}" onclick="handleToggleCuti('${doc.id}')" title="${isCuti ? 'Aktifkan Dokter' : 'Tandai Dokter Cuti'}">
-                ${isCuti ? '🟢 Aktifkan' : '🏖️ Set Cuti'}
+              <button type="button" class="table-action-btn ${isCuti ? 'aktif' : 'cuti'}" onclick="openSetCutiModal('${doc.id}')" title="${isCuti ? 'Kelola / Ubah Cuti' : 'Atur Jadwal Cuti'}">
+                ${isCuti ? '🏖️ Kelola Cuti' : '🏖️ Set Cuti'}
               </button>
               <button type="button" class="table-action-btn delete" onclick="handleDeleteDoctor('${doc.id}', '${doc.full_name}')" title="Hapus Dokter">
                 🗑️ Hapus
@@ -437,16 +531,106 @@
       }
     });
 
-    // Toggle Cuti
-    window.handleToggleCuti = async function(doctorId) {
+    // Helper: Set Tanggal berdasarkan Pilihan Durasi Hari
+    function setCutiDatesByDays(days) {
+      const startInput = document.getElementById('cuti-start-date');
+      const endInput = document.getElementById('cuti-end-date');
+      const startVal = startInput.value || window.toDateString(new Date());
+      startInput.value = startVal;
+
+      const startDateObj = new Date(startVal);
+      const endDateObj = new Date(startDateObj.getTime() + (days - 1) * 24 * 60 * 60 * 1000);
+      endInput.value = window.toDateString(endDateObj);
+    }
+
+    // Modal Atur Cuti Dokter
+    window.openSetCutiModal = function(doctorId) {
+      const doc = localDoctorsList.find(d => d.id === doctorId);
+      if (!doc) return;
+
+      document.getElementById('cuti-doctor-id').value = doc.id;
+      document.getElementById('cuti-doctor-name').textContent = doc.full_name;
+      document.getElementById('cuti-doctor-spec').textContent = `${doc.specialty} • ${doc.sip_number || 'SIP Aktif'}`;
+
+      const statusBox = document.getElementById('cuti-current-status-box');
+      const btnEndCuti = document.getElementById('btn-end-cuti-now');
+      const isCuti = doc.status === 'cuti';
+      const todayStr = window.toDateString(new Date());
+
+      if (isCuti) {
+        const endText = doc.cuti_end ? ` s/d ${window.formatCutiDateIndo(doc.cuti_end)}` : '';
+        statusBox.textContent = `Status saat ini: 🏖️ Sedang Cuti (${endText}) — ${doc.cuti_reason || 'Izin Cuti'}`;
+        btnEndCuti.style.display = 'inline-block';
+        document.getElementById('cuti-start-date').value = doc.cuti_start || todayStr;
+        document.getElementById('cuti-end-date').value = doc.cuti_end || todayStr;
+        if (doc.cuti_reason) {
+          document.getElementById('cuti-reason-select').value = doc.cuti_reason;
+        }
+      } else {
+        statusBox.textContent = 'Status saat ini: 🟢 Aktif (Siap Menerima Pasien)';
+        btnEndCuti.style.display = 'none';
+        document.getElementById('cuti-start-date').value = todayStr;
+        // Default 2 hari
+        setCutiDatesByDays(2);
+        document.querySelectorAll('#cuti-quick-chips .quick-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.days === '2');
+        });
+      }
+
+      window.showModal('modal-set-cuti');
+    };
+
+    // Quick Duration Chips Listener
+    document.querySelectorAll('#cuti-quick-chips .quick-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#cuti-quick-chips .quick-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const days = parseInt(chip.dataset.days, 10);
+        setCutiDatesByDays(days);
+      });
+    });
+
+    document.getElementById('cuti-start-date').addEventListener('change', () => {
+      const activeChip = document.querySelector('#cuti-quick-chips .quick-chip.active');
+      if (activeChip) {
+        setCutiDatesByDays(parseInt(activeChip.dataset.days, 10));
+      }
+    });
+
+    // Form Set Cuti Submit
+    document.getElementById('form-set-cuti').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const doctorId = document.getElementById('cuti-doctor-id').value;
+      const startDate = document.getElementById('cuti-start-date').value;
+      const endDate = document.getElementById('cuti-end-date').value;
+      const reason = document.getElementById('cuti-reason-select').value;
+
       try {
-        const res = await window.toggleDoctorCuti(doctorId);
-        const newStatus = res.status === 'cuti' ? 'sedang cuti' : 'kembali aktif';
-        window.showToast(`Status dokter ${res.doctor.full_name} kini ${newStatus}.`, 'success');
+        const res = await window.setDoctorCuti(doctorId, { startDate, endDate, reason });
+        window.showToast(res.message, 'success');
+        window.closeModal('modal-set-cuti');
         await loadOwnerDashboard();
       } catch (err) {
         window.showToast(err.message, 'error');
       }
+    });
+
+    // Button Akhiri Cuti Sekarang
+    document.getElementById('btn-end-cuti-now').addEventListener('click', async () => {
+      const doctorId = document.getElementById('cuti-doctor-id').value;
+      try {
+        const res = await window.endDoctorCuti(doctorId);
+        window.showToast(res.message, 'success');
+        window.closeModal('modal-set-cuti');
+        await loadOwnerDashboard();
+      } catch (err) {
+        window.showToast(err.message, 'error');
+      }
+    });
+
+    // Backward-compatible handleToggleCuti
+    window.handleToggleCuti = async function(doctorId) {
+      window.openSetCutiModal(doctorId);
     };
 
     // Hapus Dokter
