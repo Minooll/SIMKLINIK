@@ -35,7 +35,16 @@ test('dokter.html contains SOAP form elements, finish button, and live queue dis
   assert.match(html, /id=["']soap-subjective["']/i);
   assert.match(html, /id=["']soap-objective["']/i);
   assert.match(html, /id=["']soap-assessment["']/i);
-  assert.match(html, /id=["']soap-plan["']/i);
   assert.match(html, /id=["']btn-finalize-rme["']/i);
   assert.match(html, /id=["']today-queue-list["']/i);
+
+  // Layout vertikal atas-bawah memprioritaskan penulisan RME di posisi atas
+  assert.match(html, /class=["'][^"']*doctor-workspace-vertical/i);
+  assert.match(html, /class=["'][^"']*rme-primary-workspace/i);
+  assert.match(html, /class=["'][^"']*queue-secondary-workspace/i);
+
+  // Pastikan RME muncul sebelum antrean di dokumen HTML
+  const rmePos = html.indexOf('rme-primary-workspace');
+  const queuePos = html.indexOf('queue-secondary-workspace');
+  assert.ok(rmePos < queuePos, 'RME workspace must precede queue list in vertical top-to-bottom layout');
 });

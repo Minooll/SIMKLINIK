@@ -58,91 +58,105 @@
       </header>
 
       <div class="content-body">
-        <!-- VIEW 1: RUANG PERIKSA & SOAP FORM -->
+        <!-- VIEW 1: RUANG PERIKSA & SOAP FORM (UTAMAKAN RME DENGAN SUSUNAN ATAS-BAWAH) -->
         <section id="view-ruang-periksa" class="dashboard-view active">
-          <div style="display: grid; grid-template-columns: 360px 1fr; gap: 2rem;">
-            <!-- Kolom Kiri: Antrean Pasien Hari Ini -->
-            <div>
-              <div class="card" style="margin-bottom: 1.5rem;">
-                <div class="card-header">
-                  <h2 style="font-size: 1.125rem; font-weight: 800;">Antrean Pasien Hari Ini</h2>
-                  <span class="queue-badge lengang" id="doctor-crowd-badge">LENGANG</span>
-                </div>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                  Tanggal: <strong id="current-date-text">Hari Ini</strong>
-                </p>
-                
-                <div id="today-queue-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                  <!-- Dinamis diisi queue items -->
-                </div>
-              </div>
-            </div>
-
-            <!-- Kolom Kanan: Lembar Formulir SOAP RME Sekuensial -->
-            <div>
-              <div class="card" style="border-top: 4px solid var(--primary);">
-                <div class="card-header">
+          <div class="doctor-workspace-vertical">
+            <!-- 1. BAGIAN ATAS (UTAMA): LEMBAR FORMULIR SOAP REKAM MEDIS ELEKTRONIK -->
+            <div class="rme-primary-workspace">
+              <div class="card rme-card">
+                <div class="card-header rme-card-header">
                   <div>
-                    <span class="queue-badge lengang" style="margin-bottom: 0.35rem;">PASIEN AKTIF DIPERIKSA</span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+                      <span class="queue-badge lengang" style="font-weight: 800;">PASIEN AKTIF DIPERIKSA</span>
+                      <span class="badge-vital-live">● Sesi Konsultasi Medis Langsung</span>
+                    </div>
                     <h2 style="font-size: 1.35rem; font-weight: 900; color: var(--primary-dark);" id="current-patient-header">
                       No. Antrean: A-01 — Tn. Santoso (NIK: 330601xxxxxxxxxx)
                     </h2>
                   </div>
+                  <div class="rme-timestamp-badge" id="rme-session-timestamp">
+                    🗓️ Sesi Pemeriksaan Hari Ini
+                  </div>
                 </div>
 
-                <!-- SOAP Form -->
+                <!-- SOAP Form Utama -->
                 <form id="soap-form">
-                  <div class="soap-grid" style="margin-bottom: 1.5rem;">
-                    <!-- Subjective -->
-                    <div class="soap-field">
+                  <div class="soap-grid">
+                    <!-- S (Subjective) -->
+                    <div class="soap-field soap-field-s">
                       <label class="soap-label" for="soap-subjective">
-                        <span>📝</span> S (Subjective) — Anamnesis & Keluhan Utama
+                        <span class="soap-pill-badge pill-s">S</span>
+                        <span>Subjective (Anamnesis & Keluhan Utama)</span>
                       </label>
                       <textarea id="soap-subjective" class="soap-textarea" placeholder="Pasien mengeluhkan demam sejak 3 hari, pusing, batuk kering..." required></textarea>
                     </div>
 
-                    <!-- Objective -->
-                    <div class="soap-field">
+                    <!-- O (Objective) -->
+                    <div class="soap-field soap-field-o">
                       <label class="soap-label" for="soap-objective">
-                        <span>🩺</span> O (Objective) — Tanda Vital & Pemeriksaan Fisik
+                        <span class="soap-pill-badge pill-o">O</span>
+                        <span>Objective (Tanda Vital & Pemeriksaan Fisik)</span>
                       </label>
                       <textarea id="soap-objective" class="soap-textarea" placeholder="TD: 120/80 mmHg, Nadi: 82x/m, Suhu: 38.2°C, RR: 18x/m. Faring hiperemis..." required></textarea>
                     </div>
 
-                    <!-- Assessment -->
-                    <div class="soap-field">
+                    <!-- A (Assessment) -->
+                    <div class="soap-field soap-field-a">
                       <label class="soap-label" for="soap-assessment">
-                        <span>🔍</span> A (Assessment) — Diagnosa Klinis & ICD-10
+                        <span class="soap-pill-badge pill-a">A</span>
+                        <span>Assessment (Diagnosa Klinis & ICD-10)</span>
                       </label>
                       <textarea id="soap-assessment" class="soap-textarea" placeholder="Febris Akut ec Suspect Viral Infection (ICD-10: A09)..." required></textarea>
                     </div>
 
-                    <!-- Plan -->
-                    <div class="soap-field">
+                    <!-- P (Plan) -->
+                    <div class="soap-field soap-field-p">
                       <label class="soap-label" for="soap-plan">
-                        <span>💊</span> P (Plan) — Terapi Medis, Edukasi & Resep Obat
+                        <span class="soap-pill-badge pill-p">P</span>
+                        <span>Plan (Terapi Medis, Edukasi & Resep Obat)</span>
                       </label>
                       <textarea id="soap-plan" class="soap-textarea" placeholder="Paracetamol 500mg 3x1 tablet, Vitamin C 500mg 1x1. Istirahat cukup..." required></textarea>
                     </div>
                   </div>
 
-                  <div class="form-group" style="margin-bottom: 1.5rem;">
+                  <!-- Resep Tambahan / Farmasi -->
+                  <div class="form-group" style="margin-top: 1.25rem;">
                     <label class="soap-label" for="soap-prescription">
-                      <span>🏷️</span> Catatan Resep Tambahan / Instruksi Farmasi
+                      <span class="soap-pill-badge pill-rx">Rx</span>
+                      <span>Catatan Resep Tambahan / Instruksi Farmasi Klinik</span>
                     </label>
                     <input type="text" id="soap-prescription" class="form-input" placeholder="Diminum sesudah makan, habiskan antibiotik jika ada.">
                   </div>
 
-                  <!-- Action Button -->
-                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 1rem;">
-                    <span style="font-size: 0.85rem; color: var(--text-muted);">
-                      💡 Menyimpan lembar SOAP akan secara otomatis memanggil antrean pasien berikutnya.
-                    </span>
-                    <button type="submit" id="btn-finalize-rme" class="btn btn-primary" style="padding: 0.85rem 1.5rem; font-size: 0.95rem;">
-                      💾 Selesai & Simpan RME ➔
+                  <!-- Action Button Bar -->
+                  <div class="soap-action-bar">
+                    <div class="soap-hint">
+                      💡 <strong>Alur Otomatis:</strong> Menyimpan lembar SOAP akan secara otomatis memanggil antrean pasien berikutnya ke ruang periksa dan mengarsipkan catatan medis ini.
+                    </div>
+                    <button type="submit" id="btn-finalize-rme" class="btn btn-primary btn-finalize-rme">
+                      💾 Selesai & Simpan Lembar RME ➔
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+
+            <!-- 2. BAGIAN BAWAH: DAFTAR ANTREAN PASIEN HARI INI -->
+            <div class="queue-secondary-workspace">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <h2 style="font-size: 1.15rem; font-weight: 800;">👥 Antrean Pasien Hari Ini</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                      Tanggal: <strong id="current-date-text">Hari Ini</strong> — Pantau giliran pasien berikutnya yang sedang menunggu pemeriksaan
+                    </p>
+                  </div>
+                  <span class="queue-badge lengang" id="doctor-crowd-badge">LENGANG</span>
+                </div>
+                
+                <div id="today-queue-list" class="today-queue-grid">
+                  <!-- Dinamis diisi queue items -->
+                </div>
               </div>
             </div>
           </div>
@@ -292,14 +306,16 @@
       tableBody.innerHTML = '';
 
       activeQueue.forEach(item => {
-        // Render left column card
+        // Render card antrean
         const div = document.createElement('div');
-        div.style.padding = '0.875rem';
+        div.className = 'today-queue-card';
+        div.style.padding = '0.95rem 1.15rem';
         div.style.borderRadius = 'var(--radius-md)';
         div.style.border = '1px solid var(--border)';
         div.style.background = item.status === 'sedang_diperiksa' ? '#f0fdfa' : 'white';
         if (item.status === 'sedang_diperiksa') {
           div.style.borderColor = 'var(--primary)';
+          div.style.borderLeft = '4px solid var(--primary)';
         }
 
         const isAllowedCancel = window.isCancellationAllowed(item.appointment_date, item.appointment_time);
