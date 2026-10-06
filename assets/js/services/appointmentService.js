@@ -39,9 +39,12 @@
   ];
 
   const FALLBACK_DOCTORS = [
-    // ── 1. Poli Umum (b9154d6a-e41d-43d6-a25a-1f8cfcbdd816) ──
+    // ── 1. Poli Umum (b9154d6a-e41d-43d6-a25a-1f8cfcbdd816) - Klinik Purworejo Kota ──
     {
       id: '11111111-1111-4111-8111-111111111111',
+      clinic_id: 'clinic-pwr-01',
+      clinic_code: 'KLN-PWR-01',
+      clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo',
       service_id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816',
       service_code: 'POLI_UMUM',
       sip_number: 'SIP-503/001/DU/2024',
@@ -52,6 +55,9 @@
     },
     {
       id: '11111111-1111-4111-8111-222222222222',
+      clinic_id: 'clinic-pwr-01',
+      clinic_code: 'KLN-PWR-01',
+      clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo',
       service_id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816',
       service_code: 'POLI_UMUM',
       sip_number: 'SIP-503/002/DU/2024',
@@ -62,6 +68,9 @@
     },
     {
       id: '11111111-1111-4111-8111-333333333333',
+      clinic_id: 'clinic-pwr-01',
+      clinic_code: 'KLN-PWR-01',
+      clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo',
       service_id: 'b9154d6a-e41d-43d6-a25a-1f8cfcbdd816',
       service_code: 'POLI_UMUM',
       sip_number: 'SIP-503/003/DU/2024',
@@ -71,9 +80,12 @@
       profile: { id: '11111111-1111-4111-8111-333333333333', full_name: 'dr. Hendra Wijaya', phone: '081234567893' }
     },
 
-    // ── 2. Poli Gigi & Mulut (335f3cba-0e0c-4b29-83ec-b7b66316a430) ──
+    // ── 2. Poli Gigi & Mulut (335f3cba-0e0c-4b29-83ec-b7b66316a430) - Klinik Purworejo Kota ──
     {
       id: '22222222-2222-4222-8222-111111111111',
+      clinic_id: 'clinic-pwr-01',
+      clinic_code: 'KLN-PWR-01',
+      clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo',
       service_id: '335f3cba-0e0c-4b29-83ec-b7b66316a430',
       service_code: 'POLI_GIGI',
       sip_number: 'SIP-503/010/DG/2024',
@@ -84,6 +96,9 @@
     },
     {
       id: '22222222-2222-4222-8222-222222222222',
+      clinic_id: 'clinic-pwr-01',
+      clinic_code: 'KLN-PWR-01',
+      clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo',
       service_id: '335f3cba-0e0c-4b29-83ec-b7b66316a430',
       service_code: 'POLI_GIGI',
       sip_number: 'SIP-503/011/DG/2024',
@@ -94,6 +109,9 @@
     },
     {
       id: '22222222-2222-4222-8222-333333333333',
+      clinic_id: 'clinic-pwr-01',
+      clinic_code: 'KLN-PWR-01',
+      clinic_name: 'Klinik Pratama Sehat Mandiri Purworejo',
       service_id: '335f3cba-0e0c-4b29-83ec-b7b66316a430',
       service_code: 'POLI_GIGI',
       sip_number: 'SIP-503/012/DG/2024',
@@ -103,9 +121,12 @@
       profile: { id: '22222222-2222-4222-8222-333333333333', full_name: 'drg. Farhan Ramadhan, Sp.KG', phone: '081298765433' }
     },
 
-    // ── 3. Poli Spesialis Anak (aaa6eaa6-9133-4420-a2e6-591ab9aaf35c) ──
+    // ── 3. Poli Spesialis Anak (aaa6eaa6-9133-4420-a2e6-591ab9aaf35c) - Klinik Kutoarjo Medika ──
     {
       id: '33333333-3333-4333-8333-111111111111',
+      clinic_id: 'clinic-pwr-02',
+      clinic_code: 'KLN-PWR-02',
+      clinic_name: 'Klinik Pratama & Bersalin Kutoarjo Medika',
       service_id: 'aaa6eaa6-9133-4420-a2e6-591ab9aaf35c',
       service_code: 'POLI_ANAK',
       sip_number: 'SIP-503/020/SPA/2024',
@@ -116,6 +137,9 @@
     },
     {
       id: '33333333-3333-4333-8333-222222222222',
+      clinic_id: 'clinic-pwr-02',
+      clinic_code: 'KLN-PWR-02',
+      clinic_name: 'Klinik Pratama & Bersalin Kutoarjo Medika',
       service_id: 'aaa6eaa6-9133-4420-a2e6-591ab9aaf35c',
       service_code: 'POLI_ANAK',
       sip_number: 'SIP-503/021/SPA/2024',
@@ -125,9 +149,12 @@
       profile: { id: '33333333-3333-4333-8333-222222222222', full_name: 'dr. Bagus Prasetyo, Sp.A', phone: '081345678902' }
     },
 
-    // ── 4. Laboratorium Klinik (7cbdca21-101d-4191-86b4-3317dc4401d7) ──
+    // ── 4. Laboratorium Klinik (7cbdca21-101d-4191-86b4-3317dc4401d7) - Klinik Keluarga Banyuurip ──
     {
       id: '44444444-4444-4444-8444-111111111111',
+      clinic_id: 'clinic-pwr-03',
+      clinic_code: 'KLN-PWR-03',
+      clinic_name: 'Klinik Pratama Keluarga Banyuurip',
       service_id: '7cbdca21-101d-4191-86b4-3317dc4401d7',
       service_code: 'LABORATORIUM',
       sip_number: 'SIP-503/030/SPPK/2024',
@@ -138,6 +165,9 @@
     },
     {
       id: '44444444-4444-4444-8444-222222222222',
+      clinic_id: 'clinic-pwr-03',
+      clinic_code: 'KLN-PWR-03',
+      clinic_name: 'Klinik Pratama Keluarga Banyuurip',
       service_id: '7cbdca21-101d-4191-86b4-3317dc4401d7',
       service_code: 'LABORATORIUM',
       sip_number: 'SIP-503/031/SPPK/2024',
@@ -468,7 +498,7 @@
     /**
      * Get all active doctors and their practice schedules (for Petugas dashboard)
      */
-    getAllDoctorsWithSchedules() {
+    getAllDoctorsWithSchedules(clinicId = null) {
       const SCHEDULE_MAP = {
         '11111111-1111-4111-8111-111111111111': { days: 'Senin - Jumat', hours: '08:00 - 12:00 WIB', quota: 20, room: 'Ruang 101' },
         '11111111-1111-4111-8111-222222222222': { days: 'Senin - Sabtu', hours: '09:00 - 14:00 WIB', quota: 20, room: 'Ruang 102' },
@@ -482,7 +512,7 @@
         '44444444-4444-4444-8444-222222222222': { days: 'Senin - Jumat', hours: '12:00 - 20:00 WIB', quota: 25, room: 'Instalasi Lab' }
       };
 
-      return FALLBACK_DOCTORS.map(doc => {
+      let list = FALLBACK_DOCTORS.map(doc => {
         const sched = SCHEDULE_MAP[doc.id] || { days: 'Senin - Jumat', hours: '08:00 - 14:00 WIB', quota: 20, room: 'Poli' };
         const parts = sched.hours.replace(' WIB', '').split(' - ');
         return {
@@ -496,6 +526,12 @@
           }
         };
       });
+
+      if (clinicId) {
+        list = list.filter(d => d.clinic_id === clinicId || d.clinic_code === clinicId);
+      }
+
+      return list;
     },
 
     /**
