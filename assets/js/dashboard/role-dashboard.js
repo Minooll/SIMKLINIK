@@ -1701,9 +1701,9 @@
       });
     });
 
-    window.openBookingWithClinic = (clinicId) => {
+    window.openBookingWithClinic = (clinicId, serviceName) => {
       if (typeof window.handleInitiateBooking === 'function') {
-        const allowed = window.handleInitiateBooking();
+        const allowed = window.handleInitiateBooking(serviceName);
         if (!allowed) return;
       } else if (window.Modal) {
         window.Modal.open('modalBooking');
@@ -1711,6 +1711,16 @@
       if (bookingClinicSelect && clinicId) {
         bookingClinicSelect.value = clinicId;
         bookingClinicSelect.dispatchEvent(new Event('change'));
+      }
+      if (bookingServiceSelect && serviceName) {
+        for (let i = 0; i < bookingServiceSelect.options.length; i++) {
+          if (bookingServiceSelect.options[i].text.toLowerCase().includes(serviceName.toLowerCase()) ||
+              serviceName.toLowerCase().includes(bookingServiceSelect.options[i].text.toLowerCase())) {
+            bookingServiceSelect.selectedIndex = i;
+            bookingServiceSelect.dispatchEvent(new Event('change'));
+            break;
+          }
+        }
       }
     };
 

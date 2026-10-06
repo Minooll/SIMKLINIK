@@ -112,6 +112,92 @@
       return 2;
     }
 
+    calculateDistanceKm(lat1, lon1, lat2, lon2) {
+      if (lat1 === lat2 && lon1 === lon2) return 0;
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return Math.round(R * c * 10) / 10;
+    }
+
+    async getClinicRecommendations(complaint = '', locationContext = {}) {
+      const clinics = await this.getClinics();
+      const lowerComplaint = String(complaint).toLowerCase();
+
+      let userLat = locationContext.latitude;
+      let userLon = locationContext.longitude;
+      const districtName = (locationContext.district || '').toLowerCase();
+
+      const DISTRICT_COORDS = {
+        'purworejo': { lat: -7.7144, lon: 110.0125 },
+        'kutoarjo': { lat: -7.7198, lon: 109.9134 },
+        'banyuurip': { lat: -7.7420, lon: 109.9985 }
+      };
+
+      if (typeof userLat !== 'number' || typeof userLon !== 'number') {
+        if (districtName && DISTRICT_COORDS[districtName]) {
+          userLat = DISTRICT_COORDS[districtName].lat;
+          userLon = DISTRICT_COORDS[districtName].lon;
+        } else {
+          userLat = DISTRICT_COORDS['purworejo'].lat;
+          userLon = DISTRICT_COORDS['purworejo'].lon;
+        }
+      }
+
+      const isDental = /gigi|geraham|gusi|tambal|cabut gigi|karang gigi/i.test(lowerComplaint);
+      const isMaternalOrUgd = /hamil|kandungan|persalinan|melahirkan|kia|bidan|ugd 24|malam|tengah malam/i.test(lowerComplaint);
+      const isLab = /darah|kolesterol|asam urat|lab|gula darah|tensi/i.test(lowerComplaint);
+
+      const scoredClinics = [];
+
+      for (const clinic of clinics) {
+        const queueCount = await this.getClinicQueueCount(clinic.id);
+        const waitMinsPerPatient = 12;
+        const estimatedWaitMinutes = queueCount * waitMinsPerPatient;
+        const distanceKm = this.calculateDistanceKm(userLat, userLon, clinic.latitude, clinic.longitude);
+
+        let matchScore = 100;
+
+        if (isDental) {
+          if (clinic.facilities.some(f => /gigi/i.test(f))) {
+            matchScore += 200;
+          } else {
+            matchScore -= 100;
+          }
+        } else if (isMaternalOrUgd) {
+          if (clinic.facilities.some(f => /kia|kebidanan|ugd 24/i.test(f))) {
+            matchScore += 200;
+          }
+        } else if (isLab) {
+          if (clinic.facilities.some(f => /laboratorium|lab/i.test(f))) {
+            matchScore += 150;
+          }
+        }
+
+        matchScore -= (distanceKm * 5);
+        matchScore -= (queueCount * 8);
+
+        if (districtName && clinic.district.toLowerCase() === districtName) {
+          matchScore += 50;
+        }
+
+        scoredClinics.push({
+          clinic,
+          queueCount,
+          estimatedWaitMinutes,
+          distanceKm,
+          matchScore
+        });
+      }
+
+      scoredClinics.sort((a, b) => b.matchScore - a.matchScore);
+      return scoredClinics;
+    }
+
     async getClinicServices(clinicId) {
       const clinic = await this.getClinicById(clinicId);
       return clinic ? clinic.facilities : ['Poli Umum', 'Farmasi'];

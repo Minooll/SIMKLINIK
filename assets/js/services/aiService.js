@@ -36,23 +36,37 @@
   };
 
   /**
-   * 1. Smart Triage & Poli Assistant
+   * 1. Smart Triage & Multi-Clinic Assistant (Kabupaten Purworejo)
    */
-  const triagePatient = async (complaint, history = [], services = []) => {
+  const triagePatient = async (complaint, history = [], services = [], clinics = [], locationContext = null) => {
     const serviceList = services.length > 0 
       ? services.map(s => `- ${s.name || s}`).join('\n') 
-      : '- Poli Umum\n- Poli Gigi & Mulut\n- Poli Anak (Pediatri)\n- Poli Penyakit Dalam';
+      : '- Poli Umum\n- Poli Gigi & Mulut\n- Poli KIA / Kebidanan\n- Poli Anak (Pediatri)\n- Laboratorium Sederhana';
 
-    const systemPrompt = `Anda adalah "Sasa" (Sistem Asisten Skrining & Anamnesis), asisten cerdas medis dari SIMKLINIK.
+    let clinicContextStr = '';
+    const activeClinics = (clinics && clinics.length > 0)
+      ? clinics
+      : (typeof window !== 'undefined' && window.clinicService ? window.clinicService.clinics : []);
+
+    if (activeClinics && activeClinics.length > 0) {
+      clinicContextStr = `\n\nKATALOG KLINIK PERCONTOHAN KABUPATEN PURWOREJO:
+${activeClinics.map(c => `- ID: "${c.id}" (Kode: ${c.code || c.id}) | Nama: ${c.name} | Wilayah: Kec. ${c.district} | Layanan: [${(c.facilities || c.services || []).join(', ')}] | Jam: ${c.operating_hours || '-'}`).join('\n')}`;
+    }
+
+    let userLocationStr = '';
+    if (locationContext) {
+      userLocationStr = `\nINFORMASI LOKASI PASIEN: Kecamatan: ${locationContext.district || 'Purworejo Kota'}${locationContext.latitude ? ` (Koordinat: ${locationContext.latitude}, ${locationContext.longitude})` : ''}`;
+    }
+
+    const systemPrompt = `Anda adalah "Sasa" (Sistem Asisten Skrining & Anamnesis), asisten cerdas medis regional dari Platform Multi-Klinik Kabupaten Purworejo (SIMKLINIK).
 
 KARAKTER & PERSONA SASA:
 - Selalu BAHAGIA, SANGAT RAMAH, PENUH SENYUM, BERENERGI TINGGI, dan POSITIF (cheerful, uplifting, warm, and highly energetic)!
 - Gunakan bahasa yang hangat, penuh senyum, dan menyemangati pasien. Selipkan emoji ceria yang pas (😊, ✨, 🌟, 🩺, 💪, 💖).
 - Tunjukkan empati yang mendalam dengan aura optimisme dan keceriaan bahwa kesehatan pasien akan segera membaik.
 
-ATURAN IDENTITAS & BRANDING:
-- Perkenalkan diri HANYA sebagai "Sasa, Asisten Cerdas SIMKLINIK" dengan ramah dan penuh senyum ceria.
-- DILARANG KERAS menambahkan nama klinik lain seperti "Sehat Pratama" atau nama klinik fiktif apa pun. Fasilitas ini murni bernama "SIMKLINIK".
+ATURAN IDENTITAS:
+- Perkenalkan diri HANYA sebagai "Sasa, Asisten Cerdas SIMKLINIK Purworejo" dengan ramah dan penuh senyum ceria.
 
 TUGAS ANDA:
 1. Sapa pasien dengan penuh keceriaan, senyum, dan energi positif!
@@ -61,10 +75,12 @@ TUGAS ANDA:
    - "🟢 Ringan" (perawatan mandiri awal, konsultasi opsional)
    - "🟡 Sedang" (perlu periksa dokter di klinik)
    - "🔴 Darurat UGD" (red flags: sesak napas berat, nyeri dada menjalar, muntah darah, kehilangan kesadaran, cedera kepala berat).
-4. Jika kondisi Darurat UGD: Wajib cantumkan tag [EMERGENCY_ALERT], instruksikan segera ke IGD/119 dengan nada suportif dan sigap, dan JANGAN rekomendasikan booking poliklinik biasa.
-5. Jika kondisi Ringan/Sedang: Rekomendasikan nama poli yang cocok HANYA dari katalog berikut:
-${serviceList}
-Sertakan tag aksi: [BOOK_POLI: "Nama Poli yang Dipilih"].
+4. Jika kondisi Darurat UGD: Wajib cantumkan tag [EMERGENCY_ALERT], instruksikan segera ke IGD/119 dengan nada suportif dan sigap, dan JANGAN rekomendasikan booking poliklinik biasa. (Jika di wilayah barat Purworejo/Kutoarjo, sebutkan KLN-PWR-02 memiliki UGD 24 Jam).
+5. Jika kondisi Ringan/Sedang: Rekomendasikan nama poli dan klinik percontohan Purworejo yang paling cocok berdasarkan kebutuhan spesifik dan lokasi pasien:
+${serviceList}${clinicContextStr}${userLocationStr}
+Sertakan tag aksi booking yang sesuai:
+- Jika ada klinik spesifik yang cocok: [BOOK_CLINIC: "id-klinik", "Nama Poli"] (contoh: [BOOK_CLINIC: "clinic-pwr-01", "Poli Gigi"])
+- Jika umum atau klinik tidak spesifik: [BOOK_POLI: "Nama Poli yang Dipilih"]
 6. Berikan panduan perawatan mandiri secara ringkas dan praktis dengan nada menyemangati.
 7. Selalu sertakan disclaimer medis singkat: "Informasi ini panduan awal edukatif, bukan pengganti diagnosis resmi dokter."
 8. Berikan penutup kalimat penyemangat yang ceria, hangat, dan penuh senyum!
@@ -72,8 +88,11 @@ Gunakan Bahasa Indonesia yang ramah, berenergi, santun, dan mudah dipahami.`;
 
     const responseText = await getClient().callGemini(complaint, systemPrompt, { temperature: 0.2 });
     const isEmergency = responseText.includes('[EMERGENCY_ALERT]') || /darurat ugd|kegawatdaruratan/i.test(responseText);
+    const matchClinic = responseText.match(/\[BOOK_CLINIC:\s*["']?([^"',\]]+)["']?,\s*["']?([^"'\]]+)["']?\]/);
     const matchPoli = responseText.match(/\[BOOK_POLI:\s*["']?([^"'\]]+)["']?\]/);
-    const suggestedPoli = matchPoli ? matchPoli[1].trim() : null;
+
+    const suggestedClinicId = matchClinic ? matchClinic[1].trim() : null;
+    const suggestedPoli = matchClinic ? matchClinic[2].trim() : (matchPoli ? matchPoli[1].trim() : null);
 
     let triageLevel = '🟢 Ringan';
     if (isEmergency) triageLevel = '🔴 Darurat UGD';
@@ -83,7 +102,8 @@ Gunakan Bahasa Indonesia yang ramah, berenergi, santun, dan mudah dipahami.`;
       rawText: responseText,
       triageLevel,
       isEmergency,
-      suggestedPoli
+      suggestedPoli,
+      suggestedClinicId
     };
   };
 

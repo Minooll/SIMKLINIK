@@ -177,7 +177,7 @@ test('pasien.html - window.openBookingModalWithService hooks into handleInitiate
 
   assert.match(
     html,
-    /window\.openBookingModalWithService\s*=\s*\(serviceName\)\s*=>\s*\{[\s\S]*handleInitiateBooking/,
+    /window\.openBookingModalWithService\s*=\s*\(serviceName(?:,\s*clinicId)?\)\s*=>\s*\{[\s\S]*handleInitiateBooking/,
     'openBookingModalWithService must intercept via handleInitiateBooking'
   );
 });

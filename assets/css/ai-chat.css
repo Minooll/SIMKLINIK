@@ -371,3 +371,133 @@
   padding: 8px 0;
 }
 
+/* ==========================================================================
+   AI Multi-Clinic Purworejo Recommendation Card & Location Bar
+   ========================================================================== */
+.ai-location-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.78rem;
+}
+
+.ai-loc-label {
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ai-loc-select {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ai-loc-select:focus {
+  border-color: #0284c7;
+}
+
+.ai-gps-btn {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.ai-gps-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+/* Clinic Recommendation Card inside Bot Message */
+.ai-clinic-recommend-card {
+  margin-top: 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #0284c7;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-clinic-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-clinic-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+}
+
+.ai-clinic-card-name {
+  font-size: 0.85rem;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.ai-clinic-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #475569;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.ai-meta-item strong {
+  color: #0f172a;
+}
+
+.ai-booking-clinic-btn {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+
+.ai-booking-clinic-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+}
+
+
