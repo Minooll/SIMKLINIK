@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="SIMKLINIK - Sistem Informasi Manajemen Pelayanan Klinik Modern Terpadu dengan Rekam Medis Elektronik (RME) dan Antrean Real-time."
+      content="SIMKLINIK - Platform Agregator Layanan Multi-Klinik Regional Kabupaten Purworejo. Temukan faskes di Purworejo Kota, Kutoarjo, dan Banyuurip dengan antrean real-time dan RME SOAP terstandar."
     />
-    <title>SIMKLINIK — Sistem Informasi Manajemen Klinik Terpadu</title>
+    <title>SIMKLINIK — Platform Agregator Multi-Klinik Regional Kabupaten Purworejo</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230ea5e9'><path d='M19 10.5h-5.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z'/></svg>" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,14 +31,15 @@
           <div class="brand-icon">+</div>
           <div class="brand-text">
             <span>SIMKLINIK</span>
-            <small>Manajemen Klinik</small>
+            <small>Agregator Kab. Purworejo</small>
           </div>
         </a>
 
         <nav class="nav-links" id="navLinks" aria-label="Navigasi Utama">
           <a href="#hero" class="nav-link">Beranda</a>
+          <a href="#klinik" class="nav-link">Jaringan Klinik</a>
           <a href="#layanan" class="nav-link">Layanan Poli</a>
-          <a href="#alur" class="nav-link">Alur Layanan</a>
+          <a href="#alur" class="nav-link">Alur Mandiri</a>
           <a href="#dokter" class="nav-link">Jadwal Dokter</a>
           <a href="#rme" class="nav-link">Standar RME</a>
         </nav>
@@ -67,28 +68,25 @@
           <div class="hero-content">
             <div class="hero-tag">
               <span class="hero-tag-pulse" aria-hidden="true"></span>
-              <span>Platform Klinik Digital Terintegrasi</span>
+              <span>Platform Agregator Faskes Regional • Kab. Purworejo</span>
             </div>
 
             <h1 class="hero-title">
-              Pelayanan Medis Modern, Cepat &amp;
-              <span class="hero-title-highlight">Terhubung Real-Time</span>
+              Layanan Multi-Klinik Terpadu
+              <span class="hero-title-highlight">Kabupaten Purworejo</span>
             </h1>
 
             <p class="hero-desc">
-              SIMKLINIK menyatukan pendaftaran mandiri pasien, alur antrean loket
-              yang transparan, pencatatan Rekam Medis Elektronik (RME) berstandar
-              Kemenkes, hingga penerbitan e-resep dan kasir digital dalam satu
-              ekosistem terpadu.
+              Satu portal terintegrasi untuk menemukan klinik terdekat di <strong>Kec. Purworejo Kota</strong>, <strong>Kutoarjo</strong>, dan <strong>Banyuurip</strong>. Pantau antrean aktif secara real-time, pilih dokter terpercaya, dan nikmati pelayanan kesehatan mandiri tanpa friksi loket fisik.
             </p>
 
             <div class="hero-cta">
               <a
-                href="login.html?role=pasien"
+                href="#klinik"
                 class="btn btn-primary btn-lg"
                 id="heroPatientCta"
               >
-                Reservasi Pasien Mandiri
+                Jelajahi 3 Klinik Pilot &darr;
               </a>
               <a href="login.html" class="btn btn-secondary btn-lg" id="heroLoginCta">
                 Masuk ke Sistem
@@ -97,16 +95,16 @@
 
             <div class="hero-badges">
               <div class="badge-item">
+                <strong>3 Faskes Pilot</strong>
+                <span>Purworejo, Kutoarjo, Banyuurip</span>
+              </div>
+              <div class="badge-item">
                 <strong>PMK No. 24/2022</strong>
-                <span>Standar Rekam Medis Elektronik</span>
+                <span>Standar RME SOAP &amp; ICD-10</span>
               </div>
               <div class="badge-item">
-                <strong>Multi-Klinik Regional</strong>
-                <span>Kab. Purworejo: Pasien &amp; Dokter</span>
-              </div>
-              <div class="badge-item">
-                <strong>100% Cloud RLS</strong>
-                <span>Keamanan Data Medis Terisolasi</span>
+                <strong>2-Peran Mandiri</strong>
+                <span>Direct Pasien &amp; Dokter Faskes</span>
               </div>
             </div>
           </div>
@@ -118,54 +116,54 @@
               <div class="float-icon">&check;</div>
               <div>
                 <strong>E-Resep Diterbitkan</strong>
-                <small>dr. Ayu Rahma &middot; Farmasi Siap</small>
+                <small>dr. Dimas Putra &middot; Farmasi Siap</small>
               </div>
             </div>
 
             <div class="preview-card">
               <div class="preview-card-header">
                 <div>
-                  <strong>Monitoring Operasional Klinik</strong>
-                  <p class="preview-footer-note">Status Pelayanan Hari Ini</p>
+                  <strong>Live Beban Antrean Faskes</strong>
+                  <p class="preview-footer-note">Kabupaten Purworejo Hari Ini</p>
                 </div>
                 <div class="preview-status">
                   <span class="preview-status-dot" aria-hidden="true"></span>
-                  <span>Aktif Melayani</span>
+                  <span>Live Update</span>
                 </div>
               </div>
 
               <div class="preview-card-body">
                 <div class="queue-highlight">
                   <div>
-                    <span class="queue-highlight-label">Antrean Dipanggil</span>
-                    <p>Poli Umum &middot; dr. Ayu</p>
+                    <span class="queue-highlight-label">Faskes Pusat Kota</span>
+                    <p>Klinik Sehat Mandiri Purworejo</p>
                   </div>
-                  <div class="queue-highlight-num">A-021</div>
+                  <div class="queue-highlight-num">4 Antrean</div>
                 </div>
 
                 <div class="queue-mini-list">
                   <div class="mini-row">
                     <div class="mini-row-left">
-                      <strong>A-022</strong>
-                      <span>Siti Aminah &middot; Poli Umum</span>
+                      <strong>KLN-PWR-01</strong>
+                      <span>Kec. Purworejo (Kota) &middot; Poli Umum &amp; Gigi</span>
                     </div>
-                    <span class="pill-status pill-called">Dipanggil</span>
+                    <span class="pill-status pill-called">Buka</span>
                   </div>
 
                   <div class="mini-row">
                     <div class="mini-row-left">
-                      <strong>B-008</strong>
-                      <span>Andi Wijaya &middot; Poli Gigi</span>
+                      <strong>KLN-PWR-02</strong>
+                      <span>Kec. Kutoarjo &middot; UGD 24 Jam &amp; Bersalin</span>
                     </div>
-                    <span class="pill-status pill-waiting">Menunggu</span>
+                    <span class="pill-status pill-waiting">24 Jam</span>
                   </div>
 
                   <div class="mini-row">
                     <div class="mini-row-left">
-                      <strong>A-020</strong>
-                      <span>Budi Santoso &middot; Poli Umum</span>
+                      <strong>KLN-PWR-03</strong>
+                      <span>Kec. Banyuurip &middot; Lab Darah Cepat</span>
                     </div>
-                    <span class="pill-status pill-done">Selesai Poli</span>
+                    <span class="pill-status pill-done">Buka</span>
                   </div>
                 </div>
 
@@ -178,10 +176,148 @@
             <div class="float-card float-card-bottom" aria-hidden="true">
               <div class="float-icon">&#9877;</div>
               <div>
-                <strong>3 Dokter Bertugas</strong>
-                <small>Poli Umum, Gigi &amp; Anak</small>
+                <strong>3 Faskes Terkoneksi</strong>
+                <small>Kecamatan Strategis Purworejo</small>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           REGIONAL CLINICS SECTION (JARINGAN KLINIK PURWOREJO)
+      ============================================================ -->
+      <section class="section clinics-section" id="klinik">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge">Jaringan Faskes Kabupaten Purworejo</span>
+            <h2 class="section-title">3 Klinik Percontohan Siap Melayani Anda</h2>
+            <p class="section-desc">
+              Pilih fasilitas kesehatan mitra di lokasi terdekat Anda untuk memantau antrean hidup dan melakukan janji temu langsung ke dokter.
+            </p>
+          </div>
+
+          <div class="clinics-landing-grid">
+            <!-- Clinic 1: Purworejo Kota -->
+            <article class="clinic-landing-card">
+              <div class="clinic-card-topbar clinic-topbar-pwr"></div>
+              <div class="clinic-card-inner">
+                <div class="clinic-header-row">
+                  <span class="district-badge badge-pwr">Kec. Purworejo (Pusat Kota)</span>
+                  <span class="clinic-status-pill pill-open">Buka Hari Ini</span>
+                </div>
+                <h3 class="clinic-card-name">Klinik Pratama Sehat Mandiri Purworejo</h3>
+                <p class="clinic-card-code">Kode Faskes: <strong>KLN-PWR-01</strong></p>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">📍</span>
+                  <span>Jl. Brigjen Katamso No. 42, Pangenrejo, Kec. Purworejo</span>
+                </div>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">🕒</span>
+                  <span>08:00 - 21:00 WIB</span>
+                </div>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">📞</span>
+                  <span>(0275) 321456</span>
+                </div>
+                <div class="clinic-facilities-tags">
+                  <span class="tag-facility">Poli Umum</span>
+                  <span class="tag-facility">Poli Gigi &amp; Mulut</span>
+                  <span class="tag-facility">Farmasi</span>
+                </div>
+                <div class="clinic-queue-meter">
+                  <div class="queue-meter-info">
+                    <span>Status Antrean Hidup:</span>
+                    <strong>4 Pasien Aktif</strong>
+                  </div>
+                  <span class="queue-meter-badge badge-good">Lancar</span>
+                </div>
+                <a href="login.html?role=pasien" class="btn btn-primary btn-block">
+                  Reservasi di Faskes Ini &rarr;
+                </a>
+              </div>
+            </article>
+
+            <!-- Clinic 2: Kutoarjo -->
+            <article class="clinic-landing-card">
+              <div class="clinic-card-topbar clinic-topbar-ktj"></div>
+              <div class="clinic-card-inner">
+                <div class="clinic-header-row">
+                  <span class="district-badge badge-ktj">Kec. Kutoarjo (Wilayah Barat)</span>
+                  <span class="clinic-status-pill pill-24h">UGD 24 Jam</span>
+                </div>
+                <h3 class="clinic-card-name">Klinik Pratama &amp; Bersalin Kutoarjo Medika</h3>
+                <p class="clinic-card-code">Kode Faskes: <strong>KLN-PWR-02</strong></p>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">📍</span>
+                  <span>Jl. Pangeran Diponegoro No. 18, Kec. Kutoarjo</span>
+                </div>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">🕒</span>
+                  <span>24 Jam (Poli: 08:00 - 20:00 WIB)</span>
+                </div>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">📞</span>
+                  <span>(0275) 641890</span>
+                </div>
+                <div class="clinic-facilities-tags">
+                  <span class="tag-facility">Poli Umum</span>
+                  <span class="tag-facility">Poli KIA / Bersalin</span>
+                  <span class="tag-facility">UGD 24 Jam</span>
+                  <span class="tag-facility">Farmasi</span>
+                </div>
+                <div class="clinic-queue-meter">
+                  <div class="queue-meter-info">
+                    <span>Status Antrean Hidup:</span>
+                    <strong>2 Pasien Aktif</strong>
+                  </div>
+                  <span class="queue-meter-badge badge-good">Sangat Lancar</span>
+                </div>
+                <a href="login.html?role=pasien" class="btn btn-primary btn-block">
+                  Reservasi di Faskes Ini &rarr;
+                </a>
+              </div>
+            </article>
+
+            <!-- Clinic 3: Banyuurip -->
+            <article class="clinic-landing-card">
+              <div class="clinic-card-topbar clinic-topbar-byu"></div>
+              <div class="clinic-card-inner">
+                <div class="clinic-header-row">
+                  <span class="district-badge badge-byu">Kec. Banyuurip (Penyangga)</span>
+                  <span class="clinic-status-pill pill-open">Buka Hari Ini</span>
+                </div>
+                <h3 class="clinic-card-name">Klinik Pratama Keluarga Banyuurip</h3>
+                <p class="clinic-card-code">Kode Faskes: <strong>KLN-PWR-03</strong></p>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">📍</span>
+                  <span>Jl. Tentara Pelajar No. 88, Boro Kulon, Kec. Banyuurip</span>
+                </div>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">🕒</span>
+                  <span>07:30 - 20:30 WIB</span>
+                </div>
+                <div class="clinic-meta-item">
+                  <span class="meta-icon">📞</span>
+                  <span>(0275) 325112</span>
+                </div>
+                <div class="clinic-facilities-tags">
+                  <span class="tag-facility">Poli Umum</span>
+                  <span class="tag-facility">Lab Cek Darah Cepat</span>
+                  <span class="tag-facility">Farmasi</span>
+                </div>
+                <div class="clinic-queue-meter">
+                  <div class="queue-meter-info">
+                    <span>Status Antrean Hidup:</span>
+                    <strong>1 Pasien Aktif</strong>
+                  </div>
+                  <span class="queue-meter-badge badge-good">Sangat Lancar</span>
+                </div>
+                <a href="login.html?role=pasien" class="btn btn-primary btn-block">
+                  Reservasi di Faskes Ini &rarr;
+                </a>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -192,11 +328,10 @@
       <section class="section" id="layanan">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Pelayanan Kesehatan Primer</span>
+            <span class="section-badge">Pelayanan Kesehatan Terstandar</span>
             <h2 class="section-title">Layanan Poliklinik &amp; Fasilitas Terpadu</h2>
             <p class="section-desc">
-              Pilihan layanan kesehatan menyeluruh yang didukung oleh dokter
-              kompeten dan fasilitas diagnostik modern.
+              Pilihan layanan kesehatan primer menyeluruh yang didukung oleh dokter kompeten di setiap faskes mitra Kabupaten Purworejo.
             </p>
           </div>
 
@@ -205,8 +340,7 @@
               <div class="service-icon-box">&#9877;</div>
               <h3>Poli Umum</h3>
               <p>
-                Pemeriksaan kesehatan umum, diagnosis awal, penanganan penyakit
-                akut dan kronis, serta rujukan medis terstandar.
+                Pemeriksaan kesehatan umum, diagnosis awal, penanganan penyakit akut dan kronis, serta rujukan medis terstandar.
               </p>
               <ul class="service-features">
                 <li>Anamnesis &amp; vital signs lengkap</li>
@@ -219,8 +353,7 @@
               <div class="service-icon-box">&#9879;</div>
               <h3>Poli Gigi &amp; Mulut</h3>
               <p>
-                Perawatan kesehatan gigi menyeluruh untuk pencegahan gigi
-                berlubang, pembersihan karang gigi (scaling), dan tambal estetis.
+                Perawatan kesehatan gigi menyeluruh untuk pencegahan gigi berlubang, pembersihan karang gigi (scaling), dan tambal estetis.
               </p>
               <ul class="service-features">
                 <li>Pemeriksaan periodik &amp; scaling</li>
@@ -231,15 +364,14 @@
 
             <article class="service-card">
               <div class="service-icon-box">&#9825;</div>
-              <h3>Poli Spesialis Anak</h3>
+              <h3>Poli Spesialis Anak &amp; KIA</h3>
               <p>
-                Pelayanan kesehatan ramah anak mulai dari imunisasi wajib,
-                pemantauan tumbuh kembang, hingga penanganan demam dan infeksi.
+                Pelayanan kesehatan ibu dan anak mulai dari imunisasi wajib, pemantauan tumbuh kembang, hingga penanganan demam dan infeksi.
               </p>
               <ul class="service-features">
                 <li>Jadwal imunisasi berkala</li>
-                <li>Skrining gizi dan tumbuh kembang</li>
-                <li>Konsultasi laktasi dan MPASI</li>
+                <li>Pemeriksaan kehamilan &amp; persalinan</li>
+                <li>Konsultasi gizi anak &amp; MPASI</li>
               </ul>
             </article>
 
@@ -247,8 +379,7 @@
               <div class="service-icon-box">&#9745;</div>
               <h3>Farmasi &amp; E-Resep</h3>
               <p>
-                Penulisan resep obat digital langsung dari ruang dokter tanpa
-                kertas. Obat disiapkan apotek secara akurat dan tepat waktu.
+                Penulisan resep obat digital langsung dari ruang dokter tanpa kertas. Obat disiapkan apotek secara akurat dan tepat waktu.
               </p>
               <ul class="service-features">
                 <li>Instruksi dosis &amp; aturan minum jelas</li>
@@ -259,10 +390,9 @@
 
             <article class="service-card">
               <div class="service-icon-box">&#9881;</div>
-              <h3>Laboratorium Klinik</h3>
+              <h3>Laboratorium Diagnostik Cepat</h3>
               <p>
-                Pemeriksaan penunjang diagnostik cepat meliputi darah lengkap,
-                kolesterol, asam urat, gula darah puasa, dan tes urine.
+                Pemeriksaan penunjang diagnostik cepat meliputi darah lengkap, kolesterol, asam urat, gula darah puasa, dan tes urine.
               </p>
               <ul class="service-features">
                 <li>Hasil lab digital terhubung ke RME</li>
@@ -273,15 +403,14 @@
 
             <article class="service-card">
               <div class="service-icon-box">&#9830;</div>
-              <h3>Kasir &amp; Billing Terintegrasi</h3>
+              <h3>AI Health Triage &amp; FAQ</h3>
               <p>
-                Kalkulasi tagihan otomatis dari pendaftaran, tindakan poli,
-                hingga farmasi dengan kwitansi resmi yang transparan.
+                Asisten kecerdasan buatan Gemini 2.0 Flash untuk rekomendasi klinik yang sesuai dengan keluhan gejala dan estimasi jarak.
               </p>
               <ul class="service-features">
-                <li>Rincian tarif biaya terbuka</li>
-                <li>Pembayaran tunai atau transfer terverifikasi</li>
-                <li>Bukti invoice tersimpan di riwayat pasien</li>
+                <li>Rekomendasi faskes berbasis keluhan</li>
+                <li>Edukasi obat dan istilah medis aman</li>
+                <li>Tanya jawab operasional faskes 24/7</li>
               </ul>
             </article>
           </div>
@@ -289,53 +418,48 @@
       </section>
 
       <!-- ============================================================
-           WORKFLOW SECTION (ALUR LAYANAN)
+           WORKFLOW SECTION (ALUR MANDIRI DIRECT 2-ROLE)
       ============================================================ -->
       <section class="section workflow-section" id="alur">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Pengalaman Tanpa Hambatan</span>
-            <h2 class="section-title">Alur Pelayanan Pasien di SIMKLINIK</h2>
+            <span class="section-badge">Pelayanan Mandiri Tanpa Friksi</span>
+            <h2 class="section-title">Alur Pelayanan Pasien $\leftrightarrow$ Dokter</h2>
             <p class="section-desc">
-              Menghilangkan antrean manual yang berbelit-belit dengan alur kerja
-              digital yang transparan dan efisien.
+              Menghilangkan antrean loket fisik yang berbelit-belit dengan alur digital mandiri langsung antara pasien dan dokter.
             </p>
           </div>
 
           <div class="workflow-steps">
             <div class="workflow-step">
               <div class="step-number">1</div>
-              <h4>Reservasi / Daftar</h4>
+              <h4>Pilih Faskes &amp; Dokter</h4>
               <p>
-                Pasien memesan jadwal janji temu secara mandiri melalui website
-                atau mendaftar langsung di loket pendaftaran klinik.
+                Pasien menjelajahi direktori klinik di Purworejo Kota, Kutoarjo, atau Banyuurip untuk mencari kuota yang paling longgar.
               </p>
             </div>
 
             <div class="workflow-step">
               <div class="step-number">2</div>
-              <h4>Antrean Layanan</h4>
+              <h4>Reservasi &amp; Tiket Antrean</h4>
               <p>
-                Sistem memberikan nomor antrean otomatis. Pasien dapat memantau
-                status panggilan antrean secara langsung di ruang tunggu.
+                Pasien melakukan reservasi mandiri. Nomor tiket antrean digital langsung terbit dan dapat dipantau dari smartphone.
               </p>
             </div>
 
             <div class="workflow-step">
               <div class="step-number">3</div>
-              <h4>Pemeriksaan Medis (RME)</h4>
+              <h4>Pemeriksaan Medis (SOAP)</h4>
               <p>
-                Dokter memeriksa pasien, mencatat tanda vital &amp; diagnosis
-                ke dalam rekam medis elektronik, serta menerbitkan e-resep.
+                Dokter memanggil pasien langsung dari meja periksa, mendokumentasikan RME SOAP ICD-10 WHO, dan menerbitkan e-resep.
               </p>
             </div>
 
             <div class="workflow-step">
               <div class="step-number">4</div>
-              <h4>Kasir &amp; Obat</h4>
+              <h4>Apotek &amp; Transparansi RME</h4>
               <p>
-                Pasien menyelesaikan administrasi di kasir, menerima obat di
-                apotek, dan dapat melihat salinan resep di akun pribadinya.
+                Pasien mengambil obat di apotek faskes, dan seluruh riwayat catatan medis tersimpan permanen di akun pasien.
               </p>
             </div>
           </div>
@@ -343,50 +467,30 @@
       </section>
 
       <!-- ============================================================
-           DOCTORS SECTION (DOKTER & JADWAL)
+           DOCTORS SECTION (DOKTER & JADWAL PURWOREJO)
       ============================================================ -->
       <section class="section" id="dokter">
         <div class="container">
           <div class="section-header">
             <span class="section-badge">Tenaga Medis Profesional</span>
-            <h2 class="section-title">Jadwal Praktik Dokter</h2>
+            <h2 class="section-title">Jadwal Praktik Dokter Faskes Mitra</h2>
             <p class="section-desc">
-              Dokter berpengalaman yang berdedikasi memberikan konsultasi dan
-              penanganan terbaik untuk Anda dan keluarga.
+              Dokter berpengalaman yang berdedikasi melayani pasien di klinik-klinik percontohan Kabupaten Purworejo.
             </p>
           </div>
 
           <div class="doctors-grid">
             <article class="doctor-card">
               <div class="doctor-card-top">
-                <div class="doctor-avatar-circle">AR</div>
-              </div>
-              <div class="doctor-card-body">
-                <h3 class="doctor-name">dr. Ayu Rahma, Sp.A</h3>
-                <p class="doctor-spec">Dokter Spesialis Anak</p>
-                <div class="doctor-schedule-box">
-                  <strong>Senin - Kamis:</strong> 08:30 - 12:00 WIB<br />
-                  <small>Poli Spesialis Anak &middot; Ruang 102</small>
-                </div>
-                <a
-                  href="login.html?role=pasien"
-                  class="btn btn-secondary btn-sm"
-                >
-                  Pilih Jadwal Konsultasi &rarr;
-                </a>
-              </div>
-            </article>
-
-            <article class="doctor-card">
-              <div class="doctor-card-top">
                 <div class="doctor-avatar-circle">DP</div>
               </div>
               <div class="doctor-card-body">
+                <span class="doctor-clinic-tag">Klinik Pratama Sehat Mandiri Purworejo</span>
                 <h3 class="doctor-name">dr. Dimas Putra</h3>
-                <p class="doctor-spec">Dokter Pelayanan Umum</p>
+                <p class="doctor-spec">Dokter Pelayanan Umum &middot; Pusat Kota</p>
                 <div class="doctor-schedule-box">
-                  <strong>Senin - Jumat:</strong> 09:00 - 14:00 WIB<br />
-                  <small>Poli Umum &middot; Ruang 101</small>
+                  <strong>Senin - Jumat:</strong> 08:00 - 14:00 WIB<br />
+                  <small>Poli Umum &middot; Ruang 101 &middot; Kuota: 25 Pasien</small>
                 </div>
                 <a
                   href="login.html?role=pasien"
@@ -402,11 +506,33 @@
                 <div class="doctor-avatar-circle">RS</div>
               </div>
               <div class="doctor-card-body">
+                <span class="doctor-clinic-tag">Klinik Pratama Sehat Mandiri Purworejo</span>
                 <h3 class="doctor-name">drg. Rani Sari</h3>
-                <p class="doctor-spec">Dokter Gigi &amp; Mulut</p>
+                <p class="doctor-spec">Dokter Gigi &amp; Mulut &middot; Pusat Kota</p>
                 <div class="doctor-schedule-box">
-                  <strong>Selasa, Kamis, Sabtu:</strong> 10:00 - 15:00 WIB<br />
-                  <small>Poli Gigi &middot; Ruang 103</small>
+                  <strong>Selasa, Kamis, Sabtu:</strong> 13:00 - 18:00 WIB<br />
+                  <small>Poli Gigi &middot; Ruang 103 &middot; Kuota: 15 Pasien</small>
+                </div>
+                <a
+                  href="login.html?role=pasien"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Pilih Jadwal Konsultasi &rarr;
+                </a>
+              </div>
+            </article>
+
+            <article class="doctor-card">
+              <div class="doctor-card-top">
+                <div class="doctor-avatar-circle">AR</div>
+              </div>
+              <div class="doctor-card-body">
+                <span class="doctor-clinic-tag">Klinik Kutoarjo Medika</span>
+                <h3 class="doctor-name">dr. Ayu Rahma, Sp.A</h3>
+                <p class="doctor-spec">Dokter Spesialis Anak &middot; Kutoarjo</p>
+                <div class="doctor-schedule-box">
+                  <strong>Senin - Kamis:</strong> 09:00 - 13:00 WIB<br />
+                  <small>Poli Spesialis Anak &middot; Ruang 102 &middot; Kuota: 20 Pasien</small>
                 </div>
                 <a
                   href="login.html?role=pasien"
@@ -426,13 +552,12 @@
       <section class="section" id="rme">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Regulasi &amp; Privasi Data</span>
+            <span class="section-badge">Kepatuhan Hukum &amp; Privasi Data</span>
             <h2 class="section-title">
-              Kepatuhan Rekam Medis Elektronik (RME)
+              Standar Rekam Medis Elektronik Terbuka
             </h2>
             <p class="section-desc">
-              Dirancang dengan standar hukum tertinggi untuk menjamin keamanan
-              informasi kesehatan pribadi setiap pasien.
+              Dibangun dengan kepatuhan hukum penuh terhadap regulasi kesehatan Republik Indonesia.
             </p>
           </div>
 
@@ -441,8 +566,7 @@
               <div class="service-icon-box">&#9878;</div>
               <h3>Permenkes No. 24 Tahun 2022</h3>
               <p>
-                Mendukung standarisasi struktur data klinis SOAP (Subjektif,
-                Objektif, Asesmen, Plan) dan pengkodean diagnosa ICD-10 yang sah.
+                Mendukung standarisasi struktur data klinis SOAP (Subjektif, Objektif, Asesmen, Plan), pengkodean diagnosa standar ICD-10 WHO, dan penguncian mutlak pasca finalisasi dokter.
               </p>
             </article>
 
@@ -450,18 +574,15 @@
               <div class="service-icon-box">&#9884;</div>
               <h3>UU PDP No. 27 Tahun 2022</h3>
               <p>
-                Perlindungan data pribadi pasien dengan enkripsi saat transit
-                (TLS 1.3) dan isolasi hak akses setingkat baris (Row Level
-                Security).
+                Perlindungan data pribadi medis pasien dengan enkripsi in-transit dan isolasi hak akses setingkat baris (Row Level Security Supabase PostgreSQL).
               </p>
             </article>
 
             <article class="service-card">
               <div class="service-icon-box">&#9889;</div>
-              <h3>Jejak Audit Sistem Terpercaya</h3>
+              <h3>Jejak Audit Trail Terpercaya</h3>
               <p>
-                Setiap akses, perubahan diagnosa, dan penerbitan resep tercatat
-                dalam tabel audit trail yang tidak dapat dimanipulasi.
+                Setiap aksi pembuatan rekam medis, perubahan status antrean, dan penerbitan resep tercatat dalam log audit yang tidak dapat dimanipulasi.
               </p>
             </article>
           </div>
@@ -469,16 +590,15 @@
       </section>
 
       <!-- ============================================================
-           ROLES PORTAL CTA
+           ROLES PORTAL CTA (2-ROLE FOCUSED)
       ============================================================ -->
       <section class="roles-section">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Akses Multi-Peran</span>
+            <span class="section-badge">Ekosistem 2-Peran Mandiri</span>
             <h2 class="section-title">Pilih Portal Kerja Anda</h2>
             <p class="section-desc">
-              Masuk ke lingkungan kerja terpersonalisasi yang disesuaikan dengan
-              tanggung jawab dan kebutuhan Anda.
+              Masuk ke lingkungan kerja terpersonalisasi yang disesuaikan untuk Pasien dan Dokter fasilitas kesehatan.
             </p>
           </div>
 
@@ -487,8 +607,7 @@
               <div class="role-portal-icon">&#9829;</div>
               <h3>Portal Pasien Mandiri</h3>
               <p>
-                Eksplorasi faskes di Kabupaten Purworejo, reservasi janji temu dokter, tinjau riwayat rekam medis, lihat
-                resep obat aktif, dan pantau estimasi antrean klinik.
+                Eksplorasi faskes di Kabupaten Purworejo, reservasi janji temu dokter, tinjau riwayat rekam medis SOAP, lihat resep obat aktif, dan pantau estimasi antrean klinik.
               </p>
               <a
                 href="login.html?role=pasien"
@@ -503,8 +622,7 @@
               <div class="role-portal-icon">&#9877;</div>
               <h3>Portal Dokter Faskes</h3>
               <p>
-                Pilih klinik tugas aktif di Kab. Purworejo, panggil dan kelola antrean langsung, akses riwayat medis terdahulu, input form
-                RME SOAP ICD-10, dan terbitkan e-resep.
+                Pilih klinik tugas aktif di Kab. Purworejo, panggil dan layani antrean pasien langsung dari ruang periksa, akses riwayat medis terdahulu, input form RME SOAP ICD-10, dan terbitkan e-resep.
               </p>
               <a
                 href="login.html?role=dokter"
@@ -528,53 +646,38 @@
           <div class="footer-brand">
             <h4>SIMKLINIK</h4>
             <p>
-              Sistem Informasi Manajemen Fasilitas Pelayanan Kesehatan Tingkat
-              Pertama terintegrasi Rekam Medis Elektronik (RME) dan Antrean
-              Awan.
+              Platform Agregator Layanan Multi-Klinik Regional Kabupaten Purworejo, Jawa Tengah. Terintegrasi Rekam Medis Elektronik (RME) SOAP, Standar ICD-10 WHO, dan Antrean Awan Mandiri.
             </p>
           </div>
 
           <div class="footer-col">
-            <h5>Navigasi</h5>
+            <h5>Navigasi Regional</h5>
             <ul>
               <li><a href="#hero">Beranda</a></li>
+              <li><a href="#klinik">Jaringan Klinik Purworejo</a></li>
               <li><a href="#layanan">Layanan Poli</a></li>
-              <li><a href="#alur">Alur Layanan</a></li>
-              <li><a href="#dokter">Jadwal Praktik</a></li>
+              <li><a href="#alur">Alur Mandiri</a></li>
+              <li><a href="#dokter">Jadwal Praktik Dokter</a></li>
               <li><a href="#rme">Kepatuhan RME</a></li>
             </ul>
           </div>
 
           <div class="footer-col">
-            <h5>Akses Sistem</h5>
+            <h5>Akses Portal</h5>
             <ul>
-              <li><a href="login.html?role=pasien">Login Pasien</a></li>
-              <li><a href="login.html?role=dokter">Login Dokter</a></li>
+              <li><a href="login.html?role=pasien">Login Portal Pasien</a></li>
+              <li><a href="login.html?role=dokter">Login Portal Dokter</a></li>
               <li><a href="login.html">Registrasi Pasien Baru</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h5>Kontak &amp; Bantuan</h5>
-            <ul>
-              <li>Jl. Kaliurang KM 14.5, Sleman, D.I. Yogyakarta</li>
-              <li>Telepon: (0274) 898444</li>
-              <li>Email: <a href="mailto:support@simklinik.id">support@simklinik.id</a></li>
-              <li>Status Server: <span class="preview-status">Operasional</span></li>
             </ul>
           </div>
         </div>
 
         <div class="footer-bottom">
-          <p>&copy; 2026 SIMKLINIK. Seluruh hak cipta dilindungi undang-undang.</p>
-          <p>Kepatuhan Permenkes No. 24/2022 &middot; UU PDP No. 27/2022</p>
+          <p>&copy; 2026 SIMKLINIK Kabupaten Purworejo. Sesuai Permenkes No. 24/2022 &amp; UU PDP No. 27/2022.</p>
         </div>
       </div>
     </footer>
 
     <script src="assets/js/landing.js"></script>
-    <script src="config/gemini.js"></script>
-    <script src="assets/js/services/aiService.js"></script>
-    <script src="assets/js/components/aiChatWidget.js"></script>
   </body>
 </html>

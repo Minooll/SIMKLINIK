@@ -889,7 +889,216 @@ button {
   }
 }
 
+/* ============================================================
+   REGIONAL CLINICS DIRECTORY (PURWOREJO)
+   ============================================================ */
+.clinics-section {
+  background: linear-gradient(180deg, #f8fafc 0%, #f0fdfa 50%, #f8fafc 100%);
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.clinics-landing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.8rem;
+}
+
+.clinic-landing-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.clinic-landing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 36px rgba(13, 148, 136, 0.12);
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.clinic-card-topbar {
+  height: 6px;
+  width: 100%;
+}
+
+.clinic-topbar-pwr {
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+}
+
+.clinic-topbar-ktj {
+  background: linear-gradient(90deg, #0d9488, #2dd4bf);
+}
+
+.clinic-topbar-byu {
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+}
+
+.clinic-card-inner {
+  padding: 1.8rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.clinic-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.district-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.badge-pwr {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-ktj {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.badge-byu {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.clinic-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+}
+
+.pill-open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.pill-24h {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.clinic-card-name {
+  font-family: var(--font-heading);
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+}
+
+.clinic-card-code {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.clinic-card-code strong {
+  color: var(--color-slate);
+}
+
+.clinic-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.86rem;
+  color: var(--color-slate);
+  margin-bottom: 0.5rem;
+  line-height: 1.45;
+}
+
+.meta-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.clinic-facilities-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0;
+}
+
+.tag-facility {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.clinic-queue-meter {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.3rem;
+  margin-top: auto;
+}
+
+.queue-meter-info {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  display: flex;
+  flex-direction: column;
+}
+
+.queue-meter-info strong {
+  font-size: 0.95rem;
+  color: var(--color-navy);
+}
+
+.queue-meter-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.badge-good {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.doctor-clinic-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
+  .clinics-landing-grid {
+    grid-template-columns: 1fr;
+  }
   .nav-links {
     display: none;
   }

@@ -106,12 +106,45 @@
           : `<span>i</span> Username akan dicocokkan dengan akun Supabase ${account.authEmail}.`;
         authSubtitle.textContent = isPatient ? 'Akses portal pasien menggunakan email terdaftar.' : `Akses khusus ${account.label.toLowerCase()} menggunakan username.`;
         googleSignInSection.classList.toggle('auth-form-hidden', !isPatient);
-        authDivider.classList.remove('auth-form-hidden');
+        const roleHintText = document.getElementById('roleHintText');
+        if (roleHintText) {
+          roleHintText.textContent = isPatient
+            ? 'Akses portal pasien: reservasi dokter di Purworejo, pantau antrean live & resep medis.'
+            : 'Akses portal dokter: ruang periksa, pemanggilan antrean langsung & RME SOAP ICD-10.';
+        }
         usernameInput.value = '';
         usernameInput.focus();
       }
       roleOptions.forEach(option => option.addEventListener('click', () => updateRole(option.dataset.role)));
       updateRole(selectedRole);
+
+      // 1-Click Fast Demo Credentials
+      const btnFillDemoPasien = document.getElementById('btnFillDemoPasien');
+      const btnFillDemoDokter = document.getElementById('btnFillDemoDokter');
+
+      if (btnFillDemoPasien) {
+        btnFillDemoPasien.addEventListener('click', () => {
+          updateRole('pasien');
+          usernameInput.value = 'pasien@simklinik.id';
+          passwordInput.value = 'pasien123';
+          if (window.Toast && window.Toast.info) {
+            window.Toast.info('Akun demo pasien terisi.');
+          }
+          btnSubmit.focus();
+        });
+      }
+
+      if (btnFillDemoDokter) {
+        btnFillDemoDokter.addEventListener('click', () => {
+          updateRole('dokter');
+          usernameInput.value = 'dokter';
+          passwordInput.value = 'dokter123';
+          if (window.Toast && window.Toast.info) {
+            window.Toast.info('Akun demo dokter terisi.');
+          }
+          btnSubmit.focus();
+        });
+      }
 
       /* ── CSRF ───────────────────────────────────────────────── */
       const arr = new Uint8Array(24);
