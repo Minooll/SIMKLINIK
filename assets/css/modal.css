@@ -28,13 +28,15 @@
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border);
   width: 100%;
-  max-width: 560px;
+  max-width: 580px;
+  max-height: calc(100vh - 2.5rem);
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transform: scale(0.95) translateY(10px);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: auto;
 }
 
 .modal-backdrop.active .modal-container {
@@ -47,6 +49,8 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-surface);
 }
 
 .modal-title {
@@ -75,11 +79,50 @@
   background: var(--danger-bg);
 }
 
+/* PENTING: Form di dalam modal wajib flex column dan min-height 0
+   agar modal-body terbatasi tingginya dan memicu scrolling vertikal */
+.modal-container > form,
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .modal-body {
   padding: 1.5rem;
   overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(88vh - 135px);
   font-size: 0.925rem;
   color: var(--text-main);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 var(--bg-subtle, #f8fafc);
+}
+
+/* Custom scrollbar elegan */
+.modal-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: var(--bg-subtle, #f8fafc);
+  border-radius: 9999px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--primary, #0d9488);
 }
 
 .modal-footer {
@@ -90,6 +133,7 @@
   gap: 0.75rem;
   border-top: 1px solid var(--border);
   background: var(--bg-subtle);
+  flex-shrink: 0;
 }
 
 /* Toast Container */

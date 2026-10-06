@@ -51,3 +51,22 @@ test('SIMKlinik logo icon blends ramah, higienis, sistem and is integrated acros
   assert.match(pasienHtml, /booking-summary-card/i, 'pasien.html must include live booking summary card');
 });
 
+test('Modal and booking dialog enforce vertical scrolling and flex bounding', () => {
+  const modalCss = fs.readFileSync(path.join(__dirname, '../assets/css/modal.css'), 'utf8');
+  const roleCss = fs.readFileSync(path.join(__dirname, '../assets/css/role-pages.css'), 'utf8');
+  const pasienHtml = fs.readFileSync(path.join(__dirname, '../pasien.html'), 'utf8');
+
+  // modal.css must contain rules for form inside modal-container
+  assert.match(modalCss, /\.modal-container\s*>\s*form|\.modal-form/i, 'modal.css must style modal form with flex');
+  assert.match(modalCss, /min-height:\s*0/i, 'modal form/body must include min-height: 0 for proper flex scroll');
+  assert.match(modalCss, /overflow-y:\s*auto/i, 'modal-body must enable overflow-y: auto');
+  assert.match(modalCss, /::-webkit-scrollbar/i, 'modal-body must include custom scrollbar styling');
+
+  // role-pages.css must explicitly ensure #modal-booking .modal-body scrolls
+  assert.match(roleCss, /#modal-booking\s+\.modal-body/i, 'role-pages.css must ensure #modal-booking body scrolls');
+
+  // pasien.html must use modal-form class on booking-form
+  assert.match(pasienHtml, /id="booking-form"\s+class="modal-form"/i, 'booking-form must have class modal-form');
+});
+
+

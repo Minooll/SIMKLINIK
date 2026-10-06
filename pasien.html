@@ -236,7 +236,7 @@
         </h3>
         <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
       </div>
-      <form id="profile-form">
+      <form id="profile-form" class="modal-form">
         <div class="modal-body">
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.45;">
             Sesuai standar Permenkes No. 24/2022, data Kartu Keluarga dan NIK wajib dilengkapi sebelum membuat janji temu di klinik.
@@ -293,7 +293,7 @@
         </h3>
         <button type="button" class="modal-close-btn" data-close-modal>&times;</button>
       </div>
-      <form id="booking-form">
+      <form id="booking-form" class="modal-form">
         <div class="modal-body" style="padding: 1.5rem;">
           <input type="hidden" id="booking-clinic-id">
 
@@ -629,6 +629,12 @@
 
       syncDoctorPreview();
       syncScheduleSummary();
+
+      const bookingModalEl = document.getElementById('modal-booking');
+      if (bookingModalEl) {
+        const modalBody = bookingModalEl.querySelector('.modal-body');
+        if (modalBody) modalBody.scrollTop = 0;
+      }
 
       window.showModal('modal-booking');
     }

@@ -568,4 +568,19 @@
   .booking-summary-grid {
     grid-template-columns: 1fr;
   }
+  #modal-booking .modal-container {
+    max-height: 95vh;
+  }
+  #modal-booking .modal-body {
+    max-height: calc(95vh - 130px);
+    padding: 1rem 1.15rem;
+  }
 }
+
+/* Explicit Modal Booking Scroll Assurance */
+#modal-booking .modal-body {
+  overflow-y: auto !important;
+  max-height: calc(88vh - 140px);
+  overscroll-behavior: contain;
+}
+
