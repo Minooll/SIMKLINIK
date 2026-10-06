@@ -46,6 +46,22 @@
     return 'Selamat malam';
   }
 
+  // Sanitize obsolete role/user session leftovers
+  try {
+    const cachedName = localStorage.getItem('simklinik_user_name');
+    const cachedRole = localStorage.getItem('simklinik_role');
+    const cachedUser = localStorage.getItem('simklinik_user');
+    if (cachedName && cachedName.toLowerCase().includes('petugas')) {
+      localStorage.removeItem('simklinik_user_name');
+    }
+    if (cachedRole && cachedRole.toLowerCase() === 'petugas') {
+      localStorage.setItem('simklinik_role', 'pasien');
+    }
+    if (cachedUser && cachedUser.toLowerCase().includes('petugas')) {
+      localStorage.removeItem('simklinik_user');
+    }
+  } catch (_) { }
+
   /* ── Static Mock Definitions (for offline fallback) ── */
   const defaultRoleMeta = {
     dokter: {
@@ -56,17 +72,9 @@
       stats: [['Pasien hari ini', '0', 'Pasien terdaftar'], ['Jadwal selesai', '0', 'Jadwal praktik'], ['Resep aktif', '0', 'Resep diterbitkan'], ['Rata-rata layanan', '-', 'Standar Permenkes']],
       dashboard: { title: 'Jadwal konsultasi hari ini', rows: [] }
     },
-    petugas: {
-      label: 'Petugas', name: 'Nadia Prameswari', initials: 'NP',
-      get greeting() { return `${getTimeGreeting()}, Nadia`; },
-      copy: 'Pantau antrean pasien, registrasi walk-in, verifikasi jadwal, dan kasir pembayaran.',
-      nav: [['dashboard', 'Dashboard'], ['pasien', 'Data pasien'], ['antrean', 'Antrean layanan'], ['dokter', 'Jadwal dokter'], ['pembayaran', 'Pembayaran']],
-      stats: [['Antrean aktif', '0', 'Pasien antrean'], ['Terdaftar hari ini', '0', 'Pasien klinik'], ['Jadwal dokter', '10', 'Dokter tersedia'], ['Pembayaran', 'Rp 0', 'Kasir klinik']],
-      dashboard: { title: 'Antrean poli hari ini', rows: [] }
-    },
     pasien: {
-      label: 'Pasien', name: 'Pasien', initials: 'PS',
-      get greeting() { return `${getTimeGreeting()}, Pasien`; },
+      label: 'Pasien', name: 'Sahabat Sehat', initials: 'SS',
+      get greeting() { return `${getTimeGreeting()}, Sahabat Sehat`; },
       copy: 'Reservasi janji temu dokter online, pantau antrean live, resep obat, dan riwayat RME.',
       nav: [['dashboard', 'Dashboard'], ['janji', 'Janji saya'], ['rekam-medis', 'Rekam medis'], ['resep', 'Resep saya'], ['profil', 'Profil kesehatan']],
       stats: [['Janji mendatang', '0', 'Belum ada janji'], ['Resep aktif', '0', 'Belum ada resep'], ['Hasil RME', '0', 'Belum ada berkas'], ['Poin kesehatan', '0', 'Pasien aktif']],
@@ -95,7 +103,10 @@
 
   let initialCachedName = null;
   try {
-    initialCachedName = localStorage.getItem('simklinik_user_name');
+    const raw = localStorage.getItem('simklinik_user_name');
+    if (raw && !raw.toLowerCase().includes('petugas')) {
+      initialCachedName = raw.trim();
+    }
   } catch (_) { }
 
   if (headerName) headerName.textContent = initialCachedName || defaultRoleMeta.name;
@@ -138,60 +149,47 @@
   let currentDoctorRecord = null;
 
   function getCurrentUserDisplayName() {
+    const isBadName = (val) => !val || typeof val !== 'string' || !val.trim() || val.toLowerCase().includes('petugas');
+
     if (role === 'pasien') {
       // 1. Patient record profile full_name
-      if (currentPatientRecord?.profile?.full_name && currentPatientRecord.profile.full_name.trim()) {
+      if (!isBadName(currentPatientRecord?.profile?.full_name)) {
         return currentPatientRecord.profile.full_name.trim();
       }
       // 2. Patient record direct full_name or name
-      if (currentPatientRecord?.full_name && currentPatientRecord.full_name.trim()) {
+      if (!isBadName(currentPatientRecord?.full_name)) {
         return currentPatientRecord.full_name.trim();
       }
       // 3. User profile loaded from profiles table
-      if (currentUserProfile?.full_name && currentUserProfile.full_name.trim()) {
+      if (!isBadName(currentUserProfile?.full_name)) {
         return currentUserProfile.full_name.trim();
       }
-      if (currentUserProfile?.username && currentUserProfile.username.trim()) {
+      if (!isBadName(currentUserProfile?.username)) {
         return currentUserProfile.username.trim();
       }
       // 4. Supabase auth metadata
-      if (currentAuthUser?.user_metadata?.full_name && currentAuthUser.user_metadata.full_name.trim()) {
+      if (!isBadName(currentAuthUser?.user_metadata?.full_name)) {
         return currentAuthUser.user_metadata.full_name.trim();
       }
-      if (currentAuthUser?.user_metadata?.name && currentAuthUser.user_metadata.name.trim()) {
+      if (!isBadName(currentAuthUser?.user_metadata?.name)) {
         return currentAuthUser.user_metadata.name.trim();
       }
       // 5. Local storage cached name
       try {
         const cached = localStorage.getItem('simklinik_user_name');
-        if (cached && cached.trim()) return cached.trim();
+        if (!isBadName(cached)) return cached.trim();
       } catch (_) { }
-      // 6. Header name if already populated and not generic default
-      if (headerName && headerName.textContent && headerName.textContent.trim()) {
+      // 6. Header name if already populated and not generic default / petugas
+      if (headerName && !isBadName(headerName.textContent)) {
         const hName = headerName.textContent.trim();
-        if (hName !== 'Pasien' && hName !== 'Aulia Rahma') return hName;
+        if (hName !== 'Pasien' && hName !== 'Sahabat Sehat') return hName;
       }
       // 7. Auth email user prefix
-      if (currentAuthUser?.email) {
+      if (currentAuthUser?.email && !currentAuthUser.email.toLowerCase().includes('petugas')) {
         const prefix = currentAuthUser.email.split('@')[0];
         return prefix.charAt(0).toUpperCase() + prefix.slice(1);
       }
-      return 'Pasien';
-    } else if (role === 'petugas') {
-      if (currentUserProfile?.full_name && currentUserProfile.full_name.trim()) {
-        return currentUserProfile.full_name.trim();
-      }
-      if (currentUserProfile?.username && currentUserProfile.username.trim()) {
-        return currentUserProfile.username.trim();
-      }
-      try {
-        const cached = localStorage.getItem('simklinik_user_name');
-        if (cached && cached.trim()) return cached.trim();
-      } catch (_) { }
-      if (headerName && headerName.textContent && headerName.textContent.trim()) {
-        return headerName.textContent.trim();
-      }
-      return 'Petugas';
+      return 'Sahabat Sehat';
     } else if (role === 'dokter') {
       if (currentDoctorRecord?.profile?.full_name) {
         return currentDoctorRecord.profile.full_name;
@@ -242,7 +240,7 @@
         updateDashboardGreeting();
 
         // Verify correct dashboard URL
-        const actualRole = profile.role === 'Dokter' ? 'dokter' : profile.role === 'Pasien' ? 'pasien' : 'petugas';
+        const actualRole = profile.role === 'Dokter' ? 'dokter' : 'pasien';
         if (actualRole !== role) {
           location.href = actualRole + '.html';
           return null;
@@ -1659,7 +1657,7 @@
         const tags = (c.facilities || ['Poli Umum', 'Farmasi']).map(f => `<span class="clinic-tag">${f}</span>`).join('');
         return `
           <div class="clinic-card" data-clinic-id="${c.id}" data-district="${c.district}">
-            <div>
+            <div class="clinic-card-content">
               <div class="clinic-card-header">
                 <span class="clinic-badge-district">Kec. ${c.district}</span>
                 <span class="clinic-queue-indicator">
@@ -1680,10 +1678,12 @@
                 ${tags}
               </div>
             </div>
-            <button type="button" class="btn-clinic-book" onclick="window.openBookingWithClinic('${c.id}')">
+            <div class="clinic-card-actions">
+              <button type="button" class="btn-clinic-book" onclick="window.openBookingWithClinic('${c.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               Daftar di Klinik Ini
             </button>
+            </div>
           </div>
         `;
       }));
@@ -1808,12 +1808,7 @@
     }
   };
 
-  /* ══════════════════════════════════════════════════════════
-     ROLE: PETUGAS PORTAL (DEPRECATED - 2-ROLE DIRECT ARCHITECTURE)
-     ══════════════════════════════════════════════════════════ */
-  async function initPetugasPortal() {
-    window.location.replace('dokter.html');
-  }
+
 
   window.panggilAntrean = async function (queueId, queueNumber) {
     if (window.queueService && queueId && !queueId.startsWith('demo-')) {
@@ -2778,8 +2773,6 @@
 
     if (role === 'pasien') {
       initPasienPortal();
-    } else if (role === 'petugas') {
-      initPetugasPortal();
     } else if (role === 'dokter') {
       initDokterPortal();
     }
