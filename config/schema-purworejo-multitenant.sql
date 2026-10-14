@@ -281,3 +281,70 @@ VALUES
     ('cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', 'dr. Hendra Wijaya, Sp.A', 'Spesialis Anak', 'SIP-PWR-003/2024', 25, true),
     ('dddddddd-dddd-dddd-dddd-dddddddddddd', '33333333-3333-3333-3333-333333333333', 'dr. Ratna Dewi', 'Dokter Umum', 'SIP-PWR-004/2024', 20, true)
 ON CONFLICT DO NOTHING;
+
+-- ====================================================================
+-- PENGAKTIFAN ROW LEVEL SECURITY (RLS) - UU PDP No. 27/2022
+-- ====================================================================
+
+ALTER TABLE public.clinics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.clinic_owners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.doctors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.doctor_schedules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.patients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.medical_records ENABLE ROW LEVEL SECURITY;
+
+-- 1. Kebijakan Akses Faskes & Dokter Publik (Read-Only)
+CREATE POLICY "Klinik publik dapat dibaca" 
+    ON public.clinics FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Dokter faskes aktif dapat dibaca publik" 
+    ON public.doctors FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Jadwal dokter dapat dibaca publik" 
+    ON public.doctor_schedules FOR SELECT USING (is_active = true);
+
+-- 2. Kebijakan Pemilik Klinik (Tenant Admin)
+CREATE POLICY "Pemilik dapat melihat profil klinik miliknya"
+    ON public.clinic_owners FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Pemilik dapat mengelola dokter di kliniknya"
+    ON public.doctors FOR ALL
+    USING (clinic_id IN (SELECT clinic_id FROM public.clinic_owners WHERE user_id = auth.uid()));
+
+-- 3. Kebijakan Profil Pasien (Self-Data Isolation)
+CREATE POLICY "Pasien hanya dapat mengakses profil medis sendiri"
+    ON public.patients FOR ALL
+    USING (auth.uid() = user_id);
+
+-- 4. Kebijakan Janji Temu (Appointments Isolation)
+CREATE POLICY "Pasien dapat melihat janji temu miliknya"
+    ON public.appointments FOR SELECT
+    USING (patient_id IN (SELECT id FROM public.patients WHERE user_id = auth.uid()));
+
+CREATE POLICY "Pasien dapat membuat janji temu baru"
+    ON public.appointments FOR INSERT
+    WITH CHECK (patient_id IN (SELECT id FROM public.patients WHERE user_id = auth.uid()));
+
+CREATE POLICY "Dokter dapat melihat antrean kliniknya"
+    ON public.appointments FOR SELECT
+    USING (doctor_id IN (SELECT id FROM public.doctors WHERE user_id = auth.uid()));
+
+CREATE POLICY "Dokter dapat memperbarui status antrean kliniknya"
+    ON public.appointments FOR UPDATE
+    USING (doctor_id IN (SELECT id FROM public.doctors WHERE user_id = auth.uid()));
+
+-- 5. Kebijakan Rekam Medis Elektronik (RME Confidentiality - Permenkes 24/2022)
+CREATE POLICY "Pasien hanya dapat membaca riwayat RME miliknya"
+    ON public.medical_records FOR SELECT
+    USING (patient_id IN (SELECT id FROM public.patients WHERE user_id = auth.uid()));
+
+CREATE POLICY "Dokter hanya dapat membaca RME pasien di kliniknya"
+    ON public.medical_records FOR SELECT
+    USING (clinic_id IN (SELECT clinic_id FROM public.doctors WHERE user_id = auth.uid()));
+
+CREATE POLICY "Dokter terikat dapat menyimpan RME baru"
+    ON public.medical_records FOR INSERT
+    WITH CHECK (doctor_id IN (SELECT id FROM public.doctors WHERE user_id = auth.uid()));
+

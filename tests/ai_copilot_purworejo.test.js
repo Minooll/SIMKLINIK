@@ -66,3 +66,41 @@ test('askSasaAi & fallback engine responds precisely to clinical, system, and re
   assert.match(codingRes, /teknologi|komputasi|SIMKLINIK/i);
   assert.match(codingRes, /kesehatan|Purworejo/i);
 });
+
+test('Multi-turn chat: Sasa remembers conversation history and answers follow-up questions contextually and logically', async () => {
+  const history = [
+    { role: 'user', text: 'Anak saya badannya panas sejak kemarin malam di Kutoarjo' },
+    {
+      role: 'model',
+      text: 'Untuk penanganan anak yang mengalami demam, pastikan kompres air hangat di lipatan ketiak dan cukupi cairan. Di Kutoarjo, dr. Hendra Wijaya, Sp.A di Klinik Pratama & Bersalin Kutoarjo Medika siap melayani.'
+    }
+  ];
+
+  // Follow-up question without re-stating clinic or doctor name, and without keyword 'kuota'
+  const followUp1 = await askSasaAi('Apakah dokternya masih praktik hari ini?', { history });
+  // The response must be connected (nyambung): mentions Kutoarjo Medika or dr. Hendra Wijaya
+  assert.match(followUp1.cleanText, /Hendra Wijaya|Kutoarjo Medika/i, 'Must connect to previous clinic/doctor discussed');
+
+
+  // Second follow-up: asking about payment / BPJS or operational details
+  const history2 = [
+    ...history,
+    { role: 'user', text: 'Apakah kliniknya buka hari ini dan berapa sisa kuotanya?' },
+    { role: 'model', text: followUp1.cleanText }
+  ];
+  const followUp2 = await askSasaAi('Apakah bisa pakai BPJS atau umum?', { history: history2 });
+  assert.match(followUp2.cleanText, /BPJS|umum|pembayaran|faskes/i, 'Must answer payment/BPJS logically and conversationally');
+});
+
+test('Natural dialogue & logical reasoning: answers specific questions without repetitive canned templates', async () => {
+  // Logical cause explanation question
+  const gastricExplanation = await askSasaAi('Kenapa kalau asam lambung naik dada terasa panas dan perih?');
+  assert.match(gastricExplanation.cleanText, /refluks|esofagus|asam lambung|heartburn/i, 'Must explain the biological mechanism logically');
+  assert.doesNotMatch(gastricExplanation.cleanText, /Terkait hal tersebut, itu merupakan topik umum yang menarik/i, 'Must not use robotic fallback template');
+
+  // Friendly conversational greeting
+  const greeting = await askSasaAi('Selamat siang mbak, mau tanya-tanya nih');
+  assert.match(greeting.cleanText, /siang|bantu|kabar/i, 'Must greet back warmly');
+  assert.doesNotMatch(greeting.cleanText, /Terkait hal tersebut, itu merupakan topik umum/i, 'Must not dismiss greeting with canned template');
+});
+
